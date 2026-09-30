@@ -74,6 +74,9 @@ urlpatterns = [
     path("notifications/", include("apps.notifications.urls")),
     path("onboarding/", include("apps.onboarding.urls")),
     path("organizations/media/", include("apps.media_library.urls_org")),
+    # Chinese localization dictionary payload for the client overlay
+    # (zh_overrides.middleware injects the script tag). Public, cacheable.
+    path("zh-overrides/", include("zh_overrides.payload_urls")),
     path("", include("apps.accounts.urls_root")),
 ]
 
