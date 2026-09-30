@@ -79,7 +79,10 @@ LOCAL_APPS = [
     "theme",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+# Local Chinese override layer MUST be first: its translated template copies
+# only win template resolution ahead of every other app. It adds no models.
+# Removing this one entry (or the zh_overrides package) fully disables zh-hans.
+INSTALLED_APPS = ["zh_overrides.apps.ZhOverridesConfig"] + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -103,7 +106,11 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        # zh_overrides/templates is searched FIRST: the upstream project keeps
+        # its own templates/ in DIRS (which beats APP_DIRS), so an installed-app
+        # overlay alone is shadowed. This prepend is the single switch that
+        # makes the Chinese copies win; remove it to fall back to English.
+        "DIRS": [BASE_DIR / "zh_overrides" / "templates", BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
