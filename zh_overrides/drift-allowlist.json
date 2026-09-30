@@ -1,0 +1,27 @@
+{
+  "_comment": "zhcheck 漂移白名单：记录 zh_overrides 模板中【有意】与上游不一致的模板标签/变量令牌。仅登记为翻译必须的改动（如默认提示语中译、去复数后缀、时间格式本地化）。新增非必要逻辑偏差不得登记，应改回与上游一致。rel 路径使用 POSIX 斜杠。",
+  "social_accounts/list.html": {
+    "missing": [
+      "{{accounts|length|pluralize}}"
+    ],
+    "extra": []
+  },
+  "social_accounts/partials/_account_card.html": {
+    "missing": [
+      "{{account.missing_scopes|join:\", \"}}",
+      "{{account.webhook_error|default:\"We couldn't set up real-time updates for this account.\"}}"
+    ],
+    "extra": [
+      "{{account.missing_scopes|join:\"，\"}}",
+      "{{account.webhook_error|default:\"我们无法为该账号建立实时更新。\"}}"
+    ]
+  },
+  "social_accounts/partials/_posting_slots_grid.html": {
+    "missing": [
+      "{{slot.time|time:\"g:i A\"}}"
+    ],
+    "extra": [
+      "{{slot.time|time:\"H:i\"}}"
+    ]
+  }
+}

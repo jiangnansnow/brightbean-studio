@@ -99,6 +99,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "csp.middleware.CSPMiddleware",
+    # Chinese template overlay: text-node-only dictionary translation.
+    "zh_overrides.middleware.ZhLocalizationMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
