@@ -211,10 +211,14 @@ class _ZhHTMLParser(HTMLParser):
         else:
             raw = f"&#{name};"
             try:
-                code = int(name, 10)
-            except ValueError:
-                code = int(name, 16)
-            self._pending.append((raw, chr(code)))
+                if name.lower().startswith("x"):
+                    code = int(name[1:], 16)
+                else:
+                    code = int(name, 10)
+                decoded = chr(code)
+            except (ValueError, OverflowError):
+                decoded = raw
+            self._pending.append((raw, decoded))
 
     def handle_comment(self, data):
         self._flush_pending()
