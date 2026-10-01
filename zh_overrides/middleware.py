@@ -298,12 +298,12 @@ def _lang_toggle_html(request) -> str:
         color, bg, border = "#44403c", "#ffffff", "#e7e5e4"
     return (
         f'<a id="zh-lang-toggle" href="{href}" title="{hint}" '
-        f'aria-label="{hint}" style="position:fixed;left:12px;bottom:74px;'
-        f'z-index:40;display:inline-flex;align-items:center;justify-content:center;'
-        f'min-width:38px;height:30px;padding:0 10px;border-radius:9999px;'
+        f'aria-label="{hint}" style="position:fixed;right:12px;top:8px;'
+        f'z-index:50;display:inline-flex;align-items:center;justify-content:center;'
+        f'min-width:40px;height:28px;padding:0 12px;border-radius:9999px;'
         f'border:1px solid {border};background:{bg};color:{color};'
-        f'font-size:12px;font-weight:700;text-decoration:none;'
-        f'box-shadow:0 1px 4px rgba(0,0,0,0.12);">{label}</a>'
+        f'font-size:13px;font-weight:700;text-decoration:none;'
+        f'box-shadow:0 2px 8px rgba(0,0,0,0.15);">{label}</a>'
     )
 
 
