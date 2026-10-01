@@ -14,6 +14,10 @@ permissions:
 
 jobs:
   build-and-push:
+    # Only the private deployment repository builds. Both repos receive the
+    # file on dual-push; running in both races on the same GHCR package and
+    # the loser gets permission_denied: write_package.
+    if: github.repository == 'jiangnansnow/brightbean-studio-private'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
