@@ -10,6 +10,7 @@ from django.views.static import serve
 from apps.accounts.views import health_check
 from apps.api.api import api as agent_api
 from apps.oauth_server import views as oauth_views
+from zh_overrides import privacy_views
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +78,9 @@ urlpatterns = [
     # Chinese localization dictionary payload for the client overlay
     # (zh_overrides.middleware injects the script tag). Public, cacheable.
     path("zh-overrides/", include("zh_overrides.payload_urls")),
+    # Public bilingual privacy policy (Meta business verification). Not linked
+    # from any navigation; direct URL access only.
+    path("privacy", privacy_views.privacy_policy, name="privacy-policy"),
     path("", include("apps.accounts.urls_root")),
 ]
 
