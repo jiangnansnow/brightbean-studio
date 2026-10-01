@@ -28,9 +28,15 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 from django.conf import settings
+from django.http import HttpResponseRedirect
+from django.utils.html import escape
 
 _DICTIONARY: dict | None = None
 _DIGEST: str | None = None
+
+# Cookie that stores the per-user UI language. "en" forces the untouched
+# upstream page; anything else (including no cookie) renders Chinese.
+LANG_COOKIE = "zh_lang"
 
 # Text inside these tags is passed through untouched (JS/CSS/user input).
 _SKIP_TAGS = {"script", "style", "textarea"}
@@ -265,11 +271,70 @@ def _client_overlay_tags(request) -> str:
     return "".join(parts)
 
 
+def _switch_url(request, target: str) -> str:
+    """Current path with query params preserved and setlang=<target> added."""
+    params = request.GET.copy()
+    params["setlang"] = target
+    query = params.urlencode()
+    return request.path + ("?" + query if query else "")
+
+
+def _lang_toggle_html(request) -> str:
+    """Self-contained floating language pill.
+
+    Rendered in BOTH languages so the user can always switch back. Inline
+    styles only (no Tailwind dependency) and a plain anchor (no CSP impact).
+    """
+    english = request.COOKIES.get(LANG_COOKIE) == "en"
+    target = "zh" if english else "en"
+    href = escape(_switch_url(request, target))
+    if english:
+        label = "中"
+        hint = "Switch to Chinese（切换为中文）"
+        color, bg, border = "#b45309", "#fffbeb", "#fcd34d"
+    else:
+        label = "EN"
+        hint = "Switch to English（切换为英文）"
+        color, bg, border = "#44403c", "#ffffff", "#e7e5e4"
+    return (
+        f'<a id="zh-lang-toggle" href="{href}" title="{hint}" '
+        f'aria-label="{hint}" style="position:fixed;left:12px;bottom:74px;'
+        f'z-index:40;display:inline-flex;align-items:center;justify-content:center;'
+        f'min-width:38px;height:30px;padding:0 10px;border-radius:9999px;'
+        f'border:1px solid {border};background:{bg};color:{color};'
+        f'font-size:12px;font-weight:700;text-decoration:none;'
+        f'box-shadow:0 1px 4px rgba(0,0,0,0.12);">{label}</a>'
+    )
+
+
 class ZhLocalizationMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
+    def _handle_setlang(self, request):
+        """?setlang=en|zh: persist the choice in a cookie, redirect clean."""
+        target = request.GET.get("setlang")
+        if target not in {"en", "zh"}:
+            target = "zh"
+        params = request.GET.copy()
+        del params["setlang"]
+        url = request.path + ("?" + params.urlencode() if params else "")
+        response = HttpResponseRedirect(url)
+        response.set_cookie(
+            LANG_COOKIE,
+            target,
+            max_age=31536000,
+            path="/",
+            samesite="Lax",
+            secure=request.is_secure(),
+        )
+        return response
+
     def __call__(self, request):
+        # Language switch action runs before the view and redirects.
+        if "setlang" in request.GET:
+            return self._handle_setlang(request)
+
         response = self.get_response(request)
 
         content_type = response.get("Content-Type", "")
@@ -280,11 +345,13 @@ class ZhLocalizationMiddleware:
         # Django admin has its own i18n path; leave it to LANGUAGE_CODE.
         if request.path.startswith("/admin/"):
             return response
-        if not getattr(settings, "ZH_LOCALIZATION_ENABLED", True):
-            return response
+
+        enabled = getattr(settings, "ZH_LOCALIZATION_ENABLED", True)
         # Debug bypass: append ?raw=1 to see the untouched upstream page.
-        if request.GET.get("raw") == "1":
-            return response
+        raw_bypass = request.GET.get("raw") == "1"
+        # Per-user English choice: cookie zh_lang=en forces the upstream page.
+        english_mode = request.COOKIES.get(LANG_COOKIE) == "en"
+        translate = enabled and not raw_bypass and not english_mode
 
         charset = response.charset or "utf-8"
         content = response.content
@@ -292,15 +359,26 @@ class ZhLocalizationMiddleware:
             return response
 
         html_text = content.decode(charset)
-        parser = _ZhHTMLParser(load_dictionary())
-        parser.feed(html_text)
-        parser.close()
-        new_html = "".join(parser.parts)
+        if translate:
+            parser = _ZhHTMLParser(load_dictionary())
+            parser.feed(html_text)
+            parser.close()
+            new_html = "".join(parser.parts)
+        else:
+            new_html = html_text
 
-        # Inject the dynamic-write translation overlay once per page.
-        if "</body>" in new_html and "zh-overrides/payload.js" not in new_html:
-            overlay = _client_overlay_tags(request)
-            new_html = new_html.replace("</body>", overlay + "</body>", 1)
+        if enabled and "</body>" in new_html and "zh-lang-toggle" not in new_html:
+            new_html = new_html.replace(
+                "</body>", _lang_toggle_html(request) + "</body>", 1
+            )
+
+        # Dynamic-write overlay only in Chinese mode; in English mode the
+        # observer must not run or it would translate JS writes back to zh.
+        if translate:
+            if "</body>" in new_html and "zh-overrides/payload.js" not in new_html:
+                new_html = new_html.replace(
+                    "</body>", _client_overlay_tags(request) + "</body>", 1
+                )
 
         new_content = new_html.encode(charset)
         response.content = new_content
