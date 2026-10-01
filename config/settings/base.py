@@ -13,6 +13,9 @@ env = environ.Env(
     EMAIL_BACKEND_TYPE=(str, "smtp"),
     SENTRY_DSN=(str, ""),
     REDIS_URL=(str, ""),
+    # Local Chinese overlay master switch. Default on; set false in .env to
+    # disable zh-hans without code changes or image rebuild.
+    ZH_LOCALIZATION_ENABLED=(bool, True),
 )
 
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
@@ -21,6 +24,7 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 APP_URL = env("APP_URL")
+ZH_LOCALIZATION_ENABLED = env("ZH_LOCALIZATION_ENABLED")
 
 # Application definition
 

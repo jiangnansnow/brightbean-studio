@@ -282,6 +282,9 @@ class ZhLocalizationMiddleware:
             return response
         if not getattr(settings, "ZH_LOCALIZATION_ENABLED", True):
             return response
+        # Debug bypass: append ?raw=1 to see the untouched upstream page.
+        if request.GET.get("raw") == "1":
+            return response
 
         charset = response.charset or "utf-8"
         content = response.content
