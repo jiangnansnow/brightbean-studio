@@ -61,3 +61,39 @@ def payload(request: HttpRequest) -> HttpResponse:
     response["Cache-Control"] = "public, max-age=31536000, immutable"
     response["X-Content-Type-Options"] = "nosniff"
     return response
+
+
+# --- zh-client.js -----------------------------------------------------------
+# 构建期 collectstatic 用上游 config.settings.production 运行，其
+# INSTALLED_APPS 不含 zh_overrides，因此本 app 的 static/ 目录永远不会被收集，
+# 线上 /static/zh_overrides/zh-client.js 必然 404。改由本视图直接按文件内容
+# 提供服务，与 payload.js 同源同缓存策略，彻底绕开 collectstatic。
+
+_CLIENT_JS: tuple[str, str] | None = None
+
+
+def _build_client_js() -> tuple[str, str]:
+    global _CLIENT_JS
+    if _CLIENT_JS is not None:
+        return _CLIENT_JS
+
+    import hashlib
+
+    js_path = Path(__file__).resolve().parent / "static" / "zh_overrides" / "zh-client.js"
+    raw_bytes = js_path.read_bytes()
+    digest = hashlib.sha1(raw_bytes).hexdigest()[:12]
+    _CLIENT_JS = (digest, raw_bytes.decode("utf-8"))
+    return _CLIENT_JS
+
+
+def client_js_digest() -> str:
+    return _build_client_js()[0]
+
+
+@require_GET
+def client_js(request: HttpRequest) -> HttpResponse:
+    _digest, body = _build_client_js()
+    response = HttpResponse(body, content_type="application/javascript; charset=utf-8")
+    response["Cache-Control"] = "public, max-age=31536000, immutable"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response

@@ -41,6 +41,8 @@ class Command(BaseCommand):
         allowlist = {}
         if allow_path.exists():
             allowlist = json.loads(allow_path.read_text(encoding="utf-8"))
+        # 有意新增的纯中文模板（如法律页），无上游对应文件，不做漂移比对。
+        added_ok = set(allowlist.get("_added", []))
 
         if not zh_dir.exists():
             self.stdout.write(self.style.WARNING("No zh_overrides/templates directory; nothing to check."))
@@ -56,6 +58,9 @@ class Command(BaseCommand):
             checked += 1
 
             if not upstream.exists():
+                if rel_key in added_ok:
+                    self.stdout.write(self.style.SUCCESS(f"[OK-ADDED] {rel} (intentional new template)"))
+                    continue
                 problems += 1
                 self.stdout.write(self.style.ERROR(f"[DELETED UPSTREAM] {rel}"))
                 self.stdout.write("    Upstream template removed; delete or relocate this override.")

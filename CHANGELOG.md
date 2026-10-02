@@ -6,7 +6,21 @@
 - 版本号遵循 [语义化版本（Semantic Versioning）](https://semver.org/lang/zh-CN/)
 - 汉化版基线：上游 `brightbeanxyz/brightbean-studio` 官方仓库 `main` 分支
 - 词典规模（v1.2.1）：短语 773 条 / 单词 161 条 / 词元 41 条
+- 词典规模（v1.3.4）：短语 877 条 / 单词 207 条 / 词元 43 条
 - 部署环境、服务器运维、1Panel 连通方法等运维事实统一以仓库外的《Brightbean运维手册.md》（`E:\外贸文件夹\Brightbean Studio\`）为准，勿写入本文
+
+## [1.3.4] - 2026-10-03
+
+### 修复（Fixed）
+
+- **客户端汉化覆盖层从未生效（zh-client.js 404）**：构建期 `collectstatic` 使用上游 `config.settings.production`（其 `INSTALLED_APPS` 不含 `zh_overrides`），本应用 `static/` 目录从不被收集，线上 `/static/zh_overrides/zh-client.js` 恒 404，导致所有 JS 动态写入（Alpine `x-text`、发布页 `setMode()` 等）的英文无法翻译——发布编辑页切换「下一个可用时段/优先处理/立即/设置日期和时间」后按钮变回英文即此因。修复：`zh-client.js` 改由 Django 视图 `/zh-overrides/client.js` 直接按文件内容提供服务（与 `payload.js` 同源、内容哈希缓存一年），彻底绕开 `collectstatic`，不改上游 `Dockerfile`。
+- 发布编辑页 split-button 双保险：中间件属性白名单新增 `data-label`/`data-action-label`，模式按钮文案在服务端即译好，JS `setMode()` 读出即为中文（不依赖客户端覆盖层时序）。
+
+### 新增（Added）
+
+- 词典扩充至短语 877 / 单词 207 / 词元 43，覆盖：团队成员页（邀请弹窗、组织/工作区角色、成员与邀请计数、邀请行「邀请人/剩余 N 天」）、客户门户页（邀请客户弹窗、客户计数）、API 密钥页两句描述、日历页（筛选器「— 全部」项、时区下拉 21 个城市名及「（工作区）」后缀、「N 项已选」）、数据分析页（指标 Views/Reach/Reactions/Shares/Link clicks、主图「指标 · 近 N 天」、免责声明动态句、delta 提示 title、空态文案）、组织设置默认时区下拉（25 个 IANA 常用时区中文化，`value` 属性不受影响、提交值不变）、相对时间单位（天/周/月/分钟/前）。
+- 新增 `zh_overrides/templates/analytics/_post_table.html` 模板覆盖：帖子表格工具栏计数（N 篇帖子 · 近 N 天/全部时间）与分页（第 X / Y 页、共 N 条）直写中文——词典无法安全处理 ` of ` 类动态拼接；`drift-allowlist.json` 已登记去复数后缀与默认文案中译两处偏差。
+- `zhcheck` 支持 `_added` 白名单：有意新增的纯中文模板（法律页）跳过漂移比对，命令恢复零问题退出，可继续作为自动化关卡。
 
 ## [1.3.3] - 2026-10-03
 

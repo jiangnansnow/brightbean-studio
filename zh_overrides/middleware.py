@@ -31,6 +31,8 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils.html import escape
 
+from .payload_views import client_js_digest
+
 _DICTIONARY: dict | None = None
 _DIGEST: str | None = None
 
@@ -42,7 +44,9 @@ LANG_COOKIE = "zh_lang"
 _SKIP_TAGS = {"script", "style", "textarea"}
 
 # Attributes that are human-visible UI text and safe to translate.
-_ATTR_ALWAYS = {"title", "aria-label", "placeholder"}
+# data-label / data-action-label: 发布页 split-button 的模式文案由 JS 从这两个
+# 属性读出并写入按钮文本，服务端直接译好即可，无需等客户端覆盖层。
+_ATTR_ALWAYS = {"title", "aria-label", "placeholder", "data-label", "data-action-label"}
 
 
 def load_dictionary() -> dict:
@@ -253,12 +257,12 @@ _ENTITY_REFS = {
 
 def _client_overlay_tags(request) -> str:
     nonce = getattr(request, "csp_nonce", "") or ""
-    digest = dictionary_digest()
-    static_url = getattr(settings, "STATIC_URL", "/static/")
-    client_url = f"{static_url}zh_overrides/zh-client.js"
+    # client.js 走 Django 视图而非 /static/：构建期 collectstatic 用的是上游
+    # settings（INSTALLED_APPS 无 zh_overrides），静态目录不会被收集。
+    js_digest = client_js_digest()
     parts = [
-        f'<script src="/zh-overrides/payload.js?v={digest}" nonce="{nonce}" defer></script>',
-        f'<script src="{client_url}" nonce="{nonce}" defer></script>',
+        f'<script src="/zh-overrides/payload.js?v={dictionary_digest()}" nonce="{nonce}" defer></script>',
+        f'<script src="/zh-overrides/client.js?v={js_digest}" nonce="{nonce}" defer></script>',
     ]
     return "".join(parts)
 
