@@ -174,7 +174,7 @@ class _ZhHTMLParser(HTMLParser):
                 + re.escape(value) + r"\2"
             )
             raw = pattern.sub(
-                lambda m: m.group(1) + m.group(2) + new_value + m.group(2),
+                lambda m, nv=new_value: m.group(1) + m.group(2) + nv + m.group(2),
                 raw,
                 count=1,
             )
@@ -217,10 +217,7 @@ class _ZhHTMLParser(HTMLParser):
         else:
             raw = f"&#{name};"
             try:
-                if name.lower().startswith("x"):
-                    code = int(name[1:], 16)
-                else:
-                    code = int(name, 10)
+                code = int(name[1:], 16) if name.lower().startswith("x") else int(name, 10)
                 decoded = chr(code)
             except (ValueError, OverflowError):
                 decoded = raw
@@ -375,11 +372,14 @@ class ZhLocalizationMiddleware:
 
         # Dynamic-write overlay only in Chinese mode; in English mode the
         # observer must not run or it would translate JS writes back to zh.
-        if translate:
-            if "</body>" in new_html and "zh-overrides/payload.js" not in new_html:
-                new_html = new_html.replace(
-                    "</body>", _client_overlay_tags(request) + "</body>", 1
-                )
+        if (
+            translate
+            and "</body>" in new_html
+            and "zh-overrides/payload.js" not in new_html
+        ):
+            new_html = new_html.replace(
+                "</body>", _client_overlay_tags(request) + "</body>", 1
+            )
 
         new_content = new_html.encode(charset)
         response.content = new_content

@@ -19,8 +19,8 @@ can never conflict on ``config/``. Removing the ``DJANGO_SETTINGS_MODULE`` env
 line fully disables the overlay and falls back to the upstream English site.
 """
 
-from config.settings.production import *  # noqa: F401,F403
 from config.settings.base import BASE_DIR, env
+from config.settings.production import *  # noqa: F401,F403
 from config.settings.production import INSTALLED_APPS, MIDDLEWARE, TEMPLATES
 
 INSTALLED_APPS = ["zh_overrides.apps.ZhOverridesConfig"] + INSTALLED_APPS
