@@ -8,6 +8,12 @@
 - 词典规模（v1.2.1）：短语 773 条 / 单词 161 条 / 词元 41 条
 - 部署环境、服务器运维、1Panel 连通方法等运维事实统一以仓库外的《Brightbean运维手册.md》（`E:\外贸文件夹\Brightbean Studio\`）为准，勿写入本文
 
+## [1.3.2] - 2026-10-03
+
+### 新增（Added）
+
+- `zh_overrides/settings.py` 支持 SMTP 465 隐式 SSL：新增 `EMAIL_USE_SSL` 开关，启用时自动关闭 `EMAIL_USE_TLS`（Django 中二者互斥），适配网易 163 邮箱（`smtp.163.com:465`）等不支持 587 STARTTLS 的发信服务；`.env.example` 双语补充该变量。
+
 ## [1.3.1] - 2026-10-02
 
 ### 修复（Fixed）

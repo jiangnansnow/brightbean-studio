@@ -21,7 +21,7 @@ line fully disables the overlay and falls back to the upstream English site.
 
 from config.settings.base import BASE_DIR, env
 from config.settings.production import *  # noqa: F401,F403
-from config.settings.production import INSTALLED_APPS, MIDDLEWARE, TEMPLATES
+from config.settings.production import EMAIL_BACKEND_TYPE, INSTALLED_APPS, MIDDLEWARE, TEMPLATES
 
 INSTALLED_APPS = ["zh_overrides.apps.ZhOverridesConfig"] + INSTALLED_APPS
 
@@ -34,3 +34,11 @@ ROOT_URLCONF = "zh_overrides.urls"
 # Master switch for the Chinese overlay. Default on; set to false in .env to
 # disable zh-hans without code changes or image rebuild.
 ZH_LOCALIZATION_ENABLED = env.bool("ZH_LOCALIZATION_ENABLED", True)
+
+# SMTP implicit SSL (port 465) support. Upstream only wires EMAIL_USE_TLS
+# (STARTTLS on 587); providers such as NetEase 163 mail require implicit SSL
+# on 465. TLS and SSL are mutually exclusive in Django's SMTP backend.
+# Set EMAIL_USE_SSL=true together with EMAIL_PORT=465 in .env.
+if EMAIL_BACKEND_TYPE == "smtp" and env.bool("EMAIL_USE_SSL", default=False):
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
