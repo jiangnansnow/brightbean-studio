@@ -13,9 +13,6 @@ env = environ.Env(
     EMAIL_BACKEND_TYPE=(str, "smtp"),
     SENTRY_DSN=(str, ""),
     REDIS_URL=(str, ""),
-    # Local Chinese overlay master switch. Default on; set false in .env to
-    # disable zh-hans without code changes or image rebuild.
-    ZH_LOCALIZATION_ENABLED=(bool, True),
 )
 
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
@@ -24,7 +21,6 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 APP_URL = env("APP_URL")
-ZH_LOCALIZATION_ENABLED = env("ZH_LOCALIZATION_ENABLED")
 
 # Application definition
 
@@ -83,10 +79,7 @@ LOCAL_APPS = [
     "theme",
 ]
 
-# Local Chinese override layer MUST be first: its translated template copies
-# only win template resolution ahead of every other app. It adds no models.
-# Removing this one entry (or the zh_overrides package) fully disables zh-hans.
-INSTALLED_APPS = ["zh_overrides.apps.ZhOverridesConfig"] + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -103,8 +96,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "csp.middleware.CSPMiddleware",
-    # Chinese template overlay: text-node-only dictionary translation.
-    "zh_overrides.middleware.ZhLocalizationMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -112,11 +103,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # zh_overrides/templates is searched FIRST: the upstream project keeps
-        # its own templates/ in DIRS (which beats APP_DIRS), so an installed-app
-        # overlay alone is shadowed. This prepend is the single switch that
-        # makes the Chinese copies win; remove it to fall back to English.
-        "DIRS": [BASE_DIR / "zh_overrides" / "templates", BASE_DIR / "templates"],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

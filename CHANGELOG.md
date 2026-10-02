@@ -1,4 +1,4 @@
-# 汉化版更新日志
+# Changelog（更新日志）
 
 本文件记录 Brightbean Studio 中文汉化版（`local-custom` 分支）的所有显著变更。
 
@@ -6,34 +6,18 @@
 - 版本号遵循 [语义化版本（Semantic Versioning）](https://semver.org/lang/zh-CN/)
 - 汉化版基线：上游 `brightbeanxyz/brightbean-studio` 官方仓库 `main` 分支
 - 词典规模（v1.2.1）：短语 773 条 / 单词 161 条 / 词元 41 条
+- 部署环境、服务器运维、1Panel 连通方法等运维事实统一以仓库外的《Brightbean运维手册.md》（`E:\外贸文件夹\Brightbean Studio\`）为准，勿写入本文
 
-## 部署环境信息（2026-10-01）
+## [1.3.0] - 2026-10-02
 
-### 服务器
+### 变更（Changed）
 
-| 项 | 内容 |
-|---|---|
-| 云服务商/地域 | 阿里云香港 ECS（免备案，Meta webhook/媒体回拉可达） |
-| 硬件 | 2 核 vCPU / 2 GB 物理内存 / 2 GB swap |
-| 系统 | Ubuntu 22.04 |
-| 面板 | 1Panel v1.10.34-lts，`http://8.218.204.1:13513`（API 前缀 `/api/v1`，安全入口有 IP 白名单） |
-| 现存业务 | `ysec.cn` WordPress/WooCommerce 独立站：`wordpress:7.1.0`（PHP 8.3，内存上限 1024M）、MySQL 5.7.44、OpenResty；含数据库/网站备份与 wp-cron 计划任务 |
+- **零侵入重构**：汉化层与法律页面不再修改任何上游文件。新增 `zh_overrides/settings.py`（经 `DJANGO_SETTINGS_MODULE=zh_overrides.settings` 环境变量启用，内部 `from config.settings.production import *` 后叠加 app/中间件/模板目录）与 `zh_overrides/urls.py`（继承上游路由后追加 `/privacy`、`/legal`、`/terms`、`/data-deletion`、`/zh-overrides/`）；`config/urls.py`、`config/settings/base.py` 还原为上游原版，此后 `git merge upstream/main` 对 `config/` 零冲突。
+- 本文件由 `汉化版更新日志.md` 更名为 `CHANGELOG.md`，部署环境信息节迁至仓库外《Brightbean运维手册.md》。
 
-### Brightbean 部署环境（裁剪架构）
+### 部署注意（Deployment）
 
-- **仅两个容器**：`app`（Gunicorn `--workers 1 --threads 4`）+ `worker`（`python manage.py process_tasks`），均设内存上限（建议 384M/320M）；
-- **数据库用 SQLite**（文件与 `media/` 挂持久化卷，纳入 1Panel 备份），弃用官方 Postgres；不使用 Redis/Caddy；
-- HTTPS 反代走现存 OpenResty：1Panel 建反代站点 → 子域（拟定 `social.ysec.cn`）→ Let's Encrypt 证书；
-- 镜像在本机构建后上传，不在 2GB 服务器上构建；
-- 新增内存预算约 400–500 MB 常驻，属"贴上限"部署，上线后观察内存，必要时升配 4GB。
-
-### 仓库地址（三个远程）
-
-| 远程 | 地址 | 用途 |
-|---|---|---|
-| `upstream` | https://github.com/brightbeanxyz/brightbean-studio | 官方源，只拉不推 |
-| `origin` | https://github.com/jiangnansnow/brightbean-studio（公开） | 上游同步通道 |
-| `private` | https://github.com/jiangnansnow/brightbean-studio-private（私有） | 服务器部署源 |
+- 服务器 `.env` 必须新增 `DJANGO_SETTINGS_MODULE=zh_overrides.settings`；缺失该行时站点回退为上游英文版且法律页 404（运维手册已列为必备键）。
 
 ## [1.2.1] - 2026-10-01
 
