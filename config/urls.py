@@ -78,9 +78,12 @@ urlpatterns = [
     # Chinese localization dictionary payload for the client overlay
     # (zh_overrides.middleware injects the script tag). Public, cacheable.
     path("zh-overrides/", include("zh_overrides.payload_urls")),
-    # Public bilingual privacy policy (Meta business verification). Not linked
+    # Public bilingual legal pages (Meta business verification). Not linked
     # from any navigation; direct URL access only.
     path("privacy", privacy_views.privacy_policy, name="privacy-policy"),
+    path("legal", privacy_views.legal_center, name="legal-center"),
+    path("terms", privacy_views.terms_of_service, name="terms-of-service"),
+    path("data-deletion", privacy_views.data_deletion, name="data-deletion"),
     path("", include("apps.accounts.urls_root")),
 ]
 

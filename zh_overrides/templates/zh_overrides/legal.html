@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Legal Center - Brightbean Studio</title>
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --brand: #F97316;
+    --brand-dark: #EA580C;
+    --brand-soft: #FFF7ED;
+    --brand-line: #FED7AA;
+    --page-bg: #f8f7f4;
+    --card-bg: #ffffff;
+    --border: #e8e6e1;
+    --en-title: #2D3748;
+    --en-text: #2D3748;
+    --zh-text: #718096;
+    --muted: #a0aec0;
+    --sidebar-w: 264px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--page-bg);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: var(--en-text);
+    margin: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Top brand bar ─────────────────────────────── */
+  .topbar {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topbar img { width: 34px; height: 34px; border-radius: 9px; box-shadow: 0 2px 8px rgba(249,115,22,.22); }
+  .topbar .name { font-family: Georgia, 'Times New Roman', serif; font-size: 1.25rem; font-weight: 700; color: var(--en-title); letter-spacing: -0.01em; }
+  .topbar .sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+  .topbar .crumb { font-size: .8rem; font-weight: 600; color: var(--zh-text); letter-spacing: .06em; text-transform: uppercase; }
+
+  /* ── Two-column layout ─────────────────────────── */
+  .layout { max-width: 1180px; margin: 0 auto; padding: 40px 32px 120px; display: flex; gap: 56px; align-items: flex-start; }
+
+  /* Sidebar */
+  .sidebar { width: var(--sidebar-w); flex-shrink: 0; position: sticky; top: 104px; }
+  .sidebar-label { font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px 14px; }
+  .side-nav { display: flex; flex-direction: column; gap: 4px; }
+  .nav-link {
+    display: block;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .nav-link .nav-en { display: block; font-size: .9rem; font-weight: 600; color: var(--en-title); line-height: 1.35; }
+  .nav-link .nav-zh { display: block; font-size: .76rem; color: var(--zh-text); margin-top: 2px; }
+  .nav-link:hover { background: #f1efe9; }
+  .nav-link.active { background: var(--brand-soft); border-left-color: var(--brand); }
+  .nav-link.active .nav-en { color: var(--brand-dark); }
+  .nav-link.active .nav-zh { color: var(--brand-dark); opacity: .75; }
+
+  /* Main content */
+  .content { flex: 1; min-width: 0; }
+  .doc-section { scroll-margin-top: 96px; margin-bottom: 72px; }
+  .doc-section:last-child { margin-bottom: 0; }
+
+  .sec-head { margin-bottom: 30px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+  .sec-head h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 1.75rem; font-weight: 700; color: var(--en-title); margin: 0 0 6px; letter-spacing: -0.015em; line-height: 1.3; }
+  .sec-head .sec-zh { font-size: .92rem; color: var(--zh-text); }
+  .sec-head .sec-meta { font-size: .76rem; color: var(--muted); margin-top: 10px; letter-spacing: .03em; }
+
+  .sub { margin-bottom: 30px; }
+  .sub h3 { font-size: 1.02rem; font-weight: 700; color: var(--en-title); margin: 0 0 3px; line-height: 1.45; }
+  .sub .sub-zh { font-size: .82rem; font-weight: 600; color: var(--zh-text); margin: 0 0 12px; }
+  .sub p { font-size: .92rem; line-height: 1.7; color: var(--en-text); margin: 0 0 8px; }
+  .sub p.zh { font-size: 13px; line-height: 1.7; color: var(--zh-text); margin: 0 0 4px; }
+  .sub ul { margin: 4px 0 6px; padding-left: 20px; }
+  .sub li { font-size: .92rem; line-height: 1.7; color: var(--en-text); margin-bottom: 10px; }
+  .sub li .zh { display: block; font-size: 13px; color: var(--zh-text); margin-top: 2px; }
+  .sub a { color: var(--brand-dark); font-weight: 500; text-decoration: none; }
+  .sub a:hover { text-decoration: underline; }
+
+  /* Contact cards */
+  .contact-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0 8px; }
+  .contact-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 18px; text-decoration: none; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+  .contact-card:hover { border-color: var(--brand-line); box-shadow: 0 4px 14px rgba(249,115,22,.12); transform: translateY(-2px); }
+  .contact-card .c-label { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--zh-text); margin-bottom: 6px; }
+  .contact-card .c-value { font-size: .88rem; font-weight: 600; color: var(--en-title); word-break: break-all; line-height: 1.5; }
+  .contact-card .c-zh { font-size: 12px; color: var(--zh-text); margin-top: 4px; line-height: 1.5; }
+
+  /* Entity card */
+  .entity-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--brand);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(23,20,18,.04), 0 6px 20px rgba(23,20,18,.05);
+    padding: 26px 28px;
+    margin: 18px 0 6px;
+  }
+  .entity-card table { width: 100%; border-collapse: collapse; }
+  .entity-card td { padding: 8px 0; vertical-align: top; line-height: 1.65; border-bottom: 1px dashed #efede8; }
+  .entity-card tr:last-child td { border-bottom: none; }
+  .entity-card td.k { width: 250px; padding-right: 18px; font-size: .8rem; font-weight: 600; color: var(--zh-text); }
+  .entity-card td.v { font-size: .9rem; font-weight: 500; color: var(--en-title); }
+
+  /* Footer nav pills */
+  .page-foot { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 56px; padding-top: 26px; border-top: 1px solid var(--border); }
+  .page-foot a { font-size: .8rem; font-weight: 600; color: var(--brand-dark); background: var(--brand-soft); border: 1px solid var(--brand-line); border-radius: 999px; padding: 7px 16px; text-decoration: none; transition: background .15s ease; }
+  .page-foot a:hover { background: var(--brand-line); }
+
+  /* ── Responsive ────────────────────────────────── */
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; gap: 0; padding: 0 0 80px; }
+    .sidebar {
+      width: 100%;
+      position: sticky;
+      top: 64px;
+      z-index: 40;
+      background: var(--page-bg);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-label { display: none; }
+    .side-nav { flex-direction: row; overflow-x: auto; gap: 8px; scrollbar-width: none; }
+    .side-nav::-webkit-scrollbar { display: none; }
+    .nav-link { flex-shrink: 0; padding: 8px 14px; border-left: none; border-bottom: 3px solid transparent; border-radius: 8px; }
+    .nav-link .nav-en { font-size: .82rem; white-space: nowrap; }
+    .nav-link .nav-zh { display: none; }
+    .nav-link.active { border-bottom-color: var(--brand); border-radius: 8px 8px 0 0; }
+    .content { padding: 28px 20px 0; width: 100%; }
+    .doc-section { scroll-margin-top: 128px; margin-bottom: 56px; }
+    .sec-head h2 { font-size: 1.4rem; }
+    .entity-card { padding: 18px 20px; }
+    .entity-card td { display: block; width: 100%; padding: 2px 0; border-bottom: none; }
+    .entity-card td.k { padding-top: 12px; }
+    .entity-card tr { display: block; border-bottom: 1px dashed #efede8; padding-bottom: 8px; }
+    .entity-card tr:last-child { border-bottom: none; }
+    .contact-cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <img src="/static/img/brightbean-logo.webp" alt="Brightbean Studio">
+  <span class="name">Brightbean Studio</span>
+  <span class="sep"></span>
+  <span class="crumb">Legal &amp; Compliance / 法律与合规</span>
+</div>
+
+<div class="layout">
+
+  <!-- ════════ Sidebar ════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Contents / 目录</div>
+    <nav class="side-nav" id="sideNav">
+      <a href="#entity" class="nav-link active" data-section="entity">
+        <span class="nav-en">Business Entity</span>
+        <span class="nav-zh">经营主体</span>
+      </a>
+      <a href="#privacy" class="nav-link" data-section="privacy">
+        <span class="nav-en">Privacy Policy</span>
+        <span class="nav-zh">隐私政策</span>
+      </a>
+      <a href="#terms" class="nav-link" data-section="terms">
+        <span class="nav-en">Terms of Service</span>
+        <span class="nav-zh">服务条款</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ════════ Main content ════════ -->
+  <main class="content">
+
+    <!-- ──── 1. Business Entity ──── -->
+    <section class="doc-section" id="entity">
+      <div class="sec-head">
+        <h2>Business Entity</h2>
+        <div class="sec-zh">经营主体信息</div>
+        <div class="sec-meta">Registered with the Administration for Market Regulation of Macheng City, Hubei Province, P.R. China / 已在湖北省麻城市市场监督管理局登记注册</div>
+      </div>
+
+      <div class="sub">
+        <p>This website (v.ysec.cn) and the Brightbean Studio service are operated by the following registered business entity ("we", "us").</p>
+        <p class="zh">本网站（v.ysec.cn）及 Brightbean Studio 服务由以下注册经营主体（"我们"）运营。</p>
+      </div>
+
+      <div class="entity-card">
+        <table>
+          <tr><td class="k">Legal business name / 法定名称</td><td class="v">麻城易商电子商务网店</td></tr>
+          <tr><td class="k">Legal form / 类型</td><td class="v">Individual Industrial and Commercial Household / 个体工商户</td></tr>
+          <tr><td class="k">Unified Social Credit Code / 统一社会信用代码</td><td class="v">92421181MA4EGAGY1G</td></tr>
+          <tr><td class="k">Legal representative / 经营者</td><td class="v">曾亚涛（Zeng Yatao）</td></tr>
+          <tr><td class="k">Registration date / 注册日期</td><td class="v">2021-01-14</td></tr>
+          <tr><td class="k">Registration authority / 登记机关</td><td class="v">麻城市市场监督管理局（Administration for Market Regulation of Macheng City, Hubei Province）</td></tr>
+          <tr><td class="k">Registered address / 注册地址</td><td class="v">湖北省麻城市乘马岗镇程家冲村曾家坳37号<br>No. 37 Zengjia'ao, Chengjiachong Village, Chengmagang Town, Macheng City, Hubei Province, China</td></tr>
+          <tr><td class="k">Business scope / 经营范围</td><td class="v">一般项目：日用百货销售；服装服饰批发；鞋帽批发；化妆品批发；针纺织品销售；农副产品销售；新鲜蔬菜批发；母婴用品销售；五金产品批发；劳动保护用品销售；礼品花卉销售；互联网设备销售；网络技术服务；互联网销售（除销售需要许可的商品）<br><span style="color:#718096;font-size:13px">E-commerce and network technology services / 电子商务及网络技术服务</span></td></tr>
+          <tr><td class="k">Contact phone / 联系电话</td><td class="v">+86 178 9713 9713</td></tr>
+          <tr><td class="k">Contact email / 联系邮箱</td><td class="v">contact@ysec.cn</td></tr>
+          <tr><td class="k">Website / 网址</td><td class="v">https://v.ysec.cn</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ──── 2. Privacy Policy ──── -->
+    <section class="doc-section" id="privacy">
+      <div class="sec-head">
+        <h2>Privacy Policy</h2>
+        <div class="sec-zh">隐私政策</div>
+        <div class="sec-meta">Effective date / 生效日期：2026-10-01 · Last updated / 最近更新：2026-10-02</div>
+      </div>
+
+      <div class="sub">
+        <h3>1. Who We Are</h3>
+        <div class="sub-zh">我们是谁</div>
+        <p>This policy applies to <strong>v.ysec.cn</strong>, a self-hosted social media management service (Brightbean Studio) operated by the following registered business entity:</p>
+        <p class="zh">本政策适用于 v.ysec.cn——由下列注册经营主体运营的自托管社交媒体管理服务（Brightbean Studio）：</p>
+        <div class="entity-card">
+          <table>
+            <tr><td class="k">Legal business name / 法定名称</td><td class="v">麻城易商电子商务网店（个体工商户）</td></tr>
+            <tr><td class="k">Unified Social Credit Code / 统一社会信用代码</td><td class="v">92421181MA4EGAGY1G</td></tr>
+            <tr><td class="k">Legal representative / 经营者</td><td class="v">曾亚涛（Zeng Yatao）</td></tr>
+            <tr><td class="k">Registered address / 注册地址</td><td class="v">湖北省麻城市乘马岗镇程家冲村曾家坳37号<br>No. 37 Zengjia'ao, Chengjiachong Village, Chengmagang Town, Macheng City, Hubei Province, China</td></tr>
+            <tr><td class="k">Contact / 联系方式</td><td class="v">contact@ysec.cn · +86 178 9713 9713</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="sub">
+        <h3>2. Information We Collect</h3>
+        <div class="sub-zh">我们收集的信息</div>
+        <p>Account registration data (name, email address); content you create or upload (posts, images, videos); social account connection tokens (e.g. Facebook, Instagram via Meta Platforms) that you explicitly authorize; technical logs (IP address, browser, access times).</p>
+        <p class="zh">账号注册信息（姓名、电子邮箱）；您创建或上传的内容（帖子、图片、视频）；您明确授权的社交账号连接令牌（如通过 Meta 平台的 Facebook、Instagram）；技术日志（IP 地址、浏览器、访问时间）。</p>
+      </div>
+
+      <div class="sub">
+        <h3>3. How We Use Information</h3>
+        <div class="sub-zh">信息使用方式</div>
+        <p>We use the information solely to provide the service: scheduling and publishing content to your connected social accounts via official first-party APIs (including the Meta Graph API), synchronizing comments and messages into a unified inbox, and generating analytics reports.</p>
+        <p class="zh">我们仅为提供服务而使用信息：通过官方第一方 API（包括 Meta Graph API）向您连接的社交账号定时发布内容、将评论和私信同步到统一收件箱、生成数据分析报告。</p>
+      </div>
+
+      <div class="sub">
+        <h3>4. Data Sharing</h3>
+        <div class="sub-zh">数据共享</div>
+        <p>We transmit data to Meta Platforms (Facebook, Instagram, Threads) only as required to execute the API actions you request. Data is hosted on our own server. We do not sell, rent, or share personal data with third parties for marketing purposes.</p>
+        <p class="zh">我们仅在执行您请求的 API 操作所必需时向 Meta 平台（Facebook、Instagram、Threads）传输数据。数据存储于我们自己的服务器。我们不会出于营销目的向第三方出售、出租或共享个人数据。</p>
+      </div>
+
+      <div class="sub">
+        <h3>5. Data Retention and Deletion</h3>
+        <div class="sub-zh">数据保留与删除</div>
+        <p>Data is retained while your account is active. You can delete your account and all data at any time from Settings, or request deletion by emailing contact@ysec.cn. Deletion requests are completed within 30 days. You can also disconnect social accounts at any time, which revokes our access tokens. For full instructions, see <a href="/data-deletion">Data Deletion</a>.</p>
+        <p class="zh">账号存续期间数据将被保留。您可随时发送邮件至 contact@ysec.cn 请求访问、更正或删除您的数据；删除请求将在 30 天内完成。您也可随时断开社交账号连接，这将撤销我们的访问令牌。</p>
+      </div>
+
+      <div class="sub">
+        <h3>6. Cookies</h3>
+        <div class="sub-zh">Cookie 使用</div>
+        <p>We use only session cookies required for login and security. No advertising or third-party tracking cookies are used.</p>
+        <p class="zh">我们仅使用登录和安全所必需的会话 Cookie，不使用广告或第三方跟踪 Cookie。</p>
+      </div>
+
+      <div class="sub">
+        <h3>7. Security</h3>
+        <div class="sub-zh">安全措施</div>
+        <p>All traffic is encrypted via HTTPS. Social account tokens and credentials are stored encrypted at rest. Access to administrative functions is restricted.</p>
+        <p class="zh">全站通过 HTTPS 加密传输。社交账号令牌与凭证在存储时加密。后台管理功能访问受限。</p>
+      </div>
+
+      <div class="sub">
+        <h3>8. Changes to This Policy</h3>
+        <div class="sub-zh">政策变更</div>
+        <p>Any changes to this policy will be posted on this page with an updated effective date.</p>
+        <p class="zh">本政策的任何变更将发布在本页面并更新生效日期。</p>
+      </div>
+
+      <div class="sub">
+        <h3>9. Contact</h3>
+        <div class="sub-zh">联系我们</div>
+        <p>For any privacy questions or requests, reach us through any of the following channels.</p>
+        <p class="zh">如有任何隐私问题或请求，可通过以下任一方式联系我们。</p>
+        <div class="contact-cards">
+          <div class="contact-card">
+            <div class="c-label">Email / 邮箱</div>
+            <div class="c-value">contact@ysec.cn</div>
+            <div class="c-zh">数据访问、更正、删除请求</div>
+          </div>
+          <div class="contact-card">
+            <div class="c-label">Phone / 电话</div>
+            <div class="c-value">+86 178 9713 9713</div>
+            <div class="c-zh">工作日 9:00–18:00 (GMT+8)</div>
+          </div>
+          <div class="contact-card">
+            <div class="c-label">Address / 地址</div>
+            <div class="c-value">No. 37 Zengjia'ao, Chengjiachong Village, Chengmagang Town, Macheng City, Hubei, China</div>
+            <div class="c-zh">湖北省麻城市乘马岗镇程家冲村曾家坳37号</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ──── 3. Terms of Service ──── -->
+    <section class="doc-section" id="terms">
+      <div class="sec-head">
+        <h2>Terms of Service</h2>
+        <div class="sec-zh">服务条款</div>
+        <div class="sec-meta">Effective date / 生效日期：2026-10-01 · Last updated / 最近更新：2026-10-02</div>
+      </div>
+
+      <div class="sub">
+        <h3>1. Acceptance</h3>
+        <div class="sub-zh">接受条款</div>
+        <p>By accessing or using v.ysec.cn (the "Service"), operated by 麻城易商电子商务网店 (Unified Social Credit Code: 92421181MA4EGAGY1G, hereinafter "we", "us"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.</p>
+        <p class="zh">访问或使用 v.ysec.cn（"本服务"）即表示您同意受本服务条款约束。本服务由麻城易商电子商务网店（统一社会信用代码：92421181MA4EGAGY1G，下称"我们"）运营。如您不同意本条款，请停止使用本服务。</p>
+      </div>
+
+      <div class="sub">
+        <h3>2. Description of the Service</h3>
+        <div class="sub-zh">服务说明</div>
+        <p>The Service is a self-hosted social media management platform that allows you to schedule and publish content to social networks (including Facebook, Instagram, Threads via the Meta Graph API), synchronize comments and messages into a unified inbox, and view analytics reports.</p>
+        <p class="zh">本服务是一个自托管社交媒体管理平台，允许您向社交网络（包括通过 Meta Graph API 接入的 Facebook、Instagram、Threads）定时发布内容、将评论和私信同步到统一收件箱、查看数据分析报告。</p>
+      </div>
+
+      <div class="sub">
+        <h3>3. Your Responsibilities</h3>
+        <div class="sub-zh">您的责任</div>
+        <ul>
+          <li>You are responsible for the content you create, upload, or publish through the Service.<span class="zh">您对通过本服务创建、上传或发布的内容负责。</span></li>
+          <li>You must comply with the terms of service and policies of each connected platform (including Meta's Platform Terms).<span class="zh">您必须遵守各接入平台的服务条款和政策（包括 Meta 平台条款）。</span></li>
+          <li>You must not use the Service to distribute spam, malware, illegal content, or content that infringes third-party rights.<span class="zh">不得使用本服务发布垃圾信息、恶意软件、违法内容或侵犯第三方权利的内容。</span></li>
+          <li>You are responsible for maintaining the confidentiality of your account credentials.<span class="zh">您负责保护账号凭证的机密性。</span></li>
+        </ul>
+      </div>
+
+      <div class="sub">
+        <h3>4. Third-Party Platforms</h3>
+        <div class="sub-zh">第三方平台</div>
+        <p>The Service integrates with third-party platforms via their official APIs. Your use of those platforms is governed by their own terms and privacy policies. We are not responsible for the availability, accuracy, or policies of third-party platforms.</p>
+        <p class="zh">本服务通过官方 API 与第三方平台集成。您使用这些平台受其自身条款和隐私政策约束。我们不对第三方平台的可用性、准确性或政策负责。</p>
+      </div>
+
+      <div class="sub">
+        <h3>5. Service Availability</h3>
+        <div class="sub-zh">服务可用性</div>
+        <p>The Service is provided "as is" without warranty of any kind. We do not guarantee uninterrupted or error-free operation. Scheduled publications depend on the availability of third-party APIs.</p>
+        <p class="zh">本服务按"现状"提供，不作任何形式的保证。我们不保证服务不中断或无错误运行。定时发布依赖第三方 API 的可用性。</p>
+      </div>
+
+      <div class="sub">
+        <h3>6. Limitation of Liability</h3>
+        <div class="sub-zh">责任限制</div>
+        <p>To the maximum extent permitted by law, we shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service, including but not limited to loss of data, loss of revenue, or platform account restrictions.</p>
+        <p class="zh">在法律允许的最大范围内，我们对因您使用本服务而产生的任何间接、附带或后果性损害不承担责任，包括但不限于数据丢失、收入损失或平台账号受限。</p>
+      </div>
+
+      <div class="sub">
+        <h3>7. Termination</h3>
+        <div class="sub-zh">终止</div>
+        <p>You may stop using the Service and request deletion of your account and data at any time by contacting us. We reserve the right to suspend or terminate access for violation of these terms.</p>
+        <p class="zh">您可随时停止使用本服务并联系我们删除您的账号和数据。我们有权对违反本条款的行为暂停或终止访问权限。</p>
+      </div>
+
+      <div class="sub">
+        <h3>8. Governing Law</h3>
+        <div class="sub-zh">适用法律</div>
+        <p>These terms are governed by the laws of the People's Republic of China. Any disputes shall be resolved through friendly negotiation; if negotiation fails, either party may submit the dispute to the people's court with jurisdiction over our registered address.</p>
+        <p class="zh">本条款受中华人民共和国法律管辖。任何争议应通过友好协商解决；协商不成的，任何一方可向对我们注册地址有管辖权的人民法院提起诉讼。</p>
+      </div>
+
+      <div class="sub">
+        <h3>9. Changes to These Terms</h3>
+        <div class="sub-zh">条款变更</div>
+        <p>We may update these terms from time to time. Changes will be posted on this page with an updated effective date. Continued use of the Service after changes constitutes acceptance.</p>
+        <p class="zh">我们可能不时更新本条款。变更将在本页面发布并更新生效日期。变更后继续使用本服务即视为接受新条款。</p>
+      </div>
+
+      <div class="sub">
+        <h3>10. Contact</h3>
+        <div class="sub-zh">联系我们</div>
+        <p>For questions about these terms, reach us through any of the following channels.</p>
+        <p class="zh">如对本条款有疑问，可通过以下任一方式联系我们。</p>
+        <div class="contact-cards">
+          <div class="contact-card">
+            <div class="c-label">Email / 邮箱</div>
+            <div class="c-value">contact@ysec.cn</div>
+            <div class="c-zh">条款相关咨询</div>
+          </div>
+          <div class="contact-card">
+            <div class="c-label">Phone / 电话</div>
+            <div class="c-value">+86 178 9713 9713</div>
+            <div class="c-zh">工作日 9:00–18:00 (GMT+8)</div>
+          </div>
+          <div class="contact-card">
+            <div class="c-label">Address / 地址</div>
+            <div class="c-value">No. 37 Zengjia'ao, Chengjiachong Village, Chengmagang Town, Macheng City, Hubei, China</div>
+            <div class="c-zh">湖北省麻城市乘马岗镇程家冲村曾家坳37号</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-foot">
+        <a href="#entity">Business Entity / 经营主体</a>
+        <a href="/privacy">Privacy Policy / 隐私政策</a>
+      <a href="/terms">Terms of Service / 服务条款</a>
+      <a href="/data-deletion">Data Deletion / 数据删除</a>
+      <a href="/legal">Legal Center / 法律中心</a>
+      <a href="/">Home / 首页</a>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  // ── Initial deep-link positioning (e.g. /privacy → #privacy) ──
+  var initial = "{{ scroll_to|default:'entity' }}";
+  if (initial && initial !== 'entity') {
+    var target = document.getElementById(initial);
+    if (target) {
+      // Instant jump on first paint; no smooth animation for deep links.
+      setTimeout(function () { target.scrollIntoView({ behavior: 'instant', block: 'start' }); }, 30);
+    }
+  }
+
+  // ── Scrollspy via IntersectionObserver ──
+  var links = document.querySelectorAll('.nav-link');
+  var sections = document.querySelectorAll('.doc-section');
+  function setActive(id) {
+    links.forEach(function (l) {
+      l.classList.toggle('active', l.getAttribute('data-section') === id);
+    });
+  }
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) setActive(entry.target.id);
+      });
+    }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

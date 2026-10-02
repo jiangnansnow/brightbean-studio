@@ -343,8 +343,8 @@ class ZhLocalizationMiddleware:
         if getattr(response, "streaming", False):
             return response
         # Django admin has its own i18n path; leave it to LANGUAGE_CODE.
-        # Privacy policy is bilingual by design; skip overlay / translation.
-        if request.path.startswith("/admin/") or request.path == "/privacy":
+        # Legal pages are bilingual by design; skip overlay / translation.
+        if request.path.startswith("/admin/") or request.path in ("/privacy", "/legal", "/terms", "/data-deletion"):
             return response
 
         enabled = getattr(settings, "ZH_LOCALIZATION_ENABLED", True)
