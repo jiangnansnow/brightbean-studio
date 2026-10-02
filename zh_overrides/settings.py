@@ -31,6 +31,12 @@ TEMPLATES[0]["DIRS"] = [BASE_DIR / "zh_overrides" / "templates"] + TEMPLATES[0][
 
 ROOT_URLCONF = "zh_overrides.urls"
 
+# Signup gate: email/password registration is invite-only; Google OAuth
+# signups stay open (when GOOGLE_AUTH_CLIENT_ID is configured). Existing-user
+# login is unaffected. See zh_overrides/adapters.py.
+ACCOUNT_ADAPTER = "zh_overrides.adapters.ZhAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "zh_overrides.adapters.ZhSocialAccountAdapter"
+
 # Master switch for the Chinese overlay. Default on; set to false in .env to
 # disable zh-hans without code changes or image rebuild.
 ZH_LOCALIZATION_ENABLED = env.bool("ZH_LOCALIZATION_ENABLED", True)

@@ -8,6 +8,12 @@
 - 词典规模（v1.2.1）：短语 773 条 / 单词 161 条 / 词元 41 条
 - 部署环境、服务器运维、1Panel 连通方法等运维事实统一以仓库外的《Brightbean运维手册.md》（`E:\外贸文件夹\Brightbean Studio\`）为准，勿写入本文
 
+## [1.3.3] - 2026-10-03
+
+### 新增（Added）
+
+- 注册闸门（叠加层 `zh_overrides/adapters.py`，经 `ACCOUNT_ADAPTER`/`SOCIALACCOUNT_ADAPTER` 挂载，不改上游）：邮箱+密码公开注册关闭，仅「持有效组织邀请」或「Google 授权（配置 `GOOGLE_AUTH_CLIENT_ID` 时）」可注册新账号；已有用户（含超级管理员）登录不受影响。
+
 ## [1.3.2] - 2026-10-03
 
 ### 新增（Added）
