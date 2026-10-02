@@ -5,8 +5,11 @@
  * English text after load. This script mirrors the middleware logic with a
  * MutationObserver, using the same dictionary exposed at window.__ZH__.
  *
- * Loop safety: a translated node never contains a dictionary key, so the
- * mutation our write triggers is a no-op. User-editable content
+ * Loop safety: mutations are batched via requestAnimationFrame and the
+ * observer is disconnected while translations are applied, so our own
+ * writes can never retrigger the observer. Batching also collapses the
+ * mutation storms Alpine produces on the composer page (dozens of nodes
+ * per click) into one pass per frame. User-editable content
  * (contenteditable, inputs) is skipped.
  */
 (function () {
@@ -103,30 +106,55 @@
     }
   }
 
+  var OBSERVE_OPTS = {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ["title", "aria-label", "placeholder", "value"]
+  };
+
+  var pending = new Set();
+  var scheduled = false;
+
+  function processPending() {
+    scheduled = false;
+    if (!pending.size) return;
+    var nodes = Array.from(pending);
+    pending.clear();
+    // Disconnect while writing: translated output can still contain Latin
+    // letters (brand names like BrightBean), which would synchronously
+    // retrigger the observer and freeze busy pages.
+    observer.disconnect();
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n.isConnected) walk(n);
+    }
+    observer.observe(document.body, OBSERVE_OPTS);
+  }
+
   var observer = new MutationObserver(function (mutations) {
     for (var m = 0; m < mutations.length; m++) {
       var mutation = mutations[m];
       if (mutation.type === "childList") {
         for (var k = 0; k < mutation.addedNodes.length; k++) {
-          walk(mutation.addedNodes[k]);
+          pending.add(mutation.addedNodes[k]);
         }
       } else if (mutation.type === "characterData") {
-        translateTextNode(mutation.target);
+        pending.add(mutation.target);
       } else if (mutation.type === "attributes" && mutation.target.nodeType === 1) {
-        translateAttrs(mutation.target);
+        pending.add(mutation.target);
       }
+    }
+    if (pending.size && !scheduled) {
+      scheduled = true;
+      requestAnimationFrame(processPending);
     }
   });
 
   function start() {
     walk(document.body);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: ["title", "aria-label", "placeholder", "value"]
-    });
+    observer.observe(document.body, OBSERVE_OPTS);
   }
 
   if (document.body) {

@@ -1,7 +1,5 @@
 {% load analytics_extras %}
-{# ZH-OVERRIDE: 与上游 analytics/_post_table.html 的唯一差异是中文文案与去复数后缀。
-   上游动态文案（"N posts · last N days"、"1–5 of 20"、"Page 1 of 3"）无法用词典安全
-   子串替换（" of " 会污染全局残留英文），故整模板覆盖直写中文。drift-allowlist 已登记。 #}
+{# ZH-OVERRIDE: 中文直写版（计数/分页），差异已登记 drift-allowlist。注意 {# #} 仅支持单行注释！ #}
 <div id="analytics-post-table">
     {# Toolbar #}
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--neutral-100);">
