@@ -49,11 +49,7 @@ def _build_payload() -> tuple[str, str]:
         "lower": lower,
         "subs": ordered,
     }
-    body = (
-        "window.__ZH__ = "
-        + json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-        + ";"
-    )
+    body = "window.__ZH__ = " + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";"
     _PAYLOAD = (digest, body)
     return _PAYLOAD
 

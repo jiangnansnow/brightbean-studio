@@ -80,7 +80,7 @@ class Command(BaseCommand):
             allowed_extra = _normalize(allowed.get("extra", []))
 
             raw_missing = en_tokens - zh_tokens  # upstream logic lost in zh copy
-            raw_extra = zh_tokens - en_tokens    # logic added in zh copy
+            raw_extra = zh_tokens - en_tokens  # logic added in zh copy
             missing = raw_missing - allowed_missing
             extra = raw_extra - allowed_extra
 

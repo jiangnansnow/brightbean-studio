@@ -136,9 +136,7 @@ class _ZhHTMLParser(HTMLParser):
         else:
             for raw, decoded in self._pending:
                 if raw == decoded:
-                    self.parts.append(
-                        translate_text(raw, self._dictionary)
-                    )
+                    self.parts.append(translate_text(raw, self._dictionary))
                 else:
                     self.parts.append(raw)
         self._pending = []
@@ -169,10 +167,7 @@ class _ZhHTMLParser(HTMLParser):
             new_value = translate_text(value, self._dictionary)
             if new_value == value:
                 continue
-            pattern = re.compile(
-                r"(" + re.escape(name) + r"\s*=\s*)([\"'])"
-                + re.escape(value) + r"\2"
-            )
+            pattern = re.compile(r"(" + re.escape(name) + r"\s*=\s*)([\"'])" + re.escape(value) + r"\2")
             raw = pattern.sub(
                 lambda m, nv=new_value: m.group(1) + m.group(2) + nv + m.group(2),
                 raw,
@@ -296,10 +291,10 @@ def _lang_toggle_html(request) -> str:
     return (
         f'<a id="zh-lang-toggle" href="{href}" title="{hint}" '
         f'aria-label="{hint}" style="position:fixed;right:12px;top:8px;'
-        f'z-index:50;display:inline-flex;align-items:center;justify-content:center;'
-        f'min-width:40px;height:28px;padding:0 12px;border-radius:9999px;'
-        f'border:1px solid {border};background:{bg};color:{color};'
-        f'font-size:13px;font-weight:700;text-decoration:none;'
+        f"z-index:50;display:inline-flex;align-items:center;justify-content:center;"
+        f"min-width:40px;height:28px;padding:0 12px;border-radius:9999px;"
+        f"border:1px solid {border};background:{bg};color:{color};"
+        f"font-size:13px;font-weight:700;text-decoration:none;"
         f'box-shadow:0 2px 8px rgba(0,0,0,0.15);">{label}</a>'
     )
 
@@ -366,20 +361,12 @@ class ZhLocalizationMiddleware:
             new_html = html_text
 
         if enabled and "</body>" in new_html and "zh-lang-toggle" not in new_html:
-            new_html = new_html.replace(
-                "</body>", _lang_toggle_html(request) + "</body>", 1
-            )
+            new_html = new_html.replace("</body>", _lang_toggle_html(request) + "</body>", 1)
 
         # Dynamic-write overlay only in Chinese mode; in English mode the
         # observer must not run or it would translate JS writes back to zh.
-        if (
-            translate
-            and "</body>" in new_html
-            and "zh-overrides/payload.js" not in new_html
-        ):
-            new_html = new_html.replace(
-                "</body>", _client_overlay_tags(request) + "</body>", 1
-            )
+        if translate and "</body>" in new_html and "zh-overrides/payload.js" not in new_html:
+            new_html = new_html.replace("</body>", _client_overlay_tags(request) + "</body>", 1)
 
         new_content = new_html.encode(charset)
         response.content = new_content
