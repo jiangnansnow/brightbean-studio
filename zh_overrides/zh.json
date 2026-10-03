@@ -1031,7 +1031,8 @@
     "Processing": "处理中",
     "Optional": "可选",
     "Required (Internal)": "必需（内部）",
-    "Required (Internal + Client)": "必需（内部 + 客户）"
+    "Required (Internal + Client)": "必需（内部 + 客户）",
+    "Timezone:": "时区："
   },
   "words": {
     "Publish": "发布",
@@ -1326,6 +1327,14 @@
     "api key": "API 密钥",
     "api keys": "API 密钥",
     "member": "成员",
-    "members": "成员"
+    "members": "成员",
+    "Timezone: ": "时区：",
+    "Sun": "日",
+    "Mon": "一",
+    "Tue": "二",
+    "Wed": "三",
+    "Thu": "四",
+    "Fri": "五",
+    "Sat": "六"
   }
 }
