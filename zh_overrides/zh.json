@@ -934,7 +934,6 @@
     "Search": "搜索",
     "Actions": "操作",
     "All": "全部",
-    "Go": "执行",
     "None": "无",
     "Unknown": "未知",
     "Today": "今天",
@@ -1011,7 +1010,28 @@
     "Client portal users": "客户门户用户",
     "Audit logs": "审计日志",
     "Settings": "设置",
-    "User": "用户"
+    "User": "用户",
+    "Account name": "账号名称",
+    "Connection status": "连接状态",
+    "connection status": "连接状态",
+    "Filename": "文件名",
+    "Media type": "媒体类型",
+    "media type": "媒体类型",
+    "Processing status": "处理状态",
+    "processing status": "处理状态",
+    "Created at": "创建时间",
+    "created at": "创建时间",
+    "Is archived": "是否归档",
+    "is archived": "是否归档",
+    "is starred": "是否收藏",
+    "approval workflow mode": "审批工作流模式",
+    "Token Expiring": "令牌即将过期",
+    "Completed": "已完成",
+    "Pending": "待处理",
+    "Processing": "处理中",
+    "Optional": "可选",
+    "Required (Internal)": "必需（内部）",
+    "Required (Internal + Client)": "必需（内部 + 客户）"
   },
   "words": {
     "Publish": "发布",
@@ -1213,7 +1233,8 @@
     "Chicago": "芝加哥",
     "Denver": "丹佛",
     "Los_Angeles": "洛杉矶",
-    "New_York": "纽约"
+    "New_York": "纽约",
+    "Go": "执行"
   },
   "tokens": {
     "Monday": "星期一",
@@ -1291,6 +1312,20 @@
     "roles": "角色",
     "checklists": "清单",
     "o auth connections": "OAuth 连接",
-    "O auth connections": "OAuth 连接"
+    "O auth connections": "OAuth 连接",
+    "social account": "社交账号",
+    "social accounts": "社交账号",
+    "media asset": "媒体资源",
+    "media assets": "媒体资源",
+    "workspace": "工作区",
+    "workspaces": "工作区",
+    "post": "帖子",
+    "posts": "帖子",
+    "user": "用户",
+    "users": "用户",
+    "api key": "API 密钥",
+    "api keys": "API 密钥",
+    "member": "成员",
+    "members": "成员"
   }
 }
