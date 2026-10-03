@@ -331,16 +331,29 @@ class ZhLocalizationMiddleware:
         if "setlang" in request.GET:
             return self._handle_setlang(request)
 
-        response = self.get_response(request)
+        # Admin uses Django's official zh-hans translations for its chrome
+        # (auth, allauth, built-in widgets). Activate only for /admin/ so the
+        # main site keeps en-us date-formatting behaviour (explicit |date:"M j"
+        # strings must not be localized). The active language is restored after
+        # the view to avoid leaking across requests in threaded servers.
+        from django.utils import translation
+        is_admin = request.path.startswith("/admin/")
+        saved_lang = translation.get_language() if is_admin else None
+        if is_admin:
+            translation.activate("zh-hans")
+        try:
+            response = self.get_response(request)
+        finally:
+            if is_admin:
+                translation.activate(saved_lang)
 
         content_type = response.get("Content-Type", "")
         if "text/html" not in content_type:
             return response
         if getattr(response, "streaming", False):
             return response
-        # Django admin has its own i18n path; leave it to LANGUAGE_CODE.
         # Legal pages are bilingual by design; skip overlay / translation.
-        if request.path.startswith("/admin/") or request.path in ("/privacy", "/legal", "/terms", "/data-deletion"):
+        if request.path in ("/privacy", "/legal", "/terms", "/data-deletion"):
             return response
 
         enabled = getattr(settings, "ZH_LOCALIZATION_ENABLED", True)
