@@ -953,7 +953,23 @@
     "September": "9 月",
     "October": "10 月",
     "November": "11 月",
-    "December": "12 月"
+    "December": "12 月",
+    "Are you sure you want to archive ": "确定要归档 ",
+    "? The workspace will be hidden from the sidebar and no new posts can be created. All existing data will be preserved.": "？该工作区将从侧边栏隐藏，且无法创建新帖子。所有现有数据都会保留。",
+    "Are you sure you want to permanently delete ": "确定要永久删除 ",
+    "? This action cannot be undone.": "？此操作无法撤销。",
+    "Workspace memberships": "工作区成员资格",
+    "Your inbox is empty": "收件箱为空",
+    "Add Custom Event": "添加自定义事件",
+    "Edit Event": "编辑事件",
+    "Delete posts?": "删除帖子？",
+    "Publish now?": "立即发布？",
+    "Select photos to add": "选择要添加的照片",
+    "Add images": "添加图片",
+    "Use this frame": "使用此画面",
+    "Saving…": "保存中…",
+    "Adding…": "添加中…",
+    "Assets will be moved to the parent folder.": "资源将被移动到上级文件夹。"
   },
   "words": {
     "Publish": "发布",
@@ -1219,6 +1235,14 @@
     "Subscribers": "订阅者",
     "Watch time": "观看时长",
     "Avg view %": "平均观看百分比",
-    "Engagement rate": "互动率"
+    "Engagement rate": "互动率",
+    " photo selected": " 张照片已选",
+    " photos selected": " 张照片已选",
+    "Add images": "添加图片",
+    "Add ": "添加 ",
+    " images": " 张图片",
+    " selected posts now — they go out on their platforms shortly.": " 篇已选帖子将立即发布到对应平台。",
+    " selected post now — they go out on their platforms shortly.": " 篇已选帖子将立即发布到对应平台。",
+    "Publish ": "发布 "
   }
 }
