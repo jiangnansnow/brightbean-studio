@@ -1010,7 +1010,8 @@
     "Connect page platforms": "连接页面平台",
     "Client portal users": "客户门户用户",
     "Audit logs": "审计日志",
-    "Settings": "设置"
+    "Settings": "设置",
+    "User": "用户"
   },
   "words": {
     "Publish": "发布",
@@ -1284,6 +1285,12 @@
     " images": " 张图片",
     " selected posts now — they go out on their platforms shortly.": " 篇已选帖子将立即发布到对应平台。",
     " selected post now — they go out on their platforms shortly.": " 篇已选帖子将立即发布到对应平台。",
-    "Publish ": "发布 "
+    "Publish ": "发布 ",
+    "replys": "回复",
+    "sla configs": "SLA 配置",
+    "roles": "角色",
+    "checklists": "清单",
+    "o auth connections": "OAuth 连接",
+    "O auth connections": "OAuth 连接"
   }
 }
