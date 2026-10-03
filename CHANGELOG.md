@@ -8,6 +8,20 @@
 - 词典规模（v1.2.1）：短语 773 条 / 单词 161 条 / 词元 41 条
 - 词典规模（v1.3.4）：短语 877 条 / 单词 207 条 / 词元 43 条
 - 部署环境、服务器运维、1Panel 连通方法等运维事实统一以仓库外的《Brightbean运维手册.md》（`E:\外贸文件夹\Brightbean Studio\`）为准，勿写入本文
+- 词典规模（v1.4.0）：短语 1031 条 / 单词 201 条 / 词元 90 条
+
+## [1.4.0] - 2026-10-03
+
+### 新增（Added）
+
+- **Django Admin 后台完整汉化**：中间件对 `/admin/` 路径临时激活 `zh-hans`（用 `translation.activate` + 保存/恢复，仅作用于 admin 请求，不影响主站 `|date:"M j"` 等显式日期格式），移除 admin 绕过，让 zh.json 词典也对后台生效。Django 官方 zh-hans 负责后台框架（登录、仪表板、按钮、分页、筛选、auth/allauth），zh.json 补充自定义应用名、模型名、字段标签、选项值。零上游改动：不改 `LANGUAGE_CODE`、不改任何上游 model 的 `verbose_name`。
+
+### 修复（Fixed）
+
+- 数据分析页互动率公式仍为英文（如 `(Reactions + Comments + Shares) ÷ Views. Not reported by Facebook.`）：19 个指标标签原先在 `words` 段（仅精确匹配），公式是拼接字符串故不命中；将指标标签全部移入 `tokens` 段（子串替换），并新增 `Not reported by` → `非由`。
+- 工作区设置页「归档/删除工作区」说明文字、确认弹窗文字未汉化：补入对应短语。
+- 发布页筛选按钮 `All Tags` / `All Posts`、日历发布确认弹窗 `Publish now?` / `Publish X selected posts now...`、创作页 Unsplash `Select photos to add` / `Add images` / `Use this frame` 等由 Alpine `x-text` 动态渲染的文案未汉化：补入短语/词元，由 `zh-client.js` 观察器在运行时翻译。
+- 后台列表中 `Google` 被误译为 `执行ogle`：`Go`（后台「执行」按钮）原在 `phrases` 段会参与子串替换，误伤 `Google`；改为移入 `words` 段（仅精确匹配独立文本节点）。
 
 ## [1.3.6] - 2026-10-03
 
