@@ -79,3 +79,39 @@ class WorkspacePlatformCredential(models.Model):
             else:
                 masked[key] = "****"
         return masked
+
+
+class WorkspaceMeta(models.Model):
+    """Operator-only notes for a workspace (local-custom admin console).
+
+    Holds the Tester / platform-account ledger columns that have no
+    representation upstream (tester identities, Page/IG IDs for cross-check).
+    One row per workspace, created lazily by the console services.
+    """
+
+    workspace = models.OneToOneField(
+        "workspaces.Workspace",
+        on_delete=models.CASCADE,
+        related_name="workspace_meta",
+    )
+    fb_tester_note = models.CharField(
+        max_length=500,
+        blank=True,
+        default="",
+        verbose_name="FB 测试员 / Page ID 备注",
+    )
+    ig_tester_note = models.CharField(
+        max_length=500,
+        blank=True,
+        default="",
+        verbose_name="IG 测试员 / IG ID 备注",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "zh_overrides_workspace_meta"
+        verbose_name = "工作区运营备注"
+        verbose_name_plural = "工作区运营备注"
+
+    def __str__(self):
+        return f"meta:{self.workspace.name}"

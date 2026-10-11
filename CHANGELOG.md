@@ -14,6 +14,11 @@
 
 ### 新增（Added）
 
+- **超管「租户配置矩阵」控制台**：Admin 新增单页控制台（`/admin/zh_overrides/workspaceplatformcredential/tenant-config/`，仅超管），把原本分散在「用户/组织/工作区/平台凭证」多个 Admin 菜单的开通动作合并为一个页面：租户卡片折叠展开（支持搜索与全部展开/收起）、新建租户登录账号（密码可空=仅 Google SSO，自动 provision 组织+默认工作区并幂等补齐 Owner 成员关系）、通用/独立模式一键切换（前端即时锁定对侧输入区，后端按解析器同规则强制互斥）、独立模式下「+ 添加工作区」子级动态加行并逐行/整组保存、App 凭证明文显示、工作区归档（可逆默认）与强删（二次确认）、连接状态实时读取。
+- 新增 `WorkspaceMeta` 旁路表（`zh_overrides_workspace_meta`，0002 迁移）：承载 Tester/Page ID/IG ID 等运营备注字段，矩阵页直接维护，台账单处化。
+- 矩阵页右侧固定 1/4 宽独立滚动**操作说明栏**（模式规则、开租户 8 步流程、各凭据在 Meta 后台的获取位置、FB 9 项/IG 5 项权限清单、固定回调 URL 与两条共享 Webhook 口令、Tester 邀请路径、法律页/数据删除说明、开发模式与 Live 审核规则、常见错误码、安全提示），另带不占版面的**悬浮大纲**快速定位；以后开租户无需再翻外部文档。
+- Admin 首页与左侧导航中「中文汉化与平台扩展」应用分组置顶，并注入「租户配置矩阵」入口（通过包装 `AdminSite.get_app_list` 实现，纯叠加不改上游）。
+- 所有控制台写操作（建号/切模式/加工作区/归档/删除）写入 Django admin LogEntry 操作日志。
 - **工作区级平台 App 凭证（Workspace-scoped platform credentials）**：新增旁路模型 `zh_overrides.WorkspacePlatformCredential`（独立表 `zh_overrides_workspace_platform_credential`，约束 `(workspace, platform)` 唯一，凭证经 `EncryptedJSONField` 加密），支持代理商形态下「一个组织（租户）的每个工作区使用各自独立的 Meta/平台开发者 App」。凭证解析按「租户 × 平台」两级模式判定：
   - **通用模式（组织级已配置）**：组织在原 Platform credentials（平台凭证）建有完整凭证行时，全组织工作区共享该 App，行为与上游 100% 一致，工作区凭证行即使存在也被忽略；
   - **独立模式（组织级未配置）**：系统只查该工作区自己的凭证行——已配置即用工作区专属 App，未配置即空配置（连接页卡片置灰不可点、不可发布），不向任何默认 App 回退；
@@ -29,7 +34,7 @@
 
 ### 部署注意（Deployment）
 
-- 随镜像 migrate 自动新建旁路表；无新增环境变量、无需改 docker-compose；服务器 `.env` 仍不得设置 `PLATFORM_FACEBOOK_*` / `PLATFORM_INSTAGRAM_*`（完整 env 配置会压掉组织与工作区凭证行）。
+- 随镜像 migrate 自动新建两张旁路表（工作区凭证、工作区备注）；无新增环境变量、无需改 docker-compose；服务器 `.env` 仍不得设置 `PLATFORM_FACEBOOK_*` / `PLATFORM_INSTAGRAM_*`（完整 env 配置会压掉组织与工作区凭证行）。
 - 独立模式工作区更换 App 后，该工作区已连接账号的旧令牌失效，必须重新 OAuth 授权（令牌与签发 App 绑定）。
 - 新增测试设置 `zh_overrides.test_settings`（内存 SQLite）：`DJANGO_SETTINGS_MODULE=zh_overrides.test_settings pytest zh_overrides`。
 
