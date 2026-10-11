@@ -6,6 +6,7 @@
 <style>
   :root{--tc-brand:#0b6e4f;--tc-line:#d9dee7;--tc-ink:#1f2937;--tc-muted:#5b6675;}
   body{background:#f4f6f9;}
+  .tc-subtitle{font-size:13px;color:var(--tc-muted);font-weight:400;margin-left:10px;}
   #content-related{display:none;}
   .tc-wrap{display:flex;gap:16px;align-items:flex-start;}
   .tc-main{flex:1 1 75%;min-width:0;}
@@ -80,11 +81,11 @@
 
 {% block content %}
 <div id="content-main">
-  <h1>租户配置矩阵 <span style="font-size:12px;color:var(--tc-muted);font-weight:400;">超管控制台 · 工作区级平台凭证（v1.5.0）</span></h1>
+  <h1>租户配置矩阵 <span class="tc-subtitle">超管控制台 · 工作区级平台凭证（v1.5.0）</span></h1>
 
   <!-- floating outline -->
   <div class="tc-outline" id="tcOutline">
-    <button type="button" class="tc-outline-btn" onclick="document.getElementById('tcOutline').classList.toggle('open')">☰ 说明大纲</button>
+    <button type="button" class="tc-outline-btn" id="tcOutlineBtn">☰ 说明大纲</button>
     <div class="tc-outline-menu">
       <a href="#g-rules">① 两种模式与生效规则</a>
       <a href="#g-flow">② 新租户标准流程</a>
@@ -103,9 +104,9 @@
   <div class="tc-wrap">
     <div class="tc-main">
       <div class="tc-toolbar">
-        <input type="search" id="tcSearch" placeholder="搜索组织名 / 登录邮箱…" oninput="tcFilter()">
-        <button type="button" class="tc-btn ghost" onclick="tcExpandAll(true)">全部展开</button>
-        <button type="button" class="tc-btn ghost" onclick="tcExpandAll(false)">全部收起</button>
+        <input type="search" id="tcSearch" placeholder="搜索组织名 / 登录邮箱…">
+        <button type="button" class="tc-btn ghost" id="tcExpandAll">全部展开</button>
+        <button type="button" class="tc-btn ghost" id="tcCollapseAll">全部收起</button>
       </div>
 
       <!-- new tenant -->
@@ -126,7 +127,7 @@
 
       {% for t in tenants %}
       <div class="tc-card{% if forloop.first %} open{% endif %}" id="org-{{ t.organization_id }}" data-search="{{ t.organization_name|lower }} {{ t.owner_email|lower }}">
-        <div class="tc-card-head" onclick="tcToggle(this)">
+        <div class="tc-card-head" data-toggle-card>
           <span class="tc-chevron">▶</span>
           <b>{{ t.organization_name }}</b>
           <span style="color:var(--tc-muted);font-size:12px;">{{ t.owner_email }}</span>
@@ -145,11 +146,11 @@
             <div class="tc-modeseg">
               <b>租户模式：</b>
               <label><input type="radio" name="mode" value="traditional" {% if t.mode == 'traditional' %}checked{% endif %}
-                onchange="tcModeChange('{{ t.organization_id }}','traditional')"> 通用模式（组织共享 App）</label>
+                data-org="{{ t.organization_id }}" data-mode="traditional"> 通用模式（组织共享 App）</label>
               <label><input type="radio" name="mode" value="independent" {% if t.mode == 'independent' %}checked{% endif %}
-                onchange="tcModeChange('{{ t.organization_id }}','independent');return confirm('切换到独立模式将删除该组织的组织级凭证行；未单独配置的工作区会变为不可用。确定？');"> 独立模式（每工作区独立 App）</label>
+                data-org="{{ t.organization_id }}" data-mode="independent"> 独立模式（每工作区独立 App）</label>
             </div>
-            <div class="tc-credbox trad org-cred-{{ t.organization_id }}" {% if t.mode != 'traditional' %}style="display:none"{% endif %}>
+            <div class="tc-credbox trad" data-org-cred="{{ t.organization_id }}" {% if t.mode != 'traditional' %}style="display:none"{% endif %}>
               <h5>组织级 App 凭证（保存后全组织工作区共享；两个平台都需填写）</h5>
               <div class="tc-grid4">
                 <div><label>Facebook App ID</label><input name="org_fb_id" value="{{ t.org_credentials.fb.client_id }}"></div>
@@ -157,20 +158,24 @@
                 <div><label>Instagram App ID</label><input name="org_ig_id" value="{{ t.org_credentials.ig.client_id }}"></div>
                 <div><label>Instagram App Secret</label><input name="org_ig_secret" value="{{ t.org_credentials.ig.client_secret }}"></div>
               </div>
-              <button class="tc-btn primary" style="margin-top:8px;">保存模式与组织凭证</button>
+              <button class="tc-btn primary" style="margin-top:8px;"
+                data-test-input="orgtest-{{ t.organization_id }}" data-test-value="0">保存模式与组织凭证</button>
               <button type="submit" class="tc-btn warn" style="margin-top:8px;"
-                onclick="document.getElementById('orgtest-{{ t.organization_id }}').value='1';return confirm('保存后将用假授权码向 Meta 探测，验证两对 App ID/Secret 是否真实有效（不会产生任何授权）。继续？');">保存并测试凭证</button>
+                data-test-input="orgtest-{{ t.organization_id }}" data-test-value="1"
+                data-confirm="保存后将用假授权码向 Meta 探测，验证两对 App ID/Secret 是否真实有效（不会产生任何授权）。继续？">保存并测试凭证</button>
             </div>
-            <div {% if t.mode == 'traditional' %}style="display:none"{% endif %} class="org-cred-{{ t.organization_id }} tc-hint">
+            <div class="tc-hint" data-org-cred="{{ t.organization_id }}" {% if t.mode == 'traditional' %}style="display:none"{% endif %}>
               独立模式：组织级凭证区域已锁定。请在下方逐工作区填写各自的 App 凭证；不填的工作区不可连接。
             </div>
-            <div {% if t.mode == 'traditional' %}style="display:none"{% endif %} class="org-cred-{{ t.organization_id }}">
-              <button class="tc-btn primary" style="margin-top:6px;">确认切换为独立模式</button>
+            <div data-org-cred="{{ t.organization_id }}" {% if t.mode == 'traditional' %}style="display:none"{% endif %}>
+              <button class="tc-btn primary" style="margin-top:6px;"
+                data-test-input="orgtest-{{ t.organization_id }}" data-test-value="0"
+                data-confirm="切换到独立模式将删除该组织的组织级凭证行；未单独配置的工作区会变为不可用。确定？">确认切换为独立模式</button>
             </div>
           </form>
 
           <!-- workspace matrix (CSS grid; avoids invalid form-in-table nesting) -->
-          <div class="ws-matrix-{{ t.organization_id }}" {% if t.mode == 'traditional' %}style="display:none"{% endif %}>
+          <div data-ws-matrix="{{ t.organization_id }}" {% if t.mode == 'traditional' %}style="display:none"{% endif %}>
             <div class="tc-wgrid wgrid-head">
               <div>工作区名称</div><div>FB App ID</div><div>FB App Secret</div><div>IG App ID</div><div>IG App Secret</div>
               <div>FB 测试员/Page ID</div><div>IG 测试员/IG ID</div><div>连接状态</div><div>操作</div>
@@ -196,11 +201,13 @@
                 <span class="tc-dot {% if w.ig_connected %}on{% else %}off{% endif %}"></span>IG
               </div>
               <div class="tc-actions">
-                <button form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" class="tc-btn primary" title="保存本行">✓</button>
+                <button form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" class="tc-btn primary" title="保存本行"
+                  data-test-input="wstest-{{ t.organization_id }}-{{ forloop.counter }}" data-test-value="0">✓</button>
                 <button type="submit" form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" class="tc-btn warn" title="保存本行并向 Meta 探测验证两对凭证"
-                  onclick="document.getElementById('wstest-{{ t.organization_id }}-{{ forloop.counter }}').value='1';return confirm('保存后向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？');">测试</button>
+                  data-test-input="wstest-{{ t.organization_id }}-{{ forloop.counter }}" data-test-value="1"
+                  data-confirm="保存后向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？">测试</button>
                 <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
-                      onsubmit="return confirm('{% if w.is_archived %}取消归档该工作区？{% else %}归档后租户侧不可见但数据保留，可恢复。确定归档？{% endif %}');">
+                      data-confirm="{% if w.is_archived %}取消归档该工作区？{% else %}归档后租户侧不可见但数据保留，可恢复。确定归档？{% endif %}">
                   {% csrf_token %}
                   <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
                   <input type="hidden" name="workspace_id" value="{{ w.workspace_id }}">
@@ -211,7 +218,7 @@
                   {% endif %}
                 </form>
                 <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
-                      onsubmit="return confirm('彻底删除将级联删除该工作区全部帖子、社交账号与凭证，不可恢复！确定？');">
+                      data-confirm="彻底删除将级联删除该工作区全部帖子、社交账号与凭证，不可恢复！确定？">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="delete_workspace">
                   <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
@@ -236,17 +243,19 @@
               <div><input name="ig_note"></div>
               <div class="tc-status tc-hint">新建</div>
               <div class="tc-actions">
-                <button class="tc-btn primary">添加并保存</button>
+                <button class="tc-btn primary"
+                  data-test-input="newtest-{{ t.organization_id }}" data-test-value="0">添加并保存</button>
                 <button type="submit" class="tc-btn warn"
-                  onclick="document.getElementById('newtest-{{ t.organization_id }}').value='1';return confirm('保存并向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？');">保存并测试</button>
+                  data-test-input="newtest-{{ t.organization_id }}" data-test-value="1"
+                  data-confirm="保存并向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？">保存并测试</button>
               </div>
             </form>
-            <button type="button" class="tc-btn ghost tc-add" onclick="tcAddRow('{{ t.organization_id }}')">+ 添加工作区</button>
+            <button type="button" class="tc-btn ghost tc-add" data-add-row="{{ t.organization_id }}">+ 添加工作区</button>
             <p class="tc-hint">独立模式下逐行保存；App ID/Secret 必须成对填写（留空=该平台未配置，连接页置灰）。新工作区自动给组织 Owner 加入成员关系。</p>
           </div>
 
           <!-- traditional hint for workspace list -->
-          <div class="ws-matrix-{{ t.organization_id }}" {% if t.mode != 'traditional' %}style="display:none"{% endif %}>
+          <div data-ws-matrix="{{ t.organization_id }}" {% if t.mode != 'traditional' %}style="display:none"{% endif %}>
             <p class="tc-hint">通用模式：该租户全部 {{ t.workspaces|length }} 个工作区共享上方组织级 App；工作区仅管理名称、排期与媒体库。</p>
           </div>
         </div>
@@ -332,36 +341,95 @@
   </div>
 </div>
 
-<script>
-function tcToggle(headEl){ headEl.parentElement.classList.toggle('open'); }
-function tcExpandAll(open){
-  document.querySelectorAll('.tc-card').forEach(c => c.classList.toggle('open', open));
-}
-function tcFilter(){
-  var q = document.getElementById('tcSearch').value.trim().toLowerCase();
-  document.querySelectorAll('.tc-card').forEach(function(c){
-    c.style.display = (!q || c.dataset.search.indexOf(q) !== -1) ? '' : 'none';
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+  "use strict";
+  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
+
+  // Card expand / collapse (event delegation — no inline handlers, CSP-safe).
+  document.addEventListener("click", function (e) {
+    var head = e.target.closest("[data-toggle-card]");
+    if (head) { head.parentElement.classList.toggle("open"); }
+
+    var addBtn = e.target.closest("[data-add-row]");
+    if (addBtn) {
+      var row = document.getElementById("newrow-" + addBtn.getAttribute("data-add-row"));
+      if (row) {
+        row.style.display = "";
+        var nameInput = row.querySelector("input[name=workspace_name]");
+        if (nameInput) { nameInput.focus(); }
+      }
+    }
+
+    // Buttons that flip the hidden "test" flag before their form submits.
+    var tester = e.target.closest("[data-test-input]");
+    if (tester) {
+      var flag = document.getElementById(tester.getAttribute("data-test-input"));
+      if (flag) { flag.value = tester.getAttribute("data-test-value") || "0"; }
+    }
+
+    // Outline menu: toggle / close after picking an item.
+    var outlineBtn = e.target.closest("#tcOutlineBtn");
+    if (outlineBtn) {
+      document.getElementById("tcOutline").classList.toggle("open");
+      return;
+    }
+    if (e.target.closest(".tc-outline-menu a")) {
+      document.getElementById("tcOutline").classList.remove("open");
+    }
   });
-}
-function tcModeChange(orgId, mode){
-  var tradBox = document.querySelectorAll('.org-cred-'+orgId);
-  var matrix = document.querySelector('.ws-matrix-'+orgId);
-  // visual lock immediately; actual write happens on submit (server re-validates)
-  if(mode === 'traditional'){
-    tradBox.forEach(function(el){ el.style.display = ''; });
-    if(matrix) matrix.style.display = 'none';
-  } else {
-    tradBox.forEach(function(el){ el.style.display = 'none'; });
-    if(matrix) matrix.style.display = '';
+
+  // Confirmation dialogs (mode switch, probe, archive, hard delete).
+  // The message can live on the form or on the clicked submit button.
+  document.addEventListener("submit", function (e) {
+    var form = e.target.closest("form");
+    var submitter = e.submitter;
+    var msg = null;
+    if (form) { msg = form.getAttribute("data-confirm"); }
+    if (!msg && submitter) { msg = submitter.getAttribute("data-confirm"); }
+    if (msg && !window.confirm(msg)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+
+  // Close outline when clicking anywhere outside it.
+  document.addEventListener("mousedown", function (e) {
+    var menu = document.getElementById("tcOutline");
+    if (menu && !menu.contains(e.target)) { menu.classList.remove("open"); }
+  });
+
+  // Toolbar: search + bulk expand/collapse.
+  var search = $("#tcSearch");
+  if (search) {
+    search.addEventListener("input", function () {
+      var q = search.value.trim().toLowerCase();
+      $all(".tc-card").forEach(function (c) {
+        c.style.display = (!q || (c.dataset.search || "").indexOf(q) !== -1) ? "" : "none";
+      });
+    });
   }
-}
-function tcAddRow(orgId){
-  var row = document.getElementById('newrow-'+orgId);
-  if(row){ row.style.display=''; row.querySelector('input[name=workspace_name]').focus(); }
-}
-document.addEventListener('click', function(e){
-  var menu = document.getElementById('tcOutline');
-  if(!menu.contains(e.target)) menu.classList.remove('open');
-});
+  var expandBtn = $("#tcExpandAll");
+  if (expandBtn) { expandBtn.addEventListener("click", function () { $all(".tc-card").forEach(function (c) { c.classList.add("open"); }); }); }
+  var collapseBtn = $("#tcCollapseAll");
+  if (collapseBtn) { collapseBtn.addEventListener("click", function () { $all(".tc-card").forEach(function (c) { c.classList.remove("open"); }); }); }
+
+  // Mode radios: instantly lock the opposite section (visual only; the
+  // server re-validates the mutual exclusion on save).
+  $all("input[type=radio][data-org][data-mode]").forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      var orgId = radio.getAttribute("data-org");
+      var mode = radio.getAttribute("data-mode");
+      var trad = mode === "traditional";
+      $all("[data-org-cred='" + orgId + "']").forEach(function (el) {
+        el.style.display = trad ? "" : "none";
+      });
+      $all("[data-ws-matrix='" + orgId + "']").forEach(function (el) {
+        el.style.display = trad ? "none" : "";
+      });
+    });
+  });
+})();
 </script>
 {% endblock %}
