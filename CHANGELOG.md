@@ -12,8 +12,13 @@
 
 ## [1.5.0] - 2026-10-11
 
+### 修复（Fixed）
+
+- **通知页「全部标记为已读」报「出了点问题，请重试。」**：上游 `notifications.mark_all_read` 在处理 htmx POST 时直接调用了被 `@require_GET` 装饰的 `notification_drawer()`，POST 请求触发 405（数据库更新其实已成功，但前端收到错误 toast 且列表不刷新），且返回的抽屉模板与历史页列表容器不匹配。改为抽出无装饰器的 `_render_drawer()`，并按 `HX-Target` 分别返回历史列表 partial（`#notification-history-list`）或抽屉 partial（`#notification-drawer-content`）；补 2 个 htmx 回归测试。
+
 ### 新增（Added）
 
+- **矩阵页「保存并测试」凭证探测**：租户配置矩阵的组织级与工作区级保存按钮旁新增「保存并测试凭证/测试」按钮，保存后用假授权码探测 Meta OAuth 换令牌端点验证 FB/IG App ID/Secret 是否真实有效（不产生任何授权或令牌）；正确凭证返回 code/redirect 类拒绝（并能顺带提示回调 URI 未登记），错误凭证返回应用身份拒绝，网络异常/未知响应一律判失败。说明栏新增第 ⑪ 节解释探测原理与边界。
 - **超管「租户配置矩阵」控制台**：Admin 新增单页控制台（`/admin/zh_overrides/workspaceplatformcredential/tenant-config/`，仅超管），把原本分散在「用户/组织/工作区/平台凭证」多个 Admin 菜单的开通动作合并为一个页面：租户卡片折叠展开（支持搜索与全部展开/收起）、新建租户登录账号（密码可空=仅 Google SSO，自动 provision 组织+默认工作区并幂等补齐 Owner 成员关系）、通用/独立模式一键切换（前端即时锁定对侧输入区，后端按解析器同规则强制互斥）、独立模式下「+ 添加工作区」子级动态加行并逐行/整组保存、App 凭证明文显示、工作区归档（可逆默认）与强删（二次确认）、连接状态实时读取。
 - 新增 `WorkspaceMeta` 旁路表（`zh_overrides_workspace_meta`，0002 迁移）：承载 Tester/Page ID/IG ID 等运营备注字段，矩阵页直接维护，台账单处化。
 - 矩阵页右侧固定 1/4 宽独立滚动**操作说明栏**（模式规则、开租户 8 步流程、各凭据在 Meta 后台的获取位置、FB 9 项/IG 5 项权限清单、固定回调 URL 与两条共享 Webhook 口令、Tester 邀请路径、法律页/数据删除说明、开发模式与 Live 审核规则、常见错误码、安全提示），另带不占版面的**悬浮大纲**快速定位；以后开租户无需再翻外部文档。

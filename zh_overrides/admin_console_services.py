@@ -335,3 +335,107 @@ def delete_workspace(organization_id: str, workspace_id: str) -> None:
     if ws is None:
         raise ConsoleError("工作区不存在或不属于该组织。")
     ws.delete()
+
+
+# ---------------------------------------------------------------- credential probe
+
+
+# Meta token endpoints reject a bogus authorization code with HTTP 400 either
+# way. The *shape* of the error tells us whether the app credentials
+# themselves were accepted — no access token is ever issued or stored.
+_FB_TOKEN_URL = "https://graph.facebook.com/v25.0/oauth/access_token"
+_IG_TOKEN_URL = "https://api.instagram.com/oauth/access_token"
+
+# Error substrings that mean "the app was authenticated; only the fake code
+# was wrong" → credentials are valid.
+_CODE_REJECTION_MARKERS = (
+    "code", "verification code", "matching code", "authorization code",
+    "redirect_uri", "redirect", "invalid request",
+)
+_APP_REJECTION_MARKERS = (
+    "validating application", "invalid client", "client_id", "client_secret",
+    "application info", "invalid app", "appsecret", "api key",
+)
+
+
+def probe_credential(platform: str, bundle: OrgBundle) -> tuple[bool, str]:
+    """Validate an App ID/Secret pair WITHOUT any user authorisation.
+
+    Returns ``(ok, detail)``. A pair is considered valid when Meta's token
+    endpoint authenticates the app and only rejects the dummy code. Network or
+    unexpected responses report ``(False, reason)`` so the operator is never
+    told "valid" on ambiguity.
+    """
+    import httpx
+
+    cid = (bundle.client_id or "").strip()
+    csec = (bundle.client_secret or "").strip()
+    if not cid or not csec:
+        return False, "App ID 与 App Secret 必须同时填写。"
+    if not cid.isdigit():
+        return False, "App ID 应为纯数字。"
+
+    dummy_code = "zh_console_probe_invalid_code_000000"
+    try:
+        if platform == FB:
+            resp = httpx.post(
+                _FB_TOKEN_URL,
+                params={
+                    "client_id": cid,
+                    "client_secret": csec,
+                    "grant_type": "authorization_code",
+                    "redirect_uri": "https://v.ysec.cn/social-accounts/callback/facebook/",
+                    "code": dummy_code,
+                },
+                timeout=12,
+            )
+        elif platform == IG:
+            resp = httpx.post(
+                _IG_TOKEN_URL,
+                files={
+                    "client_id": (None, cid),
+                    "client_secret": (None, csec),
+                    "grant_type": (None, "authorization_code"),
+                    "redirect_uri": (None, "https://v.ysec.cn/social-accounts/callback/instagram_login/"),
+                    "code": (None, dummy_code),
+                },
+                timeout=12,
+            )
+        else:
+            return False, f"暂不支持平台 {platform} 的凭证探测。"
+    except Exception as exc:
+        return False, f"网络请求失败（未能连通 Meta）：{type(exc).__name__}"
+
+    try:
+        data = resp.json()
+    except Exception:
+        return False, f"Meta 返回非预期内容（HTTP {resp.status_code}），请稍后重试。"
+
+    err = data.get("error") or {}
+    message = " ".join(
+        str(err.get(k) or data.get(k) or "")
+        for k in ("message", "error_message", "error_type", "type")
+    ).lower()
+    code = err.get("code")
+
+    # Unexpected: a token came back for a dummy code must never happen; treat
+    # as inconclusive rather than "valid".
+    if data.get("access_token"):
+        return False, "探测出现异常响应（返回了访问令牌），请人工核对，勿继续使用。"
+
+    app_bad = any(m in message for m in _APP_REJECTION_MARKERS)
+    code_bad = any(m in message for m in _CODE_REJECTION_MARKERS)
+    redirect_missing = "redirect_uri" in message or "redirect" in message
+
+    if app_bad and not code_bad:
+        return False, f"App 凭证无效（Meta 拒绝应用身份）：{message[:160] or code}"
+    if code_bad:
+        if redirect_missing:
+            return True, "App 凭证有效，但 Meta 提示回调地址（redirect_uri）未在该 App 登记，请检查 OAuth 跳转 URI。"
+        return True, "App 凭证有效：Meta 已接受应用身份，仅拒绝了测试用假授权码（符合预期）。"
+    if code in (100,):
+        return True, "App 凭证有效：Meta 已接受应用身份，仅拒绝了测试用假授权码（符合预期）。"
+    # Fall back to known FB sub-codes: 101 = invalid api key/app.
+    if code in (101, 190, 191):
+        return False, f"App 凭证可能无效（Meta 错误码 {code}）：{message[:160]}"
+    return False, f"无法确定凭证状态（HTTP {resp.status_code}，code={code}）：{message[:160]}"

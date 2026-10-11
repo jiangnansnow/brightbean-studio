@@ -88,18 +88,26 @@ def tenant_config_action(request):
 
         elif action == "save_mode":
             mode = request.POST.get("mode", "")
-            svc.save_tenant_mode(org_id, mode, _bundles_from_post("org", request.POST))
+            bundles = _bundles_from_post("org", request.POST)
+            svc.save_tenant_mode(org_id, mode, bundles)
             org = svc.Organization.objects.get(id=org_id)
             _log(request, org, CHANGE, f"租户配置控制台：切换/保存模式为 {mode}")
             messages.success(request, f"租户「{org.name}」已保存为{'通用' if mode == 'traditional' else '独立'}模式。")
+            if request.POST.get("test") == "1" and mode == "traditional":
+                for platform in (svc.FB, svc.IG):
+                    ok, detail = svc.probe_credential(platform, bundles[platform])
+                    (messages.success if ok else messages.error)(
+                        request, f"[凭证测试·{svc.PLATFORM_LABELS[platform]}] {detail}"
+                    )
 
         elif action == "upsert_workspace":
             ws_id = request.POST.get("workspace_id") or None
+            bundles = _bundles_from_post("ws", request.POST)
             ws = svc.upsert_workspace(
                 organization_id=org_id,
                 name=request.POST.get("workspace_name", ""),
                 workspace_id=ws_id,
-                credentials=_bundles_from_post("ws", request.POST),
+                credentials=bundles,
                 notes={
                     svc.FB: request.POST.get("fb_note", ""),
                     svc.IG: request.POST.get("ig_note", ""),
@@ -107,6 +115,19 @@ def tenant_config_action(request):
             )
             _log(request, ws, ADDITION if ws_id is None else CHANGE, "租户配置控制台：保存工作区及凭证/备注")
             messages.success(request, f"工作区「{ws.name}」已保存。")
+            if request.POST.get("test") == "1":
+                for platform in (svc.FB, svc.IG):
+                    b = bundles[platform]
+                    if not (b.client_id.strip() and b.client_secret.strip()):
+                        messages.warning(
+                            request,
+                            f"[凭证测试·{svc.PLATFORM_LABELS[platform]}] 该平台未填写完整，已跳过测试（空配置=不可连接）。",
+                        )
+                        continue
+                    ok, detail = svc.probe_credential(platform, b)
+                    (messages.success if ok else messages.error)(
+                        request, f"[凭证测试·{svc.PLATFORM_LABELS[platform]}] {detail}"
+                    )
 
         elif action == "archive_workspace":
             svc.archive_workspace(org_id, request.POST.get("workspace_id", ""))

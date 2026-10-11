@@ -18,11 +18,38 @@ from .models import (
 def notification_drawer(request):
     """HTMX partial: renders the 50 most recent notifications for the drawer."""
     notifications = Notification.objects.filter(user=request.user).order_by("-created_at")[:50]
+    return _render_drawer(request, notifications)
+
+
+def _render_drawer(request, notifications):
+    """Undecorated renderer so POST views (e.g. mark_all_read) can return the
+    drawer partial without tripping require_GET (which would 405 a POST)."""
     return render(
         request,
         "notifications/partials/drawer.html",
         {
             "notifications": notifications,
+        },
+    )
+
+
+def _render_history_list(request, user):
+    """History-page list partial matching notification_list's context shape."""
+    qs = Notification.objects.filter(user=user)
+    per_page = 30
+    notifications = qs.order_by("-created_at")[:per_page]
+    return render(
+        request,
+        "notifications/partials/history_list.html",
+        {
+            "notifications": notifications,
+            "event_types": EventType.choices,
+            "selected_event_type": "",
+            "selected_read_status": "",
+            "page": 1,
+            "has_next": qs.count() > per_page,
+            "has_prev": False,
+            "total": qs.count(),
         },
     )
 
@@ -88,7 +115,16 @@ def mark_all_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True, read_at=timezone.now())
 
     if request.htmx:
-        return notification_drawer(request)
+        # The history page swaps #notification-history-list (needs the list
+        # partial); the drawer swaps its own container (needs the drawer
+        # partial). HX-Target tells them apart. Returning the right partial
+        # also avoids calling the require_GET-decorated drawer view on a POST
+        # (which 405s and surfaces a generic error toast).
+        hx_target = request.headers.get("HX-Target", "")
+        if "notification-history-list" in hx_target:
+            return _render_history_list(request, request.user)
+        notifications = Notification.objects.filter(user=request.user).order_by("-created_at")[:50]
+        return _render_drawer(request, notifications)
     return JsonResponse({"ok": True})
 
 

@@ -96,6 +96,7 @@
       <a href="#g-live">⑧ 开发模式与上线审核</a>
       <a href="#g-errors">⑨ 常见错误码</a>
       <a href="#g-security">⑩ 安全提示</a>
+      <a href="#g-probe">⑪ 保存并测试原理</a>
     </div>
   </div>
 
@@ -140,6 +141,7 @@
             {% csrf_token %}
             <input type="hidden" name="action" value="save_mode">
             <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
+            <input type="hidden" name="test" id="orgtest-{{ t.organization_id }}" value="0">
             <div class="tc-modeseg">
               <b>租户模式：</b>
               <label><input type="radio" name="mode" value="traditional" {% if t.mode == 'traditional' %}checked{% endif %}
@@ -156,6 +158,8 @@
                 <div><label>Instagram App Secret</label><input name="org_ig_secret" value="{{ t.org_credentials.ig.client_secret }}"></div>
               </div>
               <button class="tc-btn primary" style="margin-top:8px;">保存模式与组织凭证</button>
+              <button type="submit" class="tc-btn warn" style="margin-top:8px;"
+                onclick="document.getElementById('orgtest-{{ t.organization_id }}').value='1';return confirm('保存后将用假授权码向 Meta 探测，验证两对 App ID/Secret 是否真实有效（不会产生任何授权）。继续？');">保存并测试凭证</button>
             </div>
             <div {% if t.mode == 'traditional' %}style="display:none"{% endif %} class="org-cred-{{ t.organization_id }} tc-hint">
               独立模式：组织级凭证区域已锁定。请在下方逐工作区填写各自的 App 凭证；不填的工作区不可连接。
@@ -178,6 +182,7 @@
                 <input type="hidden" name="action" value="upsert_workspace">
                 <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
                 <input type="hidden" name="workspace_id" value="{{ w.workspace_id }}">
+                <input type="hidden" name="test" id="wstest-{{ t.organization_id }}-{{ forloop.counter }}" value="0">
               </form>
               <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="workspace_name" value="{{ w.name }}">{% if w.is_archived %}<div class="tc-hint">已归档</div>{% endif %}</div>
               <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="ws_fb_id" value="{{ w.fb.client_id }}"></div>
@@ -192,6 +197,8 @@
               </div>
               <div class="tc-actions">
                 <button form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" class="tc-btn primary" title="保存本行">✓</button>
+                <button type="submit" form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" class="tc-btn warn" title="保存本行并向 Meta 探测验证两对凭证"
+                  onclick="document.getElementById('wstest-{{ t.organization_id }}-{{ forloop.counter }}').value='1';return confirm('保存后向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？');">测试</button>
                 <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
                       onsubmit="return confirm('{% if w.is_archived %}取消归档该工作区？{% else %}归档后租户侧不可见但数据保留，可恢复。确定归档？{% endif %}');">
                   {% csrf_token %}
@@ -219,6 +226,7 @@
               {% csrf_token %}
               <input type="hidden" name="action" value="upsert_workspace">
               <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
+              <input type="hidden" name="test" id="newtest-{{ t.organization_id }}" value="0">
               <div><input name="workspace_name" placeholder="新工作区名称" required></div>
               <div><input name="ws_fb_id" placeholder="FB App ID"></div>
               <div><input name="ws_fb_secret" placeholder="FB App Secret"></div>
@@ -227,7 +235,11 @@
               <div><input name="fb_note"></div>
               <div><input name="ig_note"></div>
               <div class="tc-status tc-hint">新建</div>
-              <div class="tc-actions"><button class="tc-btn primary">添加并保存</button></div>
+              <div class="tc-actions">
+                <button class="tc-btn primary">添加并保存</button>
+                <button type="submit" class="tc-btn warn"
+                  onclick="document.getElementById('newtest-{{ t.organization_id }}').value='1';return confirm('保存并向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？');">保存并测试</button>
+              </div>
             </form>
             <button type="button" class="tc-btn ghost tc-add" onclick="tcAddRow('{{ t.organization_id }}')">+ 添加工作区</button>
             <p class="tc-hint">独立模式下逐行保存；App ID/Secret 必须成对填写（留空=该平台未配置，连接页置灰）。新工作区自动给组织 Owner 加入成员关系。</p>
@@ -309,6 +321,12 @@
       <h4 id="g-security">⑩ 安全提示</h4>
       <ul>
         <li class="danger">本页明文集中显示所有租户 App Secret，仅超管可访问；所有保存/删除动作写入后台操作日志（LogEntry）。</li>
+      </ul>
+      <h4 id="g-probe">⑪ 「保存并测试」原理与边界</h4>
+      <ul>
+        <li>用一对假授权码请求 Meta 的 OAuth 换令牌端点，<b>不会产生任何真实授权或令牌</b>：App ID/Secret 正确时 Meta 仅拒绝假码（code/redirect_uri 类报错）；App 身份错误时返回「validating application/invalid client」类报错，据此判定。</li>
+        <li>只能验证<b>应用身份真伪与回调 URI 是否登记</b>，不能验证 Tester、Webhook 订阅、账号授权范围——这些仍需连接后看状态列与诊断命令。</li>
+        <li>结果不确定（网络异常、未知错误码）时一律报失败，不会把模棱两可的响应当成有效。</li>
       </ul>
     </aside>
   </div>
