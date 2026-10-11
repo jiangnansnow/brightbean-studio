@@ -19,7 +19,9 @@
   <a href="https://brightbean.xyz/studio/"><img src="https://img.shields.io/badge/Free%20hosted%20version-brightbean.xyz%2Fstudio-FFB300?style=for-the-badge" alt="Free hosted version at brightbean.xyz/studio"></a>
 </p>
 
----
+<br />
+
+***
 
 ## 关于 BrightBean Studio
 
@@ -31,20 +33,20 @@ BrightBean Studio 是一个开源、可自托管的社媒管理平台，专为�
 
 ## 功能特性
 
-| | |
-|---|---|
-| **多工作区与团队** | 无限层级的组织 → 工作区 → 成员。精细化 RBAC（基于角色的访问控制），支持自定义角色、邀请函，以及面向外部协作者的独立 Client（客户）角色。 |
-| **内容编辑器** | 富文本编辑器，支持按平台分别设置文案/媒体覆盖、版本历史、可复用模板、内容分类与标签，以及看板形式的创意板。 |
-| **日历与排期** | 可视化日历，支持为每个账号设置每周重复的发布时段，以及命名队列，可自动将帖子分配到下一个可用时段。 |
-| **发布引擎** | 直接对接第一方 API（无聚合中间商），自动重试、按账号追踪速率限制，并提供 90 天发布审计日志。 |
-| **审批工作流** | 可配置阶段（无 / 可选 / 内部 / 内部 + 客户），支持楼中楼式的内部与外部评论、提醒，以及完整审计轨迹。 |
-| **统一社交收件箱** | 将来自每个已连接平台的评论、@提及、私信和评价汇集一处，支持情感分析、任务指派、楼中楼回复和历史回填。 |
-| **数据分析** | 通过每个平台的原生 API 获取单帖及渠道层级的表现数据，提供 KPI 卡片、7/30/90 天趋势图表，以及可按浏览量、互动量、粉丝增长、触达量和观看时长排序的全部帖子表格。 |
-| **媒体库** | 支持组织级和工作区级媒体库，含嵌套文件夹、自动生成的平台优化版本、替代文本（alt text），并在编辑器内内置 Unsplash 正版图库搜索。 |
-| **客户门户** | 免密码的 30 天魔法链接访问，客户无需注册账号即可批准或驳回帖子。 |
-| **通知** | 支持站内、邮件和 Webhook 投递，并可由每位用户针对每类事件设置偏好。 |
-| **安全与运维** | 加密的令牌与凭证存储、Google 单点登录（SSO）、Sentry 支持，以及 14 天可逆的组织删除宽限期。双因素认证（TOTP）已在路线图上。 |
-| **利于白标** | 可按工作区设置品牌（Logo、配色），并为话题标签、首条评论和发布模板设置工作区默认值。 |
+| <br />      | <br />                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| **多工作区与团队** | 无限层级的组织 → 工作区 → 成员。精细化 RBAC（基于角色的访问控制），支持自定义角色、邀请函，以及面向外部协作者的独立 Client（客户）角色。            |
+| **内容编辑器**   | 富文本编辑器，支持按平台分别设置文案/媒体覆盖、版本历史、可复用模板、内容分类与标签，以及看板形式的创意板。                                   |
+| **日历与排期**   | 可视化日历，支持为每个账号设置每周重复的发布时段，以及命名队列，可自动将帖子分配到下一个可用时段。                                        |
+| **发布引擎**    | 直接对接第一方 API（无聚合中间商），自动重试、按账号追踪速率限制，并提供 90 天发布审计日志。                                       |
+| **审批工作流**   | 可配置阶段（无 / 可选 / 内部 / 内部 + 客户），支持楼中楼式的内部与外部评论、提醒，以及完整审计轨迹。                                 |
+| **统一社交收件箱** | 将来自每个已连接平台的评论、@提及、私信和评价汇集一处，支持情感分析、任务指派、楼中楼回复和历史回填。                                      |
+| **数据分析**    | 通过每个平台的原生 API 获取单帖及渠道层级的表现数据，提供 KPI 卡片、7/30/90 天趋势图表，以及可按浏览量、互动量、粉丝增长、触达量和观看时长排序的全部帖子表格。 |
+| **媒体库**     | 支持组织级和工作区级媒体库，含嵌套文件夹、自动生成的平台优化版本、替代文本（alt text），并在编辑器内内置 Unsplash 正版图库搜索。                |
+| **客户门户**    | 免密码的 30 天魔法链接访问，客户无需注册账号即可批准或驳回帖子。                                                       |
+| **通知**      | 支持站内、邮件和 Webhook 投递，并可由每位用户针对每类事件设置偏好。                                                   |
+| **安全与运维**   | 加密的令牌与凭证存储、Google 单点登录（SSO）、Sentry 支持，以及 14 天可逆的组织删除宽限期。双因素认证（TOTP）已在路线图上。               |
+| **利于白标**    | 可按工作区设置品牌（Logo、配色），并为话题标签、首条评论和发布模板设置工作区默认值。                                             |
 
 ### 快速一览
 
@@ -64,23 +66,23 @@ BrightBean Studio 是一个开源、可自托管的社媒管理平台，专为�
 
 ## 支持的平台
 
-| 平台 | 发布 | 评论 | 私信 | 洞察 |
-|---|:---:|:---:|:---:|:---:|
-| <img src="https://cdn.simpleicons.org/facebook" width="16" height="16"> Facebook | ✓ | ✓ | ✓ | ✓ |
-| <img src="https://cdn.simpleicons.org/instagram" width="16" height="16"> Instagram | ✓ | ✓ | ✓ | ✓ |
-| <img src="https://cdn.simpleicons.org/instagram" width="16" height="16"> Instagram（直连） | ✓ | ✓ | ✓ | ✓ |
-| <img src="https://api.iconify.design/logos/linkedin-icon.svg" width="16" height="16"> LinkedIn（个人） | ✓ | ✓ | — | ✓ |
-| <img src="https://api.iconify.design/logos/linkedin-icon.svg" width="16" height="16"> LinkedIn（公司主页） | ✓ | ✓ | — | ✓ |
-| <img src="https://cdn.simpleicons.org/tiktok" width="16" height="16"> TikTok | ✓ | — | — | ✓ |
-| <img src="https://cdn.simpleicons.org/youtube" width="16" height="16"> YouTube | ✓ | ✓ | — | ✓ |
-| <img src="https://cdn.simpleicons.org/pinterest" width="16" height="16"> Pinterest | ✓ | — | — | ✓ |
-| <img src="https://cdn.simpleicons.org/threads" width="16" height="16"> Threads | ✓ | ✓ | — | ✓ |
-| <img src="https://cdn.simpleicons.org/bluesky" width="16" height="16"> Bluesky | ✓ | ✓ | — | — |
-| <img src="https://api.iconify.design/logos/google-icon.svg" width="16" height="16"> Google 商家资料 | ✓ | — | — | ✓ |
-| <img src="https://cdn.simpleicons.org/mastodon" width="16" height="16"> Mastodon | ✓ | ✓ | — | — |
-| <img src="https://cdn.simpleicons.org/devdotto/000000" width="16" height="16"> DEV.to | ✓ | — | — | — |
+| 平台                                                                                                   |  发布 |  评论 |  私信 |  洞察 |
+| ---------------------------------------------------------------------------------------------------- | :-: | :-: | :-: | :-: |
+| <img src="https://cdn.simpleicons.org/facebook" width="16" height="16"> Facebook                     |  ✓  |  ✓  |  ✓  |  ✓  |
+| <img src="https://cdn.simpleicons.org/instagram" width="16" height="16"> Instagram                   |  ✓  |  ✓  |  ✓  |  ✓  |
+| <img src="https://cdn.simpleicons.org/instagram" width="16" height="16"> Instagram（直连）               |  ✓  |  ✓  |  ✓  |  ✓  |
+| <img src="https://api.iconify.design/logos/linkedin-icon.svg" width="16" height="16"> LinkedIn（个人）   |  ✓  |  ✓  |  —  |  ✓  |
+| <img src="https://api.iconify.design/logos/linkedin-icon.svg" width="16" height="16"> LinkedIn（公司主页） |  ✓  |  ✓  |  —  |  ✓  |
+| <img src="https://cdn.simpleicons.org/tiktok" width="16" height="16"> TikTok                         |  ✓  |  —  |  —  |  ✓  |
+| <img src="https://cdn.simpleicons.org/youtube" width="16" height="16"> YouTube                       |  ✓  |  ✓  |  —  |  ✓  |
+| <img src="https://cdn.simpleicons.org/pinterest" width="16" height="16"> Pinterest                   |  ✓  |  —  |  —  |  ✓  |
+| <img src="https://cdn.simpleicons.org/threads" width="16" height="16"> Threads                       |  ✓  |  ✓  |  —  |  ✓  |
+| <img src="https://cdn.simpleicons.org/bluesky" width="16" height="16"> Bluesky                       |  ✓  |  ✓  |  —  |  —  |
+| <img src="https://api.iconify.design/logos/google-icon.svg" width="16" height="16"> Google 商家资料      |  ✓  |  —  |  —  |  ✓  |
+| <img src="https://cdn.simpleicons.org/mastodon" width="16" height="16"> Mastodon                     |  ✓  |  ✓  |  —  |  —  |
+| <img src="https://cdn.simpleicons.org/devdotto/000000" width="16" height="16"> DEV.to                |  ✓  |  —  |  —  |  —  |
 
----
+***
 
 ### 托管版本
 
@@ -90,34 +92,34 @@ Brightbean Studio 的免费托管版本位于 [brightbean.xyz/studio](https://br
 
 ### 一键部署
 
-| Heroku | Render | Railway |
-|:------:|:------:|:-------:|
+|                                                                           Heroku                                                                          |                                                                              Render                                                                             |                                                            Railway                                                           |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------: |
 | [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/brightbeanxyz/brightbean-studio) | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/brightbeanxyz/brightbean-studio) | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/brightbean-studio?referralCode=brightbean) |
 
 部署完成后，在你所用平台的仪表盘中设置以下环境变量：
 
-| 变量 | 是否必需 | 说明 |
-|----------|----------|-------------|
-| `DJANGO_SETTINGS_MODULE` | 自动设置 | `config.settings.production`。若部署配置未自动写入，则手动设置。 |
-| `SECRET_KEY` | 自动生成 | Django 密钥。由部署按钮自动设置。 |
-| `ENCRYPTION_KEY_SALT` | 自动生成 | 加密盐值。由部署按钮自动设置。 |
-| `DATABASE_URL` | 自动配置 | PostgreSQL 连接字符串。自动设置。 |
-| `ALLOWED_HOSTS` | 是 | 你应用的域名，例如 `your-app.herokuapp.com` |
-| `APP_URL` | 是 | 完整的公网 URL，例如 `https://your-app.herokuapp.com` |
-| `STORAGE_BACKEND` | 否 | 设为 `s3` 可使用 S3/R2 存储。默认：`local`。Heroku、Render 和 Railway 的文件系统是临时的，若不使用 S3，重新部署时上传的文件会丢失。 |
-| `SERVE_MEDIA` | 否 | 仅在 `STORAGE_BACKEND=local` 时使用。默认 `true`，即由 Django 在 `/media/` 路径提供上传文件。这些文件是**未经鉴权**提供的——任何拿到路径的人都能访问。在此模式下这是必需的：Instagram、Threads、Facebook、Pinterest、Google 商家资料和 dev.to 在发布时会在服务端拉取附件 URL，因此 `/media/` 必须可公开访问。以这种方式暴露的只有媒体库、头像和工作区图标（见 `config/urls.py` 中的 `PUBLIC_MEDIA_PREFIXES`）；评论附件则通过一个有权限校验的视图提供。只有当反向代理或 CDN 在相同的公开路径上提供这些内容时，才设为 `false`。 |
-| `CADDY_MEDIA_ROOT` | 否 | 仅 docker-compose 使用。Caddy 读取上传文件的位置。默认：`/app/media`。当 `STORAGE_BACKEND=s3` 时设为 `/var/empty`——`media_data` 数据卷在切换后仍保留，而 Caddy 无法感知 `SERVE_MEDIA`，否则它会继续提供之前遗留的上传文件。 |
-| `S3_ENDPOINT_URL` | 使用 S3 时 | 兼容 S3 的端点 URL |
-| `S3_ACCESS_KEY_ID` | 使用 S3 时 | S3 访问密钥 |
-| `S3_SECRET_ACCESS_KEY` | 使用 S3 时 | S3 秘密密钥 |
-| `S3_BUCKET_NAME` | 使用 S3 时 | S3 存储桶名称 |
-| `EMAIL_HOST` | 否 | 用于发送邀请函和密码重置邮件的 SMTP 服务器 |
-| `EMAIL_PORT` | 否 | SMTP 端口（默认：`587`） |
-| `EMAIL_HOST_USER` | 否 | SMTP 用户名 |
-| `EMAIL_HOST_PASSWORD` | 否 | SMTP 密码 |
-| `GOOGLE_AUTH_CLIENT_ID` | 否 | 用于 Google OAuth 登录。从 [Google Cloud Console](https://console.cloud.google.com/) → Credentials（凭证）获取。 |
-| `GOOGLE_AUTH_CLIENT_SECRET` | 否 | Google OAuth 密钥 |
-| `UNSPLASH_ACCESS_KEY` | 否 | 在编辑器中启用 Unsplash 图库搜索。可在 [unsplash.com/developers](https://unsplash.com/developers) 免费创建应用。 |
+| 变量                          | 是否必需    | 说明                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DJANGO_SETTINGS_MODULE`    | 自动设置    | `config.settings.production`。若部署配置未自动写入，则手动设置。                                                                                                                                                                                                                                                                                                         |
+| `SECRET_KEY`                | 自动生成    | Django 密钥。由部署按钮自动设置。                                                                                                                                                                                                                                                                                                                                   |
+| `ENCRYPTION_KEY_SALT`       | 自动生成    | 加密盐值。由部署按钮自动设置。                                                                                                                                                                                                                                                                                                                                        |
+| `DATABASE_URL`              | 自动配置    | PostgreSQL 连接字符串。自动设置。                                                                                                                                                                                                                                                                                                                                 |
+| `ALLOWED_HOSTS`             | 是       | 你应用的域名，例如 `your-app.herokuapp.com`                                                                                                                                                                                                                                                                                                                     |
+| `APP_URL`                   | 是       | 完整的公网 URL，例如 `https://your-app.herokuapp.com`                                                                                                                                                                                                                                                                                                          |
+| `STORAGE_BACKEND`           | 否       | 设为 `s3` 可使用 S3/R2 存储。默认：`local`。Heroku、Render 和 Railway 的文件系统是临时的，若不使用 S3，重新部署时上传的文件会丢失。                                                                                                                                                                                                                                                               |
+| `SERVE_MEDIA`               | 否       | 仅在 `STORAGE_BACKEND=local` 时使用。默认 `true`，即由 Django 在 `/media/` 路径提供上传文件。这些文件是**未经鉴权**提供的——任何拿到路径的人都能访问。在此模式下这是必需的：Instagram、Threads、Facebook、Pinterest、Google 商家资料和 dev.to 在发布时会在服务端拉取附件 URL，因此 `/media/` 必须可公开访问。以这种方式暴露的只有媒体库、头像和工作区图标（见 `config/urls.py` 中的 `PUBLIC_MEDIA_PREFIXES`）；评论附件则通过一个有权限校验的视图提供。只有当反向代理或 CDN 在相同的公开路径上提供这些内容时，才设为 `false`。 |
+| `CADDY_MEDIA_ROOT`          | 否       | 仅 docker-compose 使用。Caddy 读取上传文件的位置。默认：`/app/media`。当 `STORAGE_BACKEND=s3` 时设为 `/var/empty`——`media_data` 数据卷在切换后仍保留，而 Caddy 无法感知 `SERVE_MEDIA`，否则它会继续提供之前遗留的上传文件。                                                                                                                                                                                     |
+| `S3_ENDPOINT_URL`           | 使用 S3 时 | 兼容 S3 的端点 URL                                                                                                                                                                                                                                                                                                                                          |
+| `S3_ACCESS_KEY_ID`          | 使用 S3 时 | S3 访问密钥                                                                                                                                                                                                                                                                                                                                                |
+| `S3_SECRET_ACCESS_KEY`      | 使用 S3 时 | S3 秘密密钥                                                                                                                                                                                                                                                                                                                                                |
+| `S3_BUCKET_NAME`            | 使用 S3 时 | S3 存储桶名称                                                                                                                                                                                                                                                                                                                                               |
+| `EMAIL_HOST`                | 否       | 用于发送邀请函和密码重置邮件的 SMTP 服务器                                                                                                                                                                                                                                                                                                                               |
+| `EMAIL_PORT`                | 否       | SMTP 端口（默认：`587`）                                                                                                                                                                                                                                                                                                                                      |
+| `EMAIL_HOST_USER`           | 否       | SMTP 用户名                                                                                                                                                                                                                                                                                                                                               |
+| `EMAIL_HOST_PASSWORD`       | 否       | SMTP 密码                                                                                                                                                                                                                                                                                                                                                |
+| `GOOGLE_AUTH_CLIENT_ID`     | 否       | 用于 Google OAuth 登录。从 [Google Cloud Console](https://console.cloud.google.com/) → Credentials（凭证）获取。                                                                                                                                                                                                                                                    |
+| `GOOGLE_AUTH_CLIENT_SECRET` | 否       | Google OAuth 密钥                                                                                                                                                                                                                                                                                                                                        |
+| `UNSPLASH_ACCESS_KEY`       | 否       | 在编辑器中启用 Unsplash 图库搜索。可在 [unsplash.com/developers](https://unsplash.com/developers) 免费创建应用。                                                                                                                                                                                                                                                            |
 
 社交媒体 API 密钥，参见[平台凭证](#平台凭证)。完整变量参考：`.env.example`。
 
@@ -146,8 +148,7 @@ docker compose exec app python manage.py createsuperuser
 
 Tailwind 由 `tailwind` Compose 服务自动编译。首次构建约需 60–90 秒（在全新容器中运行 `npm install`）；之后的启动是即时的。可用 `docker compose logs -f tailwind` 查看进度。
 
-打开 http://localhost:8000 ——你已成功运行。
-
+打开 <http://localhost:8000> ——你已成功运行。
 
 ## 完全本地化开发（不使用 Docker）
 
@@ -209,23 +210,26 @@ python manage.py createsuperuser
 **7. 启动应用（3 个终端标签页）**
 
 标签页 1 —— Tailwind 监视器：
+
 ```bash
 cd theme/static_src && npm run start
 ```
 
 标签页 2 —— Django 开发服务器：
+
 ```bash
 source .venv/bin/activate
 python manage.py runserver
 ```
 
 标签页 3 —— 后台 worker：
+
 ```bash
 source .venv/bin/activate
 python manage.py process_tasks
 ```
 
-打开 http://localhost:8000，用你创建的超级用户登录。
+打开 <http://localhost:8000，用你创建的超级用户登录。>
 
 ### 日常工作流（不使用 Docker）
 
@@ -298,17 +302,17 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 ### 其他平台
 
-| 平台 | 配置文件 | 说明 |
-|----------|-------------|-------|
-| **Heroku** | `Procfile` + `app.json` | 已为部署按钮做好准备。必须使用 Basic 或以上档位的 dyno（Eco dyno 会导致 worker 无法正常工作）。 |
-| **Railway** | `railway.toml` | [一键模板](https://railway.com/deploy/brightbean-studio)会配置三个服务：web（Gunicorn，启动时执行 `migrate`）、worker（`python manage.py process_tasks`）以及托管 PostgreSQL。Web 服务启动时的 `migrate` 会触发 `post_migrate` 钩子，注册周期性任务，因此排期开箱即用。 |
-| **Render** | `render.yaml` | 包含 web、worker、PostgreSQL 的蓝图。必须使用付费档位。 |
+| 平台          | 配置文件                    | 说明                                                                                                                                                                                                             |
+| ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Heroku**  | `Procfile` + `app.json` | 已为部署按钮做好准备。必须使用 Basic 或以上档位的 dyno（Eco dyno 会导致 worker 无法正常工作）。                                                                                                                                                 |
+| **Railway** | `railway.toml`          | [一键模板](https://railway.com/deploy/brightbean-studio)会配置三个服务：web（Gunicorn，启动时执行 `migrate`）、worker（`python manage.py process_tasks`）以及托管 PostgreSQL。Web 服务启动时的 `migrate` 会触发 `post_migrate` 钩子，注册周期性任务，因此排期开箱即用。 |
+| **Render**  | `render.yaml`           | 包含 web、worker、PostgreSQL 的蓝图。必须使用付费档位。                                                                                                                                                                         |
 
 所有使用临时文件系统的平台都需要 `STORAGE_BACKEND=s3` —— S3 配置见 `.env.example`。
 
 **内存配置。** 导入应用本身在处理任何请求之前约需 100 MB，一个预热后的 Gunicorn worker 稳定在 200 MB 左右——因此内置命令运行单线程 worker（`--workers 1 --threads 4`），可适配 512 MB 的 dyno，并为媒体处理留出空间。只有在相应增加内存时才提高 `--workers`；经验法则是每个 worker 约 250 MB。**不要**添加 `--max-requests`：gthread 在触发计数器的那个请求开始时会停止心跳，一旦超过 `--timeout`（30 秒），arbiter 会在请求中途杀死 worker——这会丢掉恰好是该请求的上传，而这里的上传最大可达 1 GB。`worker` 进程也需要同样的余量：它会把视频下载到磁盘再流式上传到平台，如果在发布中途被杀死（Heroku 的 R15、OOM 内存杀除、一次部署），受影响的帖子会被确认清理流程标记为失败，而不是停留在不确定状态。
 
-**为什么 worker 使用 `--duration 3600` 运行。** `process_tasks` 是一个不分叉的单一进程，在同一个堆中运行每个任务且从不重启，因此一次峰值分配会永久抬高 RSS（常驻内存）——CPython 和 glibc 会把释放的页保留在各自的 arena 中。放任不管它会只增不减：在 512 MB 的 Basic dyno 上，它从部署后约 280 MB 在 15 小时内攀升到 566 MB，达到配额的 110%。`--duration` 在运行循环的*顶部*检查，因此正在执行的任务总会完成；进程随后在任务之间以退出码 0 退出，平台会在内存下限重启它。不会丢失任何东西——回收不会打断发布，且 `confirm_pending_publishes` 无论如何都会处理任何进行中的任务。不要低于约 1800 秒，否则 Heroku 的崩溃冷却机制会开始介入。其他部署目标保持原命令：`docker-compose.yml` 中 worker 没有 `restart:` 策略，在那里干净退出只会让它停止。
+**为什么 worker 使用** **`--duration 3600`** **运行。** `process_tasks` 是一个不分叉的单一进程，在同一个堆中运行每个任务且从不重启，因此一次峰值分配会永久抬高 RSS（常驻内存）——CPython 和 glibc 会把释放的页保留在各自的 arena 中。放任不管它会只增不减：在 512 MB 的 Basic dyno 上，它从部署后约 280 MB 在 15 小时内攀升到 566 MB，达到配额的 110%。`--duration` 在运行循环的*顶部*检查，因此正在执行的任务总会完成；进程随后在任务之间以退出码 0 退出，平台会在内存下限重启它。不会丢失任何东西——回收不会打断发布，且 `confirm_pending_publishes` 无论如何都会处理任何进行中的任务。不要低于约 1800 秒，否则 Heroku 的崩溃冷却机制会开始介入。其他部署目标保持原命令：`docker-compose.yml` 中 worker 没有 `restart:` 策略，在那里干净退出只会让它停止。
 
 **`MALLOC_ARENA_MAX`。** glibc 给每个线程一个独立的 arena（最大 64 MB），上限为 `8 × nproc`，而容器报告的是宿主机的核心数，因此该上限实际上是无限的。本应用存在真实的线程频繁创建销毁——发布器每 15 秒构建一个新线程池，boto3 的托管传输每次下载增加十个线程——而这些 arena 永远不会归还给操作系统。在 Heroku 上，仓库的 `.profile` 已将其设为 2，同等适用于 web、worker、release 阶段以及一次性的 `heroku run` dyno；它被写为默认值而非强制覆盖，因此如果你想调优，配置变量仍然优先生效。基于 `Dockerfile` 构建的部署目标（Render、Railway、docker-compose）不读取 `.profile`——如果主机内存紧张，请在它们各自的环境配置中设置。
 
@@ -390,18 +394,14 @@ Facebook 和 Instagram 共享同一套 Meta 应用凭证。Threads 运行在同�
    **用例："Manage everything on your Page"（管理你公共主页上的一切）**（Facebook）
    - 该用例自动包含 `business_management`、`pages_show_list` 和 `public_profile`
    - 添加以下可选权限：`pages_manage_posts`、`pages_manage_engagement`、`pages_read_engagement`、`pages_read_user_content`、`pages_manage_metadata`、`read_insights`
-
    **用例："Messenger from Meta"（来自 Meta 的 Messenger）**（Facebook 消息）
    - 启用 `pages_messaging` 权限所必需，该权限在 "Manage Pages" 用例下不可用
    - 添加可选权限：`pages_messaging`
-
    **用例："Manage messaging & content on Instagram"（管理 Instagram 上的消息与内容）**（Instagram）
    - 添加以下权限：`instagram_basic`、`instagram_content_publish`、`instagram_manage_comments`、`instagram_manage_insights`
-
    **用例："Access the Threads API"（访问 Threads API）**（Threads）
    - 该用例自动包含 `threads_basic`
    - 添加以下可选权限：`threads_content_publish`、`threads_manage_insights`、`threads_manage_replies`
-
 4. 在 **Facebook Login → Settings（设置）→ Valid OAuth Redirect URIs（有效的 OAuth 重定向 URI）** 下，添加以下重定向 URI：
    ```
    {APP_URL}/social-accounts/callback/facebook/
@@ -412,13 +412,10 @@ Facebook 和 Instagram 共享同一套 Meta 应用凭证。Threads 运行在同�
    - **Callback URL（回调 URL）：** `{APP_URL}/webhooks/facebook/`
    - **Verify token（验证令牌）：** 你 `.env` 中 `FACEBOOK_WEBHOOK_VERIFY_TOKEN` 的值（任意随机字符串；生成一个并在点击 *Verify and Save（验证并保存）* 之前设置好该环境变量）
    - 验证通过后，订阅 `feed`、`mention` 和 `messages` 字段。`feed` 承载你公共主页帖子上的评论。
-
    > **这一步容易遗漏，而且会静默失败。** 连接公共主页会自动让它订阅你的应用，因此账号无论如何都显示为健康——但如果不在这里配置回调 URL，Meta 永远不会投递任何东西。此时评论只能通过 5 分钟轮询回退到达，而 @提及则完全无法到达。可运行 `python manage.py diagnose_facebook --account-id <uuid>` 检查。
-
-   **如果你通过这个 Facebook 应用连接 Instagram，还需在同一个 Webhooks 页面订阅 `Instagram` 对象**：
+   **如果你通过这个 Facebook 应用连接 Instagram，还需在同一个 Webhooks 页面订阅** **`Instagram`** **对象**：
    - **Callback URL（回调 URL）：** `{APP_URL}/webhooks/facebook/`（同一个端点——它同时处理两个平台）
    - 订阅 `comments` 和 `mentions` 字段。
-
    > `comments` 和 `mentions` 属于 **Instagram** 对象，而不是 Page——Page 只接受它自己的字段（`feed`、`mention`、`messages` 等）。Studio 会在连接时自动订阅 Instagram *账号*，但这里的对象级配置只能在面板中完成。没有它，Instagram 评论只能通过 5 分钟轮询到达，@提及则完全无法到达。
 6. 设置环境变量：
    ```
@@ -602,6 +599,7 @@ python manage.py backfill_inbox --days 7
 ```
 
 选项：
+
 - `--days N` —— 回填的天数（默认：7）
 - `--platform NAME` —— 仅回填某个特定平台（例如 `facebook`、`youtube`、`linkedin`、`tiktok`）
 - `--account-id UUID` —— 仅回填某个特定账号
@@ -642,37 +640,37 @@ Authorization: Bearer bb_studio_...
 
 ### 速率限制
 
-| 作用域 | 限制 |
-|---|---|
-| 每个密钥的写入 | 120 / 分钟 |
-| 每个密钥的读取 | 300 / 分钟 |
+| 作用域      | 限制        |
+| -------- | --------- |
+| 每个密钥的写入  | 120 / 分钟  |
+| 每个密钥的读取  | 300 / 分钟  |
 | 每个工作区的聚合 | 1000 / 分钟 |
 
 速率限制响应（`429`）包含 `Retry-After`、`X-RateLimit-Limit` 和 `X-RateLimit-Remaining` 请求头。
 
 ### REST 端点
 
-| 方法 | 路径 | 用途 | 权限 |
-|---|---|---|---|
-| `GET` | `/me` | 查看调用者的作用域与工作区权限 | — |
-| `GET` | `/accounts` | 列出已连接的社媒账号 | — |
-| `POST` | `/posts` | 创建草稿或定时帖子 | `create_posts`（排期还需 `publish_directly`） |
-| `GET` | `/posts/{post_id}` | 读取单个帖子 | — |
-| `PATCH` | `/posts/{post_id}` | 更新草稿字段 | `create_posts` |
-| `POST` | `/posts/{post_id}/schedule` | 为草稿排期 | `create_posts` + `publish_directly` |
-| `POST` | `/posts/{post_id}/cancel` | 将定时帖子还原为草稿 | `create_posts` |
-| `GET` | `/analytics/accounts/{account_id}` | 渠道分析摘要（7/30/90 天窗口） | `view_analytics` |
-| `GET` | `/analytics/posts/{post_id}` | 帖子分析，含各平台指标 | `view_analytics` |
-| `POST` | `/media` | 上传媒体文件（multipart） | `upload_media` |
-| `GET` | `/media/{media_id}` | 获取一个媒体资产 | — |
-| `GET` | `/media` | 列出媒体资产（可过滤、分页） | — |
-| `GET` | `/inbox` | 列出收件箱消息（按状态/类型/账号过滤，分页） | `use_inbox` |
-| `GET` | `/inbox/{message_id}` | 读取一条收件箱消息及其回复线程 | `use_inbox` |
-| `POST` | `/inbox/{message_id}/replies` | 起草回复（设置 `send: true` 立即发送） | `use_inbox`（发送还需 `reply_from_inbox`） |
-| `PATCH` | `/inbox/replies/{reply_id}` | 编辑草稿回复 | `use_inbox` |
-| `POST` | `/inbox/replies/{reply_id}/send` | 将草稿回复投递到平台 | `reply_from_inbox` |
-| `DELETE` | `/inbox/replies/{reply_id}` | 丢弃草稿回复 | `use_inbox` |
-| `POST` | `/mcp` | 面向 MCP 客户端的 JSON-RPC 2.0 端点 | — |
+| 方法       | 路径                                 | 用途                          | 权限                                      |
+| -------- | ---------------------------------- | --------------------------- | --------------------------------------- |
+| `GET`    | `/me`                              | 查看调用者的作用域与工作区权限             | —                                       |
+| `GET`    | `/accounts`                        | 列出已连接的社媒账号                  | —                                       |
+| `POST`   | `/posts`                           | 创建草稿或定时帖子                   | `create_posts`（排期还需 `publish_directly`） |
+| `GET`    | `/posts/{post_id}`                 | 读取单个帖子                      | —                                       |
+| `PATCH`  | `/posts/{post_id}`                 | 更新草稿字段                      | `create_posts`                          |
+| `POST`   | `/posts/{post_id}/schedule`        | 为草稿排期                       | `create_posts` + `publish_directly`     |
+| `POST`   | `/posts/{post_id}/cancel`          | 将定时帖子还原为草稿                  | `create_posts`                          |
+| `GET`    | `/analytics/accounts/{account_id}` | 渠道分析摘要（7/30/90 天窗口）         | `view_analytics`                        |
+| `GET`    | `/analytics/posts/{post_id}`       | 帖子分析，含各平台指标                 | `view_analytics`                        |
+| `POST`   | `/media`                           | 上传媒体文件（multipart）           | `upload_media`                          |
+| `GET`    | `/media/{media_id}`                | 获取一个媒体资产                    | —                                       |
+| `GET`    | `/media`                           | 列出媒体资产（可过滤、分页）              | —                                       |
+| `GET`    | `/inbox`                           | 列出收件箱消息（按状态/类型/账号过滤，分页）     | `use_inbox`                             |
+| `GET`    | `/inbox/{message_id}`              | 读取一条收件箱消息及其回复线程             | `use_inbox`                             |
+| `POST`   | `/inbox/{message_id}/replies`      | 起草回复（设置 `send: true` 立即发送）  | `use_inbox`（发送还需 `reply_from_inbox`）    |
+| `PATCH`  | `/inbox/replies/{reply_id}`        | 编辑草稿回复                      | `use_inbox`                             |
+| `POST`   | `/inbox/replies/{reply_id}/send`   | 将草稿回复投递到平台                  | `reply_from_inbox`                      |
+| `DELETE` | `/inbox/replies/{reply_id}`        | 丢弃草稿回复                      | `use_inbox`                             |
+| `POST`   | `/mcp`                             | 面向 MCP 客户端的 JSON-RPC 2.0 端点 | —                                       |
 
 帖子创建、媒体上传和收件箱回复创建接受 `idempotency_key`（或 `Idempotency-Key` 请求头），以便安全重试。
 
@@ -682,26 +680,26 @@ Authorization: Bearer bb_studio_...
 
 MCP 服务器位于 `POST {APP_URL}/api/v1/mcp`，通过 Streamable HTTP 讲 JSON-RPC 2.0。它实现标准的 `initialize`、`tools/list`、`tools/call` 和 `ping` 方法。工具如下：
 
-| 工具 | 用途 | 权限 |
-|---|---|---|
-| `list_accounts` | 列出该 API 密钥可操作的社媒账号 | — |
-| `create_draft` | 创建草稿帖子（文案、标题、媒体、首条评论，可选建议发布时间） | `create_posts` |
-| `schedule_post` | 一步创建并排期帖子 | `create_posts` + `publish_directly` |
-| `schedule_draft` | 为现有草稿排期 | `create_posts` + `publish_directly` |
-| `get_post` | 获取帖子，含聚合状态和各平台状态 | — |
-| `list_posts` | 按最新优先列出帖子，可选状态过滤和游标分页 | — |
-| `cancel_post` | 将定时帖子还原为草稿 | `create_posts` |
-| `search_media` | 按查询、类型、标签或文件夹查找媒体资产 | — |
-| `get_media` | 按 ID 获取单个媒体资产 | — |
-| `upload_media` | 上传一个小型 base64 编码文件（原始大小 ≤ 1 MB）。更大的文件请使用 REST `POST /media`。 | `upload_media` |
-| `get_account_analytics` | 在滚动的 7–90 天窗口内获取渠道分析 | `view_analytics` |
-| `get_post_analytics` | 获取单个帖子的各平台指标（适合轮询草稿） | `view_analytics` |
-| `list_inbox_messages` | 列出收件箱条目（评论、@提及、私信、评价）及其回复线程 | `use_inbox` |
-| `get_inbox_message` | 获取一条收件箱消息及其回复线程 | `use_inbox` |
-| `create_reply_draft` | 为收件箱消息起草回复（已保存，未发送） | `use_inbox` |
-| `update_reply_draft` | 替换草稿（或失败）回复的正文 | `use_inbox` |
-| `discard_reply_draft` | 删除草稿（或失败）回复 | `use_inbox` |
-| `send_reply` | 投递回复（用 `reply_id`，或用 `message_id` + `body` 起草并发送） | `reply_from_inbox` |
+| 工具                      | 用途                                                           | 权限                                  |
+| ----------------------- | ------------------------------------------------------------ | ----------------------------------- |
+| `list_accounts`         | 列出该 API 密钥可操作的社媒账号                                           | —                                   |
+| `create_draft`          | 创建草稿帖子（文案、标题、媒体、首条评论，可选建议发布时间）                               | `create_posts`                      |
+| `schedule_post`         | 一步创建并排期帖子                                                    | `create_posts` + `publish_directly` |
+| `schedule_draft`        | 为现有草稿排期                                                      | `create_posts` + `publish_directly` |
+| `get_post`              | 获取帖子，含聚合状态和各平台状态                                             | —                                   |
+| `list_posts`            | 按最新优先列出帖子，可选状态过滤和游标分页                                        | —                                   |
+| `cancel_post`           | 将定时帖子还原为草稿                                                   | `create_posts`                      |
+| `search_media`          | 按查询、类型、标签或文件夹查找媒体资产                                          | —                                   |
+| `get_media`             | 按 ID 获取单个媒体资产                                                | —                                   |
+| `upload_media`          | 上传一个小型 base64 编码文件（原始大小 ≤ 1 MB）。更大的文件请使用 REST `POST /media`。 | `upload_media`                      |
+| `get_account_analytics` | 在滚动的 7–90 天窗口内获取渠道分析                                         | `view_analytics`                    |
+| `get_post_analytics`    | 获取单个帖子的各平台指标（适合轮询草稿）                                         | `view_analytics`                    |
+| `list_inbox_messages`   | 列出收件箱条目（评论、@提及、私信、评价）及其回复线程                                  | `use_inbox`                         |
+| `get_inbox_message`     | 获取一条收件箱消息及其回复线程                                              | `use_inbox`                         |
+| `create_reply_draft`    | 为收件箱消息起草回复（已保存，未发送）                                          | `use_inbox`                         |
+| `update_reply_draft`    | 替换草稿（或失败）回复的正文                                               | `use_inbox`                         |
+| `discard_reply_draft`   | 删除草稿（或失败）回复                                                  | `use_inbox`                         |
+| `send_reply`            | 投递回复（用 `reply_id`，或用 `message_id` + `body` 起草并发送）            | `reply_from_inbox`                  |
 
 ### 连接 MCP 客户端
 
@@ -720,29 +718,29 @@ claude mcp add --transport http brightbean {APP_URL}/api/v1/mcp \
 
 不想自己搭建客户端？配套的 [brightbean-studio-agent](https://github.com/brightbeanxyz/brightbean-studio-agent) 仓库提供一个完整的智能体技能，通过上面文档所述的 REST API 和 MCP 工具端到端驱动 BrightBean Studio。
 
----
+***
 
 ## 技术栈
 
-| 层 | 技术 |
-|-------|-----------|
-| 后端 | Django 5.x |
-| 前端 | Django 模板、HTMX、Alpine.js |
-| CSS | 通过 django-tailwind 使用 Tailwind CSS 4 |
-| 数据库 | PostgreSQL 16+ |
-| 后台任务 | django-background-tasks（无需 Redis） |
-| 认证 | django-allauth（邮箱 + Google OAuth） |
-| 媒体 | Pillow（图片）、FFmpeg（视频） |
-| 部署 | Docker、Gunicorn、Caddy |
+| 层    | 技术                                   |
+| ---- | ------------------------------------ |
+| 后端   | Django 5.x                           |
+| 前端   | Django 模板、HTMX、Alpine.js             |
+| CSS  | 通过 django-tailwind 使用 Tailwind CSS 4 |
+| 数据库  | PostgreSQL 16+                       |
+| 后台任务 | django-background-tasks（无需 Redis）    |
+| 认证   | django-allauth（邮箱 + Google OAuth）    |
+| 媒体   | Pillow（图片）、FFmpeg（视频）                |
+| 部署   | Docker、Gunicorn、Caddy                |
 
----
+***
 
 ## 故障排查
 
-**Docker：`postgres` 容器不健康（unhealthy）**
+**Docker：`postgres`** **容器不健康（unhealthy）**
 `docker compose up` 后等待 10–15 秒让健康检查通过，然后重试命令。用 `docker compose logs postgres` 查看日志。
 
-**`python manage.py migrate` 因连接错误失败**
+**`python manage.py migrate`** **因连接错误失败**
 确保 PostgreSQL 正在运行且健康。Docker：`docker compose ps` 应显示 postgres 为 "healthy"。本地：检查 `.env` 中的 `DATABASE_URL` 是否匹配你的设置。
 
 **Tailwind CSS 改动没有出现**
@@ -751,7 +749,7 @@ claude mcp add --transport http brightbean {APP_URL}/api/v1/mcp \
 **OAuth 回调错误（"redirect URI mismatch"，重定向 URI 不匹配）**
 在平台上注册的重定向 URI 必须与 `{APP_URL}/social-accounts/callback/{platform}/` 完全一致。检查 `.env` 中的 `APP_URL` 是否与你访问的 URL 匹配（包括 `http` 与 `https` 以及端口号）。
 
-**Threads："No app ID was provided in the request"（请求中未提供应用 ID，错误 `4476002`）**
+**Threads："No app ID was provided in the request"（请求中未提供应用 ID，错误** **`4476002`）**
 Threads 使用它自己的 App ID，而不是 Facebook 的。从 **Use cases → Access the Threads API → Settings** 设置 `PLATFORM_THREADS_APP_ID` / `PLATFORM_THREADS_APP_SECRET`，并在同一面板注册 `{APP_URL}/social-accounts/callback/threads/`——Facebook Login 的重定向 URI 列表不覆盖 Threads。见 [Meta](#metafacebookinstagramthreads) 小节。
 
 **后台任务不运行（帖子不发布）**
