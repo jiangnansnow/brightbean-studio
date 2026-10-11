@@ -119,11 +119,36 @@ def _extract_secret(credentials):
     return creds.get("app_secret") or creds.get("client_secret") or ""
 
 
-def resolve_platform_credentials(platform, org_id):
+def _workspace_credential_model():
+    """Return the sidecar model when the zh_overrides app is installed, else None.
+
+    Upstream test/CI settings don't install zh_overrides, and importing an
+    uninstalled model raises at class construction — gate every sidecar lookup
+    through this helper.
+    """
+    from django.apps import apps
+
+    if not apps.is_installed("zh_overrides"):
+        return None
+    from zh_overrides.models import WorkspacePlatformCredential
+
+    return WorkspacePlatformCredential
+
+
+def resolve_platform_credentials(platform, org_id, workspace_id=None):
     """Return app credentials for ``platform``, with ``.env`` dominant.
 
-    If env has any non-empty value for the platform it wins; otherwise fall back
-    to the org's admin-entered ``PlatformCredential`` row. Returns a fresh dict.
+    Resolution order:
+
+    1. A complete ``.env`` config wins globally.
+    2. The org's admin-entered ``PlatformCredential`` row wins — traditional
+       mode: the whole org shares one app; workspace rows are ignored.
+    3. Otherwise, when ``workspace_id`` is given, the workspace's own
+       ``WorkspacePlatformCredential`` row is used (independent mode). A
+       workspace without one is simply unconfigured — there is intentionally
+       no fallback to a "default" workspace app.
+
+    Returns a fresh dict.
     """
     from django.conf import settings
 
@@ -136,16 +161,28 @@ def resolve_platform_credentials(platform, org_id):
         cred = PlatformCredential.objects.for_org(org_id).get(platform=platform, is_configured=True)
         return dict(cred.credentials)
     except PlatformCredential.DoesNotExist:
+        workspace_model = _workspace_credential_model()
+        if workspace_id is not None and workspace_model is not None:
+            # Local-custom sidecar: workspace-scoped credentials (zh_overrides).
+            try:
+                ws_cred = workspace_model.objects.get(
+                    workspace_id=workspace_id,
+                    platform=platform,
+                    is_configured=True,
+                )
+                return dict(ws_cred.credentials)
+            except workspace_model.DoesNotExist:
+                pass
         return dict(env_creds)
 
 
-def resolve_app_secret(platform, org_id):
+def resolve_app_secret(platform, org_id, workspace_id=None):
     """Return the single app secret for one org's platform (.env dominant).
 
     Used to bind inbound-webhook verification to the specific account/org being
     written, so one org's secret can't authorize events for another org.
     """
-    return _extract_secret(resolve_platform_credentials(platform, org_id))
+    return _extract_secret(resolve_platform_credentials(platform, org_id, workspace_id=workspace_id))
 
 
 def resolve_app_secrets(*platforms):
@@ -169,4 +206,15 @@ def resolve_app_secrets(*platforms):
         secret = _extract_secret(cred.credentials)
         if secret and secret not in secrets:
             secrets.append(secret)
+    # Local-custom sidecar: workspace-scoped rows are independent apps whose
+    # webhooks hit the same shared endpoint, so their secrets must verify too.
+    workspace_model = _workspace_credential_model()
+    if workspace_model is not None:
+        for cred in workspace_model.objects.filter(
+            platform__in=platforms,
+            is_configured=True,
+        ):
+            secret = _extract_secret(cred.credentials)
+            if secret and secret not in secrets:
+                secrets.append(secret)
     return secrets

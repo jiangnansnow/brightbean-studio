@@ -67,7 +67,11 @@ class Command(BaseCommand):
             try:
                 from apps.social_accounts.provider_factory import _get_provider_for_platform
 
-                provider = _get_provider_for_platform(account.platform, account.workspace.organization_id)
+                provider = _get_provider_for_platform(
+                    account.platform,
+                    account.workspace.organization_id,
+                    workspace_id=account.workspace_id,
+                )
             except Exception as exc:
                 self.stderr.write(f"  ! {label}: could not build provider — {exc}")
                 failed += 1

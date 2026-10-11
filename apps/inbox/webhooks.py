@@ -107,7 +107,11 @@ def _process_meta_events(payload: dict, platforms: list[str], valid_secrets: set
         ).select_related("workspace__organization")
 
         for account in accounts:
-            account_secret = resolve_app_secret(account.platform, account.workspace.organization_id)
+            account_secret = resolve_app_secret(
+                account.platform,
+                account.workspace.organization_id,
+                workspace_id=account.workspace_id,
+            )
             if not account_secret or account_secret not in valid_secrets:
                 logger.warning(
                     "Meta webhook: signature not valid for account %s's org app; skipping event.",

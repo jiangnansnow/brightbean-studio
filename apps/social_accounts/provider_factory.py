@@ -8,12 +8,18 @@ providers without importing the view module back — ``views`` imports
 from apps.credentials.models import resolve_platform_credentials
 
 
-def _get_provider_for_platform(platform: str, org_id, **extra_credentials):
-    """Resolve app credentials and instantiate the provider."""
+def _get_provider_for_platform(platform: str, org_id, workspace_id=None, **extra_credentials):
+    """Resolve app credentials and instantiate the provider.
+
+    ``workspace_id`` enables the local-custom workspace-scoped credential
+    sidecar: it is consulted only when the org has no credential row for the
+    platform.
+    """
     from providers import get_provider
 
-    # .env is dominant; admin-entered org credentials are the fallback.
-    credentials = resolve_platform_credentials(platform, org_id)
+    # .env is dominant; admin-entered org credentials are the fallback, and
+    # workspace-scoped credentials only apply when the org has no row.
+    credentials = resolve_platform_credentials(platform, org_id, workspace_id=workspace_id)
 
     if extra_credentials:
         credentials = {**credentials, **extra_credentials}

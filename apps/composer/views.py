@@ -2115,8 +2115,13 @@ def pinterest_boards(request, workspace_id, account_id):
     from apps.credentials.models import resolve_platform_credentials
     from providers import get_provider
 
-    # .env is dominant; admin-entered org credentials are the fallback.
-    credentials = resolve_platform_credentials("pinterest", workspace.organization_id)
+    # .env is dominant; admin-entered org credentials are the fallback, with
+    # workspace-scoped credentials (local-custom) when the org has no row.
+    credentials = resolve_platform_credentials(
+        "pinterest",
+        workspace.organization_id,
+        workspace_id=workspace.id,
+    )
 
     provider = get_provider("pinterest", credentials)
 
@@ -2151,7 +2156,11 @@ def tiktok_creator_info(request, workspace_id, account_id):
     from apps.credentials.models import resolve_platform_credentials
     from providers import get_provider
 
-    credentials = resolve_platform_credentials("tiktok", workspace.organization_id)
+    credentials = resolve_platform_credentials(
+        "tiktok",
+        workspace.organization_id,
+        workspace_id=workspace.id,
+    )
     provider = get_provider("tiktok", credentials)
 
     # This endpoint enriches the composer panel; the real privacy/audit gate is

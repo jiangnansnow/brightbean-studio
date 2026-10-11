@@ -20,7 +20,11 @@ from django.views.decorators.http import require_GET, require_POST
 from django_ratelimit.decorators import ratelimit
 
 from apps.common.validators import is_safe_url as _is_safe_url
-from apps.credentials.models import PlatformCredential, derive_is_configured
+from apps.credentials.models import (
+    PlatformCredential,
+    _workspace_credential_model,
+    derive_is_configured,
+)
 from apps.members.decorators import require_permission
 from providers.exceptions import QuotaExceededError
 
@@ -49,8 +53,14 @@ def _get_visible_platform_choices():
     return PlatformVisibility.visible_choices()
 
 
-def _get_configured_platforms(org_id):
-    """Return set of platform names that have credentials configured."""
+def _get_configured_platforms(org_id, workspace_id=None):
+    """Return set of platform names that have credentials configured.
+
+    A platform is connectable when env, the org row, or (local-custom) the
+    workspace's own sidecar row is complete. Org-level mode and
+    workspace-level mode both surface as "configured" here; the precedence
+    between them is enforced later by ``resolve_platform_credentials``.
+    """
     from providers import PROVIDER_REGISTRY
     from providers.types import AuthType
 
@@ -66,6 +76,16 @@ def _get_configured_platforms(org_id):
         # screen, and only fail at token exchange with a generic error.
         if derive_is_configured(platform, creds):
             configured.add(platform)
+
+    # Local-custom: workspace-scoped credentials (independent mode).
+    if workspace_id is not None:
+        workspace_model = _workspace_credential_model()
+        if workspace_model is not None:
+            configured.update(
+                workspace_model.objects.filter(workspace_id=workspace_id, is_configured=True).values_list(
+                    "platform", flat=True
+                )
+            )
 
     # Session-auth platforms (e.g. Bluesky) don't need app-level credentials —
     # the user supplies their own handle + app password at connect time.
@@ -181,7 +201,7 @@ def account_list(request, workspace_id):
         .prefetch_related("posting_slots")
         .order_by("platform", "account_name")
     )
-    configured_platforms = _get_configured_platforms(request.org.id)
+    configured_platforms = _get_configured_platforms(request.org.id, workspace_id)
 
     return render(
         request,
@@ -206,7 +226,7 @@ def account_list(request, workspace_id):
 @ratelimit(key="user", rate="20/m", method="POST", block=True)
 def connect_platform(request, workspace_id):
     """GET: show platform grid. POST: initiate OAuth flow."""
-    configured_platforms = _get_configured_platforms(request.org.id)
+    configured_platforms = _get_configured_platforms(request.org.id, workspace_id)
     visible_platform_choices = _get_visible_platform_choices()
 
     if request.method == "GET":
@@ -242,7 +262,7 @@ def connect_platform(request, workspace_id):
         return redirect("social_accounts:connect_devto", workspace_id=workspace_id)
 
     # Standard OAuth flow
-    provider = _get_provider_for_platform(platform, request.org.id)
+    provider = _get_provider_for_platform(platform, request.org.id, workspace_id=workspace_id)
     apply_analytics_scope_flag(provider, platform)
     nonce = secrets.token_urlsafe(32)
     state = _sign_state(workspace_id, platform, request.user.id, nonce)
@@ -336,7 +356,12 @@ def oauth_callback(request, platform):
         if platform == PlatformCredential.Platform.MASTODON:
             extra_creds = _resolve_mastodon_extra_creds(session_data)
 
-        provider = _get_provider_for_platform(platform, request.org.id, **extra_creds)
+        # workspace_id comes from the signed OAuth state (the callback URL
+        # itself carries no workspace), so credentials resolve to the app
+        # configured for the workspace that started the flow.
+        provider = _get_provider_for_platform(
+            platform, request.org.id, workspace_id=workspace_id, **extra_creds
+        )
         redirect_uri = redirect_uri_from_request(request)
         tokens = provider.exchange_code(code, redirect_uri, **pkce_kwargs(session_data.get("code_verifier")))
 
@@ -755,7 +780,7 @@ def reconnect(request, workspace_id, account_id):
         return redirect("social_accounts:connect_devto", workspace_id=workspace_id)
 
     # Standard OAuth reconnect
-    provider = _get_provider_for_platform(platform, request.org.id)
+    provider = _get_provider_for_platform(platform, request.org.id, workspace_id=workspace_id)
     apply_analytics_scope_flag(provider, platform)
     nonce = secrets.token_urlsafe(32)
     state = _sign_state(workspace_id, platform, request.user.id, nonce)

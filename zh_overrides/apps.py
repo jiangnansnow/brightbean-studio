@@ -9,5 +9,5 @@ class ZhOverridesConfig(AppConfig):
     # a translated copy. Being first in INSTALLED_APPS makes Django's template
     # loader pick these up; pages without an override fall back to English.
     name = "zh_overrides"
-    verbose_name = "中文模板覆盖层"
+    verbose_name = "中文汉化与平台扩展"
     default_auto_field = "django.db.models.BigAutoField"

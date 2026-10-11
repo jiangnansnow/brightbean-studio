@@ -69,7 +69,11 @@ def subscribe_account_webhooks(account) -> bool:
     nothing happened.
     """
     try:
-        provider = _get_provider_for_platform(account.platform, account.workspace.organization_id)
+        provider = _get_provider_for_platform(
+            account.platform,
+            account.workspace.organization_id,
+            workspace_id=account.workspace_id,
+        )
     except Exception:
         logger.exception("Could not build provider to subscribe webhooks for %s", account.id)
         # Almost always missing or misconfigured app credentials. Recorded
@@ -236,7 +240,11 @@ def unsubscribe_account_webhooks(account) -> bool:
         return False
 
     try:
-        provider = _get_provider_for_platform(account.platform, account.workspace.organization_id)
+        provider = _get_provider_for_platform(
+            account.platform,
+            account.workspace.organization_id,
+            workspace_id=account.workspace_id,
+        )
         return provider.unsubscribe_webhooks(account.oauth_access_token, webhook_target(account))
     except Exception:
         logger.warning(
@@ -259,7 +267,11 @@ def record_missing_scopes(account) -> list[str]:
     as the flag migration 0021 put on every Pinterest account, is cleared.
     """
     try:
-        provider = _get_provider_for_platform(account.platform, account.workspace.organization_id)
+        provider = _get_provider_for_platform(
+            account.platform,
+            account.workspace.organization_id,
+            workspace_id=account.workspace_id,
+        )
         # Match what OAuth actually asked for. Connect omits the analytics-only
         # scopes when the platform's analytics is switched off, so comparing
         # against the unconditional list would report a scope as missing that we

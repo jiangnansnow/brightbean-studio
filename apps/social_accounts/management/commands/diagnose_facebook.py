@@ -99,7 +99,11 @@ class Command(BaseCommand):
         try:
             from apps.social_accounts.provider_factory import _get_provider_for_platform, apply_analytics_scope_flag
 
-            provider = _get_provider_for_platform("facebook", account.workspace.organization_id)
+            provider = _get_provider_for_platform(
+                "facebook",
+                account.workspace.organization_id,
+                workspace_id=account.workspace_id,
+            )
             # Mirror what the OAuth flow does, or required_scopes reports
             # read_insights as expected on a deployment where analytics is
             # deliberately off — and a healthy token gets reported as broken.

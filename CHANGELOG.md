@@ -10,6 +10,29 @@
 - 部署环境、服务器运维、1Panel 连通方法等运维事实统一以仓库外的《Brightbean运维手册.md》（`E:\外贸文件夹\Brightbean Studio\`）为准，勿写入本文
 - 词典规模（v1.4.0）：短语 1031 条 / 单词 201 条 / 词元 90 条
 
+## [1.5.0] - 2026-10-11
+
+### 新增（Added）
+
+- **工作区级平台 App 凭证（Workspace-scoped platform credentials）**：新增旁路模型 `zh_overrides.WorkspacePlatformCredential`（独立表 `zh_overrides_workspace_platform_credential`，约束 `(workspace, platform)` 唯一，凭证经 `EncryptedJSONField` 加密），支持代理商形态下「一个组织（租户）的每个工作区使用各自独立的 Meta/平台开发者 App」。凭证解析按「租户 × 平台」两级模式判定：
+  - **通用模式（组织级已配置）**：组织在原 Platform credentials（平台凭证）建有完整凭证行时，全组织工作区共享该 App，行为与上游 100% 一致，工作区凭证行即使存在也被忽略；
+  - **独立模式（组织级未配置）**：系统只查该工作区自己的凭证行——已配置即用工作区专属 App，未配置即空配置（连接页卡片置灰不可点、不可发布），不向任何默认 App 回退；
+  - 环境变量完整配置时仍为最高优先级（与上游一致）。
+- Admin 后台新增 **工作区平台凭证（Workspace platform credentials）** 管理入口（超管专属，Django Admin 标准表单自动生成，无自定义模板）；原组织级 Platform credentials 入口保持不变。
+- 全链路透传 `workspace_id`：OAuth 发起/回调（回调从签名 state 取工作区）/重连、发布引擎、数据分析、健康检查与令牌刷新、Webhook 订阅/退订、`diagnose_facebook` / `subscribe_webhooks` 管理命令、composer 的 Pinterest/TikTok 校验。
+- Webhook 验签密钥全集（`resolve_app_secrets`）纳入工作区凭证行：多个独立 App 推送至同一回调端点时照常验签，再按 Page/IG 账号归属工作区的密钥二次复核；OAuth 回调与 Webhook 地址、验证口令各租户继续共用，无需细分。
+
+### 变更（Changed）
+
+- 解析器 `resolve_platform_credentials()` / `resolve_app_secret()` 新增可选参数 `workspace_id`（默认 `None`，旧调用行为不变）；连接页「已配置平台」集合改为按工作区计算（复用既有未配置遮罩模板，租户前端页面零模板改动）。
+- `zh_overrides` 应用后台显示名由「中文模板覆盖层」改为「中文汉化与平台扩展」。
+
+### 部署注意（Deployment）
+
+- 随镜像 migrate 自动新建旁路表；无新增环境变量、无需改 docker-compose；服务器 `.env` 仍不得设置 `PLATFORM_FACEBOOK_*` / `PLATFORM_INSTAGRAM_*`（完整 env 配置会压掉组织与工作区凭证行）。
+- 独立模式工作区更换 App 后，该工作区已连接账号的旧令牌失效，必须重新 OAuth 授权（令牌与签发 App 绑定）。
+- 新增测试设置 `zh_overrides.test_settings`（内存 SQLite）：`DJANGO_SETTINGS_MODULE=zh_overrides.test_settings pytest zh_overrides`。
+
 ## [1.4.0] - 2026-10-03
 
 ### 新增（Added）
