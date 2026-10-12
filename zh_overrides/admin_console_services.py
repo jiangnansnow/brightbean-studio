@@ -188,57 +188,70 @@ def load_tenants() -> list[TenantRow]:
 
 
 def create_tenant(email: str, password: str, organization_name: str) -> Organization:
-    """Create the login account; the signup signal provisions org + 1 ws.
+    """Create the login account and reuse the signal-provisioned org.
 
-    Then make both memberships idempotent (the signal already creates them
-    for a normal signup, but guaranteeing them here keeps this usable even if
-    provisioning logic changes upstream).
+    The ``accounts`` post_save signal creates a default ``My Organization``
+    + ``My Workspace`` for every new user (same upstream behaviour as normal
+    sign-up and raw Admin user creation). We must NOT create a second org:
+    rename that auto-provisioned org/workspace to the requested names.
+
+    We also register a *verified* allauth ``EmailAddress``: without one,
+    ``SOCIALACCOUNT_EMAIL_AUTHENTICATION`` fails to match the tenant's first
+    Google login, which allauth then treats as a brand-new user and
+    provisions a second organisation (observed duplicate-tenant bug).
     """
+    from allauth.account.models import EmailAddress
+
     email = (email or "").strip().lower()
+    name = (organization_name or "").strip() or email.split("@")[0]
     if not email:
         raise ConsoleError("登录邮箱不能为空。")
     if User.objects.filter(email__iexact=email).exists():
         raise ConsoleError(f"登录账号 {email} 已存在，请直接在矩阵中编辑该租户。")
 
     with transaction.atomic():
+        # post_save signal provisions org + default workspace + memberships
         user = User.objects.create_user(email=email, password=password or None, name="")
-        # The accounts.post_save signal provisions org + default workspace;
-        # look it up, and only create it ourselves if provisioning was absent.
-        org = Organization.objects.filter(memberships__user=user).first()
-        if org is None:
-            # Defensive: provision now if the signal did not run.
-            org = Organization.objects.create(name=organization_name or email.split("@")[0])
-            ws = Workspace.objects.create(organization=org, name=organization_name or "My Workspace")
-            from django.utils import timezone
 
-            OrgMembership.objects.get_or_create(
-                user=user, organization=org,
-                defaults={"org_role": OrgMembership.OrgRole.OWNER, "accepted_at": timezone.now()},
-            )
-            WorkspaceMembership.objects.get_or_create(
-                user=user, workspace=ws,
-                defaults={"workspace_role": WorkspaceMembership.WorkspaceRole.OWNER},
-            )
-        if organization_name.strip():
-            org.name = organization_name.strip()
-            org.save(update_fields=["name"])
-            first_ws = Workspace.objects.filter(organization=org).order_by("created_at").first()
-            if first_ws and first_ws.name in ("My Workspace",):
-                first_ws.name = organization_name.strip()
-                first_ws.save(update_fields=["name"])
-        # Guarantee memberships regardless of the provisioning path above.
-        first_ws = Workspace.objects.filter(organization=org).order_by("created_at").first()
-        from django.utils import timezone
-
-        OrgMembership.objects.get_or_create(
-            user=user, organization=org,
-            defaults={"org_role": OrgMembership.OrgRole.OWNER, "accepted_at": timezone.now()},
+        membership = (
+            OrgMembership.objects.filter(user=user)
+            .select_related("organization")
+            .order_by("accepted_at")
+            .first()
         )
-        if first_ws:
+        if membership is None:
+            # Defensive fallback only (signal disabled / custom user factory)
+            org = Organization.objects.create(name=name)
+            first_ws = Workspace.objects.create(organization=org, name=name)
+            OrgMembership.objects.create(
+                user=user, organization=org, org_role=OrgMembership.OrgRole.OWNER
+            )
+            WorkspaceMembership.objects.create(
+                user=user, workspace=first_ws,
+                workspace_role=WorkspaceMembership.WorkspaceRole.OWNER,
+            )
+        else:
+            org = membership.organization
+            if org.name != name:
+                org.name = name
+                org.save(update_fields=["name", "updated_at"])
+            first_ws = (
+                Workspace.objects.filter(organization=org).order_by("created_at").first()
+            )
+            if first_ws and first_ws.name == "My Workspace":
+                first_ws.name = name
+                first_ws.save(update_fields=["name", "updated_at"])
             WorkspaceMembership.objects.get_or_create(
                 user=user, workspace=first_ws,
                 defaults={"workspace_role": WorkspaceMembership.WorkspaceRole.OWNER},
             )
+
+        # Verified primary email -> first Google SSO matches this user,
+        # instead of auto-creating a duplicate user/organisation.
+        EmailAddress.objects.update_or_create(
+            user=user, email=email,
+            defaults={"verified": True, "primary": True},
+        )
     return org
 
 
@@ -308,6 +321,11 @@ def upsert_workspace(
 ) -> Workspace:
     """Create or rename one workspace and attach its credentials/notes.
 
+    Workspace create/rename/notes are allowed in BOTH modes (raw Admin allows
+    creating workspaces for any organisation; a traditional-mode tenant can
+    have many workspaces sharing the org-level App). Only *workspace-scoped
+    credential writes* are rejected in traditional mode.
+
     Credentials are written ONLY when both fields are non-empty. A partial
     pair is an explicit error (never stored half-configured). Empty pairs
     leave any existing row untouched — blank rows mean "not configured".
@@ -319,9 +337,20 @@ def upsert_workspace(
     if not name:
         raise ConsoleError("工作区名称不能为空。")
 
-    # Independent mode is a hard precondition for workspace-scoped rows.
-    if PlatformCredential.objects.filter(organization=org, platform__in=PLATFORMS).exists():
-        raise ConsoleError("该租户为通用模式：App 凭证在组织级统一配置，工作区凭证不生效。请先切换到独立模式。")
+    traditional_mode = PlatformCredential.objects.filter(
+        organization=org, platform__in=PLATFORMS
+    ).exists()
+
+    credential_values_present = any(
+        (credentials.get(p) or OrgBundle()).client_id.strip()
+        or (credentials.get(p) or OrgBundle()).client_secret.strip()
+        for p in PLATFORMS
+    )
+    if traditional_mode and credential_values_present:
+        raise ConsoleError(
+            "该租户为通用模式：App 凭证在组织级统一配置并由全部工作区共享，"
+            "工作区不能单独配置凭证。如需独立 App，请先切换到独立模式。"
+        )
 
     with transaction.atomic():
         owner_membership = (

@@ -111,13 +111,51 @@ def test_partial_credential_pair_rejected(org_and_owner):
 
 
 @pytest.mark.django_db
-def test_workspace_credential_rejected_in_traditional_mode(org_and_owner):
+def test_workspace_create_and_rename_allowed_in_traditional_mode(org_and_owner):
+    """Raw Admin allows workspaces in any org; traditional only blocks ws *creds*."""
+    org, user, w1 = org_and_owner
+    svc.save_tenant_mode(str(org.id), "traditional", {svc.FB: svc.OrgBundle(**FB),
+                                                       svc.IG: svc.OrgBundle(**IG)})
+    renamed = svc.upsert_workspace(str(org.id), "改名成功", str(w1.id), {}, {})
+    renamed.refresh_from_db()
+    assert renamed.name == "改名成功"
+    count = Workspace.objects.filter(organization=org).count()
+    new_ws = svc.upsert_workspace(str(org.id), "第二工作区", None, {}, {})
+    assert Workspace.objects.filter(organization=org).count() == count + 1
+    assert WorkspaceMembership.objects.filter(user=user, workspace=new_ws).exists()
+    assert not WorkspacePlatformCredential.objects.filter(workspace=new_ws).exists()
+
+
+@pytest.mark.django_db
+def test_workspace_credential_values_rejected_in_traditional_mode(org_and_owner):
     org, _u, w1 = org_and_owner
     svc.save_tenant_mode(str(org.id), "traditional", {svc.FB: svc.OrgBundle(**FB),
                                                        svc.IG: svc.OrgBundle(**IG)})
-    with pytest.raises(svc.ConsoleError):
+    with pytest.raises(svc.ConsoleError, match="通用模式"):
         svc.upsert_workspace(str(org.id), "W1", str(w1.id),
                              {svc.FB: svc.OrgBundle("OTHER", "OTHERS"), svc.IG: svc.OrgBundle("", "")}, {})
+
+
+@pytest.mark.django_db
+def test_create_tenant_single_org_and_verified_email():
+    """Console creation must reuse signal org (no duplicate) + register verified email."""
+    from allauth.account.models import EmailAddress
+
+    svc.create_tenant("duptest@x.com", "pw12345678", "客户甲")
+    u = User.objects.get(email="duptest@x.com")
+    assert Organization.objects.filter(memberships__user=u).count() == 1
+    org = Organization.objects.filter(memberships__user=u).first()
+    assert org.name == "客户甲"
+    assert list(Workspace.objects.filter(organization=org).values_list("name", flat=True)) == ["客户甲"]
+    ea = EmailAddress.objects.get(user=u, email="duptest@x.com")
+    assert ea.verified and ea.primary
+
+
+@pytest.mark.django_db
+def test_create_tenant_default_name_from_email_prefix():
+    svc.create_tenant("noname@x.com", "", None)
+    u = User.objects.get(email="noname@x.com")
+    assert Organization.objects.filter(memberships__user=u).first().name == "noname"
 
 
 @pytest.mark.django_db
@@ -129,6 +167,21 @@ def test_archive_unarchive_and_delete(org_and_owner):
     assert Workspace.objects.get(id=w1.id).is_archived is False
     svc.delete_workspace(str(org.id), str(w1.id))
     assert not Workspace.objects.filter(id=w1.id).exists()
+
+
+@pytest.mark.django_db
+def test_console_get_renders_with_impact_summary(org_and_owner):
+    """GET page must render tree panels and cascade impact (Admin collector)."""
+    org, _user, w1 = org_and_owner
+    User.objects.create_superuser(email="root@x.com", password="pw12345678")
+    c = Client()
+    assert c.login(username="root@x.com", password="pw12345678")
+    resp = c.get("/admin/zh_overrides/workspaceplatformcredential/tenant-config/")
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "tc-tree-pane" in body
+    assert "删除工作区「%s」" % w1.name in body
+    assert "个工作区" in body or "个workspace" in body.lower()
 
 
 @pytest.mark.django_db

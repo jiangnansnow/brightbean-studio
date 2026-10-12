@@ -56,6 +56,76 @@ def _bundles_from_post(prefix: str, post) -> dict[str, svc.OrgBundle]:
     }
 
 
+def _delete_impact(request, objs):
+    """Cascade summary identical to Django Admin's delete confirmation page."""
+    from django.contrib.admin.utils import get_deleted_objects
+
+    try:
+        _deleted, model_count, _perms, _protected = get_deleted_objects(
+            objs, request, admin.site
+        )
+    except Exception:
+        return []
+    return [
+        {"label": label, "count": count}
+        for label, count in sorted(model_count.items(), key=lambda kv: (-kv[1], kv[0]))
+    ]
+
+
+# Cascade collector returns Django verbose_name_plural (English upstream
+# labels); display Chinese equivalents for the models involved in tenant /
+# workspace deletion. Unknown labels fall through unchanged.
+_IMPACT_LABELS_ZH = {
+    "organizations": "组织",
+    "workspaces": "工作区",
+    "org memberships": "组织成员关系",
+    "workspace memberships": "工作区成员关系",
+    "social accounts": "社交账号",
+    "posts": "帖子",
+    "ideas": "想法",
+    "idea groups": "想法分组",
+    "tags": "标签",
+    "content categories": "内容分类",
+    "post templates": "帖子模板",
+    "inbox messages": "收件箱消息",
+    "saved replies": "快捷回复",
+    "inbox sla configs": "收件箱 SLA 配置",
+    "media assets": "媒体素材",
+    "media folders": "媒体文件夹",
+    "pending uploads": "待上传素材",
+    "api keys": "API 密钥",
+    "approval actions": "审批操作",
+    "approval reminders": "审批提醒",
+    "post comments": "帖子评论",
+    "notifications": "通知",
+    "org settings": "组织设置",
+    "workspace settings": "工作区设置",
+    "workspace platform credentials": "工作区平台凭证",
+    "platform credentials": "组织平台凭证",
+    "calendar queues": "发布队列",
+    "calendar events": "日历事件",
+    "magic link tokens": "客户门户令牌",
+    "connection links": "连接链接",
+    "onboarding checklists": "引导清单",
+    "csv import jobs": "CSV 导入任务",
+    "feeds": "RSS 订阅源",
+    "post insights snapshots": "帖子分析快照",
+    "account insights snapshots": "账号分析快照",
+    "email send counters": "邮件计数",
+    "email suppressions": "退信名单",
+}
+
+
+def _impact_text(items):
+    if not items:
+        return ""
+    parts = [
+        f"{i['count']} 个{_IMPACT_LABELS_ZH.get(i['label'].lower(), i['label'])}"
+        for i in items
+    ]
+    return "、".join(parts)
+
+
 @_superuser_required
 @require_http_methods(["GET"])
 def tenant_config_view(request):
@@ -70,12 +140,28 @@ def tenant_config_view(request):
         "accounts": svc.SocialAccount.objects.filter(platform__in=svc.PLATFORMS).count(),
         "admins": len(admins),
     }
+    # Cascade summaries for delete confirmations (same collector as raw Admin)
+    impact = {}
+    impact_text = {}
+    org_ids = [t.organization_id for t in tenants]
+    org_map = {str(o.id): o for o in svc.Organization.objects.filter(id__in=org_ids)}
+    ws_ids = [w.workspace_id for t in tenants for w in t.workspaces]
+    ws_map = {str(w.id): w for w in svc.Workspace.objects.filter(id__in=ws_ids)}
+    for oid, org in org_map.items():
+        impact[oid] = _delete_impact(request, [org])
+        impact_text[oid] = _impact_text(impact[oid])
+    for wid, ws in ws_map.items():
+        impact[wid] = _delete_impact(request, [ws])
+        impact_text[wid] = _impact_text(impact[wid])
+
     context = {
         **admin.site.each_context(request),
         "title": "租户配置矩阵",
         "tenants": tenants,
         "admins": admins,
         "stats": stats,
+        "impact": impact,
+        "impact_text": impact_text,
         "fb": svc.FB,
         "ig": svc.IG,
         "opts": {"app_label": "zh_overrides"},  # admin template breadcrumbs

@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-{% load static %}
+{% load static console_extras %}
 {% block title %}租户配置矩阵{% endblock %}
 
 {% block extrastyle %}{{ block.super }}
@@ -53,6 +53,9 @@
   .sec-cap::after{content:"";flex:1;height:1px solid #e3e6eb;}
 
   .tn{user-select:none;}
+  /* 组织行层级强化：加粗，与工作区/账号叶子拉开 */
+  .torg > .trow .tname{font-weight:600;}
+  .torg > .trow .tic{font-size:15px;}
   .trow{display:flex;align-items:center;gap:2px;height:32px;border-radius:5px;cursor:pointer;
        padding:0 6px 0 2px;white-space:nowrap;}
   .trow:hover{background:#f5f7fa;}
@@ -62,8 +65,9 @@
   .trow.root .tname{font-size:15px;font-weight:700;}
   .trow.root .tic{font-size:17px;}
   .trow.root .tstate,.trow.root .tmore{display:none;}
-  .tchev{flex:0 0 14px;width:14px;height:32px;border:none;background:none;color:#9aa0ab;padding:0;
-       font-size:9px;cursor:pointer;}
+  .tchev{flex:0 0 20px;width:20px;height:32px;border:none;background:none;color:#6b7280;padding:0;
+       font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .tchev:hover{color:var(--brand);}
   .tchev.blank{cursor:default;}
   .tic{flex:0 0 18px;width:18px;text-align:center;font-size:14px;line-height:1;}
   .ttxt{flex:1;min-width:0;overflow:hidden;padding:0 4px;}
@@ -77,12 +81,14 @@
   .tag.off{visibility:hidden;}
   .dot{flex:0 0 8px;width:8px;height:8px;border-radius:50%;}
   .dot.on{background:var(--green);} .dot.off{background:var(--gray);}
-  .tmore{flex:0 0 14px;width:14px;height:22px;border:none;background:none;border-radius:4px;
-       color:#8a919f;cursor:pointer;font-size:13px;padding:0;visibility:hidden;}
+  .tmore{flex:0 0 16px;width:16px;height:22px;border:none;background:none;border-radius:4px;
+       color:#8a919f;cursor:pointer;font-size:14px;padding:0;visibility:hidden;}
   .trow:hover .tmore{visibility:visible;}
   .tmore:hover{background:#e3e8f2;color:var(--brand);}
-  .tkids{padding-left:14px;border-left:1px solid #edf0f4;}
+  .tkids{margin-left:10px;padding-left:14px;border-left:1px solid #d3d9e1;}
   .tn.collapsed>.tkids{display:none;}
+  /* 层级悬停引导线 */
+  .tkids:hover{border-left-color:#c2cad5;}
   .tleaf-ic{flex:0 0 18px;width:18px;text-align:center;font-size:13px;line-height:1;}
 
   .tc-menu{position:fixed;z-index:60;background:#fff;border:1px solid var(--line);border-radius:7px;
@@ -127,6 +133,8 @@
   .dhint{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.5;}
   .mode-note{font-size:12px;color:var(--brand);border-left:3px solid var(--brand);
        padding:6px 10px;margin-bottom:10px;line-height:1.5;background:#fff;}
+  .impact-note{font-size:12px;color:var(--danger);background:#fff5f5;border:1px solid #f3d0d0;
+       border-radius:6px;padding:8px 12px;margin-bottom:10px;line-height:1.5;}
 
   .pf{border:1px solid var(--line);border-radius:7px;margin-bottom:12px;}
   .pf-t{height:36px;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--line2);
@@ -153,9 +161,10 @@
   .dkv{display:grid;grid-template-columns:96px 1fr;gap:9px 16px;font-size:13px;max-width:640px;}
   .dkv dt{color:var(--label);font-weight:500;} .dkv dd{margin:0;}
 
-  /* ===== 右侧说明 ===== */
-  .tc-guide{flex:0 0 272px;background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column;}
-  .tc-guide-h{height:40px;flex:0 0 40px;display:flex;align-items:center;padding:0 14px;font-size:13.5px;
+  /* ===== 右侧说明（上提与顶栏对接） ===== */
+  .tc-guide{flex:0 0 272px;background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column;
+       margin-top:-46px;height:calc(100% + 46px);position:relative;z-index:2;}
+  .tc-guide-h{height:46px;flex:0 0 46px;display:flex;align-items:center;padding:0 16px;font-size:13.5px;
        font-weight:700;border-bottom:1px solid var(--line);color:#2b303b;background:#fff;}
   .tc-guide-b{flex:1;overflow-y:auto;padding:10px 14px 28px;font-size:12px;line-height:1.65;color:#4a5160;
        scrollbar-width:none;-ms-overflow-style:none;}
@@ -400,11 +409,11 @@
               </tr>
               {% endfor %}
             </table>
-            <div class="dacts org-ind-add" {% if t.mode != 'independent' %}style="display:none"{% endif %}>
+            <div class="dacts">
               <button type="button" class="tbtn" data-add-ws="{{ t.organization_id }}">＋ 添加工作区</button>
             </div>
 
-            <!-- 新建工作区（独立模式，就地展开） -->
+            <!-- 新建工作区（就地展开） -->
             <form method="post" class="newws-form" id="newws-{{ t.organization_id }}"
                   action="{% url 'admin:zh_overrides_tenant_config_action' %}#org-{{ t.organization_id }}"
                   style="display:none;margin-top:12px;">
@@ -416,20 +425,24 @@
                 <div class="pf-t">新工作区</div>
                 <div class="pf-b"><div class="fg">
                   <div class="df full"><label>工作区名称</label>
-                    <input type="text" name="workspace_name" required placeholder="输入名称即可创建，凭证以后再补"></div>
+                    <input type="text" name="workspace_name" required placeholder="输入名称即可创建{% if t.mode == 'independent' %}，凭证以后再补{% endif %}"></div>
+                  {% if t.mode == 'independent' %}
                   <div class="df"><label>Facebook App ID</label><input type="text" autocomplete="off" name="ws_fb_id"></div>
                   <div class="df"><label>Facebook App Secret</label><input type="text" autocomplete="off" name="ws_fb_secret"></div>
                   <div class="df full"><label>FB 测试员 / 主页 / Page ID</label><input type="text" autocomplete="off" name="fb_note"></div>
                   <div class="df"><label>Instagram App ID</label><input type="text" autocomplete="off" name="ws_ig_id"></div>
                   <div class="df"><label>Instagram App Secret</label><input type="text" autocomplete="off" name="ws_ig_secret"></div>
                   <div class="df full"><label>IG 测试员 / IG 账号 / IG ID</label><input type="text" autocomplete="off" name="ig_note"></div>
+                  {% endif %}
                 </div>
                 <div class="dacts">
                   <button type="submit" class="tbtn primary"
                           data-test-input="newtest-{{ t.organization_id }}" data-test-value="0">添加并保存</button>
+                  {% if t.mode == 'independent' %}
                   <button type="submit" class="tbtn warn"
                           data-test-input="newtest-{{ t.organization_id }}" data-test-value="1"
                           data-confirm="保存后向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？">保存并测试</button>
+                  {% endif %}
                   <span class="sp"></span>
                   <button type="button" class="tbtn" data-cancel-ws="{{ t.organization_id }}">取消</button>
                 </div></div>
@@ -438,8 +451,11 @@
           </div>
 
           <div class="dsec">
+            {% if impact_text|get_item:t.organization_id %}
+            <div class="impact-note">删除组织将同时永久删除：{{ impact_text|get_item:t.organization_id }}。此操作不可恢复。</div>
+            {% endif %}
             <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
-                  data-confirm="彻底删除组织将级联删除其全部工作区、帖子、社交账号与凭证，不可恢复！确定？">
+                  data-confirm="删除组织「{{ t.organization_name }}」将同时永久删除：{{ impact_text|get_item:t.organization_id }}。此操作不可恢复，确定删除？">
               {% csrf_token %}
               <input type="hidden" name="action" value="delete_org">
               <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
@@ -467,6 +483,12 @@
                 <div class="df"><label>工作区 ID</label>
                   <input type="text" value="{{ w.workspace_id }}" readonly></div>
               </div>
+              {% if not w.is_archived %}
+              <div class="dacts">
+                <button type="submit" class="tbtn primary"
+                        data-test-input="wstest-{{ w.workspace_id }}" data-test-value="0">保存名称</button>
+              </div>
+              {% endif %}
             </div>
 
             {% if t.mode == 'independent' %}
@@ -497,9 +519,7 @@
               </div>
               {% if not w.is_archived %}
               <div class="dacts">
-                <button type="submit" class="tbtn primary"
-                        data-test-input="wstest-{{ w.workspace_id }}" data-test-value="0">保存</button>
-                <button type="submit" class="tbtn warn"
+                <button type="submit" class="tbtn"
                         data-test-input="wstest-{{ w.workspace_id }}" data-test-value="1"
                         data-confirm="保存后向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？">保存并测试</button>
               </div>
@@ -531,6 +551,9 @@
           </div>
 
           <div class="dsec">
+            {% if not w.is_archived and impact_text|get_item:w.workspace_id %}
+            <div class="impact-note">删除工作区将同时永久删除：{{ impact_text|get_item:w.workspace_id }}。此操作不可恢复。如仅需停用，建议使用归档。</div>
+            {% endif %}
             <div class="dacts">
               <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}#ws-{{ w.workspace_id }}"
                     data-confirm="{% if w.is_archived %}取消归档该工作区？{% else %}归档后租户侧不可见但数据保留，可恢复。确定归档？{% endif %}">
@@ -542,7 +565,7 @@
               </form>
               <span class="sp"></span>
               <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
-                    data-confirm="彻底删除将级联删除该工作区全部帖子、社交账号与凭证，不可恢复！确定？">
+                    data-confirm="删除工作区「{{ w.name }}」将同时永久删除：{{ impact_text|get_item:w.workspace_id }}。此操作不可恢复，确定删除？">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="delete_workspace">
                 <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
@@ -676,7 +699,7 @@
   }
   fitConsole();
   window.addEventListener("resize", fitConsole);
-  var LS_KEY = "tc-tree-open-v4";
+  var LS_KEY = "tc-tree-open-v5";
   function loadOpen() {
     try { return new Set(JSON.parse(localStorage.getItem(LS_KEY) || "[]")); } catch (e) { return new Set(); }
   }
@@ -726,7 +749,9 @@
   $all(".tn", consoleEl).forEach(function (n) {
     if (!hasKids(n)) { return; }
     var id = n.querySelector(":scope > .trow").getAttribute("data-node");
-    setOpen(n, !hasMemory || openIds.has(id));
+    // 根（平台）始终展开；组织/工作区默认折叠，除非本地记忆为展开
+    var defaultOpen = (id === "root");
+    setOpen(n, defaultOpen || (hasMemory && openIds.has(id)));
   });
 
   /* ---------- 事件委托 ---------- */
@@ -865,7 +890,6 @@
     var saved = panel.getAttribute("data-saved-mode");
     $all(".org-trad-sec", panel).forEach(function (el) { el.style.display = trad ? "" : "none"; });
     $all(".org-ind-hint", panel).forEach(function (el) { el.style.display = trad ? "none" : ""; });
-    $all(".org-ind-add", panel).forEach(function (el) { el.style.display = trad ? "none" : ""; });
     var note = $('[data-trad-note="' + org + '"]', panel);
     if (note) { note.style.display = (trad && saved === "independent") ? "" : "none"; }
     $all("[data-mode-label]", panel).forEach(function (lb) {
