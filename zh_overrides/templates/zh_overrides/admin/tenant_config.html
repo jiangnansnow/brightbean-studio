@@ -4,432 +4,945 @@
 
 {% block extrastyle %}{{ block.super }}
 <style>
-  :root{--tc-brand:#0b6e4f;--tc-line:#d9dee7;--tc-ink:#1f2937;--tc-muted:#5b6675;}
-  body{background:#f4f6f9;}
-  .tc-subtitle{font-size:13px;color:var(--tc-muted);font-weight:400;margin-left:10px;}
+  :root{
+    --brand:#2b6de0; --brand-soft:#e9f1fe; --brand-bar:#f4f8ff;
+    --line:#e4e7ec; --line2:#eef0f3; --ink:#1f2329; --muted:#8a919f;
+    --label:#4b5563; --danger:#d83931; --warn:#b26b00;
+    --green:#2ea121; --gray:#c4cad3;
+  }
+  html:has(body.admin-tenant-console){overflow:hidden;}
+  body.admin-tenant-console{background:#fff !important;overflow:hidden;}
+  body.admin-tenant-console #content{padding-bottom:0;}
+  body.admin-tenant-console br.clear{display:none;}
+  .tc-console{margin:-20px -40px;display:flex;flex-direction:column;
+       background:#fff;font-size:13px;color:var(--ink);}
   #content-related{display:none;}
-  .tc-wrap{display:flex;gap:16px;align-items:flex-start;}
-  .tc-main{flex:1 1 75%;min-width:0;}
-  .tc-side{flex:0 0 25%;max-width:25%;position:sticky;top:10px;max-height:calc(100vh - 24px);overflow-y:auto;
-    background:#fff;border:1px solid var(--tc-line);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--tc-ink);}
-  .tc-side h4{font-size:13px;margin:14px 0 6px;color:var(--tc-brand);border-bottom:1px dashed var(--tc-line);padding-bottom:4px;}
-  .tc-side h4:first-child{margin-top:0;}
-  .tc-side code{background:#eef2f7;border-radius:4px;padding:1px 5px;font-size:11.5px;word-break:break-all;}
-  .tc-side ul{margin:4px 0 4px 16px;padding:0;} .tc-side li{margin:3px 0;line-height:1.5;}
-  .tc-side .danger{color:#b91c1c;}
-  /* floating outline */
-  .tc-outline{position:fixed;right:calc(25% + 24px);top:90px;z-index:40;}
-  .tc-outline-btn{background:var(--tc-brand);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);}
-  .tc-outline-menu{display:none;position:absolute;right:0;top:34px;background:#fff;border:1px solid var(--tc-line);border-radius:10px;
-    box-shadow:0 8px 28px rgba(0,0,0,.16);padding:6px 0;min-width:210px;max-height:60vh;overflow:auto;}
-  .tc-outline.open .tc-outline-menu{display:block;}
-  .tc-outline-menu a{display:block;padding:6px 14px;color:var(--tc-ink);text-decoration:none;font-size:12.5px;}
-  .tc-outline-menu a:hover{background:#eaf5f0;color:var(--tc-brand);}
-  .tc-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
-  .tc-toolbar input[type=search]{padding:6px 10px;border:1px solid var(--tc-line);border-radius:8px;width:240px;}
-  .tc-card{background:#fff;border:1px solid var(--tc-line);border-radius:12px;margin-bottom:12px;overflow:hidden;}
-  .tc-card-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:#fbfdff;user-select:none;}
-  .tc-card-head:hover{background:#f1f7f4;}
-  .tc-chevron{transition:transform .2s;color:var(--tc-muted);font-size:12px;}
-  .tc-card.open .tc-chevron{transform:rotate(90deg);}
-  .tc-card-body{display:none;padding:14px 16px 18px;border-top:1px solid var(--tc-line);}
-  .tc-card.open .tc-card-body{display:block;}
-  .tc-badges{margin-left:auto;font-size:12px;color:var(--tc-muted);display:flex;gap:8px;align-items:center;}
-  .tc-badge{border-radius:10px;padding:2px 9px;background:#eef2f7;}
-  .tc-badge.trad{background:#fdece8;} .tc-badge.ind{background:#e9f7ef;}
-  .tc-badge.arch{background:#fff3cd;}
-  .tc-field{margin:8px 0;}
-  .tc-field label{display:block;font-size:12px;color:var(--tc-muted);margin-bottom:3px;}
-  .tc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .tc-grid4{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;}
-  .tc-input,.tc-card input[type=text],.tc-card input[type=email],.tc-card input[type=password]{width:100%;padding:6px 9px;border:1px solid #c9d2dd;border-radius:7px;font-size:12.5px;box-sizing:border-box;}
-  .tc-credbox{border:1px solid var(--tc-line);border-radius:10px;padding:10px 12px;margin:10px 0;background:#fafbfc;}
-  .tc-credbox.trad{background:#fff8f5;} .tc-credbox.ind{background:#f5fbf7;}
-  .tc-credbox h5{margin:0 0 8px;font-size:12.5px;color:var(--tc-ink);}
-  table.tc-matrix{width:100%;border-collapse:collapse;font-size:12px;}
-  table.tc-matrix th,table.tc-matrix td{border:1px solid var(--tc-line);padding:5px 7px;vertical-align:top;}
-  table.tc-matrix th{background:#eef3f8;font-weight:600;text-align:center;}
-  table.tc-matrix input{margin:0;}
-  .tc-wgrid{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr 1fr 1fr 1fr .7fr 1.1fr;gap:1px;background:var(--tc-line);border:1px solid var(--tc-line);border-radius:8px;overflow:hidden;margin-bottom:8px;}
-  .tc-wgrid > div,.tc-wgrid > form{background:#fff;padding:5px 6px;font-size:12px;min-width:0;}
-  .tc-wgrid > form{display:none;}
-  .tc-wgrid.wgrid-head > div{background:#eef3f8;font-weight:600;text-align:center;font-size:11.5px;padding:7px 4px;}
-  .tc-wgrid input{width:100%;padding:5px 6px;font-size:12px;box-sizing:border-box;}
-  .tc-wgrid.archived{background:#fff3cd;}
-  .tc-wgrid.archived > div{background:#fffdf4;opacity:.8;}
-  .tc-wgrid.tc-new-row{background:#ffe8a8;}
-  .tc-wgrid.tc-new-row > div{background:#fff8e1;}
-  .tc-status{text-align:center;font-size:11px;white-space:nowrap;line-height:1.7;}
-  tr.archived{opacity:.55;background:#fffdf4;}
-  tr.tc-new-row{background:#fff8e1;}
-  .tc-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;}
-  .tc-dot.on{background:#16a34a;} .tc-dot.off{background:#cbd5e1;}
-  .tc-btn{border:none;border-radius:7px;padding:6px 12px;font-size:12.5px;cursor:pointer;}
-  .tc-btn.primary{background:var(--tc-brand);color:#fff;}
-  .tc-btn.ghost{background:#eef2f7;color:var(--tc-ink);}
-  .tc-btn.danger{background:#fdece8;color:#b91c1c;}
-  .tc-btn.warn{background:#fff3cd;color:#8a6d00;}
-  .tc-lock{background:#f0f0f0 !important;color:#999;cursor:not-allowed;}
-  .tc-actions{white-space:nowrap;text-align:center;}
-  .tc-actions form{display:inline;}
-  .tc-add{margin-top:8px;}
-  .tc-modeseg label{display:inline-flex;align-items:center;gap:4px;margin-right:18px;font-size:13px;}
-  .tc-hint{font-size:11.5px;color:var(--tc-muted);margin-top:4px;line-height:1.5;}
-  .tc-newcard{background:#fff;border:1px dashed #9db4c7;border-radius:12px;padding:12px 16px;margin-bottom:16px;}
+
+  /* ===== 顶栏 ===== */
+  .tc-top{height:46px;flex:0 0 46px;background:#fff;border-bottom:1px solid var(--line);display:flex;
+       align-items:center;padding:0 16px;gap:10px;}
+  .tc-top .lg{width:22px;height:22px;border-radius:5px;background:var(--brand);color:#fff;font-size:12px;
+       font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .tc-top b{font-size:14px;}
+  .tc-top .sp{flex:1;}
+  .tbtn{height:30px;border:1px solid var(--line);background:#fff;border-radius:5px;padding:0 13px;
+       font-size:12.5px;color:#444b56;cursor:pointer;}
+  .tbtn:hover{border-color:var(--brand);color:var(--brand);}
+  .tbtn.primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .tbtn.primary:hover{background:#225cc4;color:#fff;}
+  .tbtn.danger{color:var(--danger);border-color:#f0c8c2;}
+  .tbtn.warn{color:var(--warn);border-color:#e8d9a8;}
+
+  .tc-wrap{flex:1;display:flex;min-height:0;}
+
+  /* ===== 左树 ===== */
+  .tc-tree-pane{width:320px;flex:0 0 320px;background:#fff;border-right:1px solid var(--line);
+       display:flex;flex-direction:column;}
+  .tc-tree-tool{padding:10px 12px 8px;display:flex;gap:8px;}
+  .tc-tree-tool .s{flex:1;height:30px;display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+       border-radius:5px;padding:0 9px;color:var(--muted);}
+  .tc-tree-tool .s input{border:none;outline:none;flex:1;font-size:12.5px;background:transparent;}
+  .tc-tree-tool .plus{width:30px;height:30px;border:1px solid var(--line);border-radius:5px;background:#fff;
+       cursor:pointer;color:#555d6b;font-size:16px;line-height:1;}
+  .tc-tree-tool .plus:hover{border-color:var(--brand);color:var(--brand);}
+  .tc-tree{flex:1;overflow-y:auto;padding:2px 6px 20px;scrollbar-width:none;-ms-overflow-style:none;}
+  .tc-tree::-webkit-scrollbar{display:none;}
+
+  .sec-cap{display:flex;align-items:center;gap:8px;padding:0 10px;height:28px;margin:10px 4px 4px;
+       font-size:12.5px;font-weight:700;color:var(--cap,#565d6b);}
+  .sec-cap::after{content:"";flex:1;height:1px solid #e3e6eb;}
+
+  .tn{user-select:none;}
+  .trow{display:flex;align-items:center;gap:2px;height:32px;border-radius:5px;cursor:pointer;
+       padding:0 6px 0 2px;white-space:nowrap;}
+  .trow:hover{background:#f5f7fa;}
+  .trow.sel{background:var(--brand-soft);}
+  .trow.sel .tname{color:var(--brand);font-weight:600;}
+  .trow.root{height:40px;}
+  .trow.root .tname{font-size:15px;font-weight:700;}
+  .trow.root .tic{font-size:17px;}
+  .trow.root .tstate,.trow.root .tmore{display:none;}
+  .tchev{flex:0 0 14px;width:14px;height:32px;border:none;background:none;color:#9aa0ab;padding:0;
+       font-size:9px;cursor:pointer;}
+  .tchev.blank{cursor:default;}
+  .tic{flex:0 0 18px;width:18px;text-align:center;font-size:14px;line-height:1;}
+  .ttxt{flex:1;min-width:0;overflow:hidden;padding:0 4px;}
+  .tname{font-size:13px;overflow:hidden;text-overflow:ellipsis;}
+  .tstate{flex:0 0 56px;width:56px;display:flex;align-items:center;justify-content:flex-end;gap:5px;}
+  .tag{flex:0 0 auto;font-size:10px;border-radius:3px;padding:0 7px;line-height:18px;height:18px;}
+  .tag.trad{background:#fdece8;color:#b0441f;}
+  .tag.ind{background:#e9f5ec;color:#1f7a26;}
+  .tag.arch{background:#fdf3df;color:var(--warn);}
+  .tag.lock{background:#f0f1f4;color:#8a919f;}
+  .tag.off{visibility:hidden;}
+  .dot{flex:0 0 8px;width:8px;height:8px;border-radius:50%;}
+  .dot.on{background:var(--green);} .dot.off{background:var(--gray);}
+  .tmore{flex:0 0 14px;width:14px;height:22px;border:none;background:none;border-radius:4px;
+       color:#8a919f;cursor:pointer;font-size:13px;padding:0;visibility:hidden;}
+  .trow:hover .tmore{visibility:visible;}
+  .tmore:hover{background:#e3e8f2;color:var(--brand);}
+  .tkids{padding-left:14px;border-left:1px solid #edf0f4;}
+  .tn.collapsed>.tkids{display:none;}
+  .tleaf-ic{flex:0 0 18px;width:18px;text-align:center;font-size:13px;line-height:1;}
+
+  .tc-menu{position:fixed;z-index:60;background:#fff;border:1px solid var(--line);border-radius:7px;
+       box-shadow:0 8px 26px rgba(20,30,50,.15);padding:4px 0;min-width:148px;display:none;}
+  .tc-menu.open{display:block;}
+  .tc-menu button{display:block;width:100%;text-align:left;border:none;background:none;padding:7px 15px;
+       font-size:12.5px;cursor:pointer;color:#2b303b;}
+  .tc-menu button:hover{background:#f2f5ff;color:var(--brand);}
+  .tc-menu button.danger{color:var(--danger);} .tc-menu button.danger:hover{background:#fdf1f1;}
+  .tc-menu .idline{padding:5px 15px;font-size:10.5px;color:#a0a7b2;border-top:1px solid var(--line2);margin-top:3px;}
+
+  /* ===== 中间 ===== */
+  .tc-main{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff;}
+  .tc-pane-head{border-bottom:1px solid var(--line);padding:0 24px;height:54px;display:flex;align-items:center;
+       gap:12px;flex:0 0 54px;}
+  .tc-pane-head h2{font-size:17px;margin:0;font-weight:700;}
+  .tc-pane-head .h-acts{margin-left:auto;display:flex;gap:12px;}
+  .tc-pane-body{flex:1;overflow-y:auto;padding:18px 24px 36px;scrollbar-width:none;-ms-overflow-style:none;}
+  .tc-pane-body::-webkit-scrollbar{display:none;}
+  .tc-pane-inner{max-width:760px;}
+  .dpanel{display:none;} .dpanel.show{display:block;}
+
+  .dsec{margin-bottom:20px;}
+  .dsec-t{display:flex;align-items:center;height:34px;padding:0 12px;margin-bottom:12px;
+       font-size:14px;font-weight:700;color:#2b303b;background:#fff;border:1px solid var(--line);
+       border-left:3px solid var(--brand);border-radius:5px;}
+  .fg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px;row-gap:13px;max-width:624px;}
+  .df{min-width:0;}
+  .df.full{grid-column:1 / -1;}
+  .df label{display:block;font-size:12.5px;color:var(--label);font-weight:500;margin-bottom:4px;}
+  .df input[type=text],.df input[type=password],.df input[type=email]{width:100%;height:32px;
+       border:1px solid #d4d9e0;border-radius:5px;padding:0 10px;font-size:13px;background:#fff;}
+  .df input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 2px rgba(43,109,224,.12);}
+  .df input[readonly]{background:#f8f9fa;color:#5a6270;}
+  .seg{display:inline-flex;height:32px;border:1px solid #d4d9e0;border-radius:5px;overflow:hidden;}
+  .seg label{display:flex;align-items:center;padding:0 20px;font-size:13px;cursor:pointer;background:#fff;}
+  .seg label.on{background:var(--brand-soft);color:var(--brand);font-weight:600;}
+  .seg label+label{border-left:1px solid #d4d9e0;}
+  .seg input{display:none;}
+  .dacts{display:flex;gap:9px;align-items:center;margin-top:14px;}
+  .dacts .sp{flex:1;}
+  .dhint{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.5;}
+  .mode-note{font-size:12px;color:var(--brand);border-left:3px solid var(--brand);
+       padding:6px 10px;margin-bottom:10px;line-height:1.5;background:#fff;}
+
+  .pf{border:1px solid var(--line);border-radius:7px;margin-bottom:12px;}
+  .pf-t{height:36px;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--line2);
+       border-radius:7px 7px 0 0;font-size:13px;font-weight:600;background:#fff;}
+  .pf-b{padding:13px 12px 12px;}
+  .pbadge{font-size:10.5px;border-radius:3px;padding:1px 7px;}
+  .pbadge.on{background:#e9f5ec;color:#1f7a26;} .pbadge.off{background:#f0f1f4;color:#8a919f;}
+  .pf-t .rt{margin-left:auto;}
+
+  table.dmt{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:7px;}
+  table.dmt th{background:#fff;font-size:12px;font-weight:600;color:var(--label);text-align:left;
+       padding:8px 12px;border-bottom:1px solid var(--line);}
+  table.dmt td{padding:8px 12px;border-bottom:1px solid var(--line2);font-size:13px;}
+  table.dmt tr:last-child td{border-bottom:none;}
+  table.dmt tr.hl{cursor:pointer;} table.dmt tr.hl:hover td{background:#fafcff;}
+  .s-ok{color:var(--green);font-size:12px;} .s-no{color:#9aa3af;font-size:12px;}
+  .empty-line{padding:14px 12px;color:var(--muted);font-size:12.5px;border:1px dashed #dde1e8;
+       border-radius:7px;margin-top:10px;text-align:center;background:#fff;}
+
+  .dstats{display:grid;grid-template-columns:repeat(4,130px);gap:12px;}
+  .dstat{border:1px solid var(--line);border-radius:7px;padding:12px 14px;background:#fff;}
+  .dstat .n{font-size:21px;font-weight:600;}
+  .dstat .l{font-size:12px;color:var(--muted);margin-top:2px;}
+  .dkv{display:grid;grid-template-columns:96px 1fr;gap:9px 16px;font-size:13px;max-width:640px;}
+  .dkv dt{color:var(--label);font-weight:500;} .dkv dd{margin:0;}
+
+  /* ===== 右侧说明 ===== */
+  .tc-guide{flex:0 0 272px;background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column;}
+  .tc-guide-h{height:40px;flex:0 0 40px;display:flex;align-items:center;padding:0 14px;font-size:13.5px;
+       font-weight:700;border-bottom:1px solid var(--line);color:#2b303b;background:#fff;}
+  .tc-guide-b{flex:1;overflow-y:auto;padding:10px 14px 28px;font-size:12px;line-height:1.65;color:#4a5160;
+       scrollbar-width:none;-ms-overflow-style:none;}
+  .tc-guide-b::-webkit-scrollbar{display:none;}
+  .tc-guide-b h4{font-size:12.5px;margin:13px 0 5px;color:var(--brand);}
+  .tc-guide-b h4:first-child{margin-top:2px;}
+  .tc-guide-b ul{margin:3px 0 3px 15px;padding:0;} .tc-guide-b li{margin:2px 0;}
+  .tc-guide-b code{background:#f4f6f8;border-radius:3px;padding:0 4px;font-size:11px;word-break:break-all;}
+  .tc-guide-b .rd{color:var(--danger);}
+
+  /* ===== 新建组织弹窗 ===== */
+  .tc-mask{position:fixed;inset:0;z-index:90;display:none;}
+  .tc-mask.open{display:block;}
+  .tc-mask .bg{position:absolute;inset:0;background:rgba(20,28,40,.38);}
+  .tc-box{position:relative;background:#fff;border-radius:8px;width:420px;max-width:calc(100vw - 40px);
+       margin:11vh auto 0;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,.2);}
+  .tc-box h3{margin:0 0 10px;font-size:14px;}
+  .tc-box .df{margin-bottom:8px;}
+  .tc-box .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="content-main">
-  <h1>租户配置矩阵 <span class="tc-subtitle">超管控制台 · 工作区级平台凭证（v1.5.0）</span></h1>
+<div class="tc-console" id="tcConsole">
 
-  <!-- floating outline -->
-  <div class="tc-outline" id="tcOutline">
-    <button type="button" class="tc-outline-btn" id="tcOutlineBtn">☰ 说明大纲</button>
-    <div class="tc-outline-menu">
-      <a href="#g-rules">① 两种模式与生效规则</a>
-      <a href="#g-flow">② 新租户标准流程</a>
-      <a href="#g-fields">③ 各字段从哪里取</a>
-      <a href="#g-perms">④ 权限清单</a>
-      <a href="#g-fixed">⑤ 固定回调与口令</a>
-      <a href="#g-tester">⑥ 测试员邀请路径</a>
-      <a href="#g-legal">⑦ 前提/法律页/删除说明</a>
-      <a href="#g-live">⑧ 开发模式与上线审核</a>
-      <a href="#g-errors">⑨ 常见错误码</a>
-      <a href="#g-security">⑩ 安全提示</a>
-      <a href="#g-probe">⑪ 保存并测试原理</a>
-    </div>
+  <div class="tc-top">
+    <span class="lg">B</span><b>Brightbean 平台控制台</b>
+    <span style="font-size:12px;color:var(--muted)">超级管理员</span>
+    <span class="sp"></span>
   </div>
 
   <div class="tc-wrap">
-    <div class="tc-main">
-      <div class="tc-toolbar">
-        <input type="search" id="tcSearch" placeholder="搜索组织名 / 登录邮箱…">
-        <button type="button" class="tc-btn ghost" id="tcExpandAll">全部展开</button>
-        <button type="button" class="tc-btn ghost" id="tcCollapseAll">全部收起</button>
+    <!-- ================= 左树 ================= -->
+    <aside class="tc-tree-pane">
+      <div class="tc-tree-tool">
+        <span class="s">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8a919f" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input id="tcSearch" placeholder="搜索组织、工作区">
+        </span>
+        <button class="plus" type="button" id="tcNewOrgBtn" title="添加组织">＋</button>
       </div>
+      <div class="tc-tree" id="tcTree">
 
-      <!-- new tenant -->
-      <div class="tc-newcard">
-        <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="create_tenant">
-          <b>新建租户登录账号</b>
-          <span class="tc-hint">（创建后自动生成「组织 + 默认工作区」；密码可留空=仅允许 Google 登录）</span>
-          <div class="tc-grid2" style="margin-top:8px;">
-            <input type="email" name="email" placeholder="租户登录邮箱（必填）" required>
-            <input type="password" name="password" placeholder="初始密码（可空，空=Google SSO）">
-            <input type="text" name="organization_name" placeholder="组织显示名（可空，默认取邮箱前缀）">
-            <button class="tc-btn primary" style="width:120px;">创建租户</button>
+        <div class="tn">
+          <div class="trow root" data-node="root">
+            <button type="button" class="tchev blank"></button>
+            <span class="tic">🔷</span>
+            <span class="ttxt"><div class="tname">Brightbean 平台</div></span>
+            <span class="tstate"></span><button type="button" class="tmore"></button>
           </div>
-        </form>
-      </div>
-
-      {% for t in tenants %}
-      <div class="tc-card{% if forloop.first %} open{% endif %}" id="org-{{ t.organization_id }}" data-search="{{ t.organization_name|lower }} {{ t.owner_email|lower }}">
-        <div class="tc-card-head" data-toggle-card>
-          <span class="tc-chevron">▶</span>
-          <b>{{ t.organization_name }}</b>
-          <span style="color:var(--tc-muted);font-size:12px;">{{ t.owner_email }}</span>
-          <span class="tc-badges">
-            <span class="tc-badge {% if t.mode == 'traditional' %}trad{% else %}ind{% endif %} mode-label">{% if t.mode == 'traditional' %}通用模式{% else %}独立模式{% endif %}</span>
-            <span class="tc-badge">{{ t.workspaces|length }} 工作区</span>
-          </span>
-        </div>
-        <div class="tc-card-body">
-          <!-- mode switch -->
-          <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}#org-{{ t.organization_id }}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="save_mode">
-            <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
-            <input type="hidden" name="test" id="orgtest-{{ t.organization_id }}" value="0">
-            <div class="tc-modeseg">
-              <b>租户模式：</b>
-              <label><input type="radio" name="mode" value="traditional" {% if t.mode == 'traditional' %}checked{% endif %}
-                data-org="{{ t.organization_id }}" data-mode="traditional"> 通用模式（组织共享 App）</label>
-              <label><input type="radio" name="mode" value="independent" {% if t.mode == 'independent' %}checked{% endif %}
-                data-org="{{ t.organization_id }}" data-mode="independent"> 独立模式（每工作区独立 App）</label>
-            </div>
-            <div class="tc-credbox trad" data-org-cred="{{ t.organization_id }}" {% if t.mode != 'traditional' %}style="display:none"{% endif %}>
-              <h5>组织级 App 凭证（保存后全组织工作区共享；两个平台都需填写）</h5>
-              <div class="tc-grid4">
-                <div><label>Facebook App ID</label><input name="org_fb_id" value="{{ t.org_credentials.fb.client_id }}"></div>
-                <div><label>Facebook App Secret</label><input name="org_fb_secret" value="{{ t.org_credentials.fb.client_secret }}"></div>
-                <div><label>Instagram App ID</label><input name="org_ig_id" value="{{ t.org_credentials.ig.client_id }}"></div>
-                <div><label>Instagram App Secret</label><input name="org_ig_secret" value="{{ t.org_credentials.ig.client_secret }}"></div>
+          <div class="tkids">
+            <div class="sec-cap">管理</div>
+            <div class="tn">
+              <div class="trow" data-node="admins">
+                <button type="button" class="tchev blank"></button>
+                <span class="tic">👤</span>
+                <span class="ttxt"><div class="tname">管理员</div></span>
+                <span class="tstate" style="justify-content:flex-end;"><span style="font-size:11.5px;color:var(--muted);">{{ stats.admins }} 人</span></span>
+                <button type="button" class="tmore"></button>
               </div>
-              <button class="tc-btn primary" style="margin-top:8px;"
-                data-test-input="orgtest-{{ t.organization_id }}" data-test-value="0">保存模式与组织凭证</button>
-              <button type="submit" class="tc-btn warn" style="margin-top:8px;"
-                data-test-input="orgtest-{{ t.organization_id }}" data-test-value="1"
-                data-confirm="保存后将用假授权码向 Meta 探测，验证两对 App ID/Secret 是否真实有效（不会产生任何授权）。继续？">保存并测试凭证</button>
             </div>
-            <div class="tc-hint" data-org-cred="{{ t.organization_id }}" {% if t.mode == 'traditional' %}style="display:none"{% endif %}>
-              独立模式：组织级凭证区域已锁定。请在下方逐工作区填写各自的 App 凭证；不填的工作区不可连接。
-            </div>
-            <div data-org-cred="{{ t.organization_id }}" {% if t.mode == 'traditional' %}style="display:none"{% endif %}>
-              <button class="tc-btn primary" style="margin-top:6px;"
-                data-test-input="orgtest-{{ t.organization_id }}" data-test-value="0"
-                data-confirm="切换到独立模式将删除该组织的组织级凭证行；未单独配置的工作区会变为不可用。确定？">确认切换为独立模式</button>
-            </div>
-          </form>
 
-          <!-- workspace matrix (CSS grid; avoids invalid form-in-table nesting) -->
-          <div data-ws-matrix="{{ t.organization_id }}" {% if t.mode == 'traditional' %}style="display:none"{% endif %}>
-            <div class="tc-wgrid wgrid-head">
-              <div>工作区名称</div><div>FB App ID</div><div>FB App Secret</div><div>IG App ID</div><div>IG App Secret</div>
-              <div>FB 测试员/Page ID</div><div>IG 测试员/IG ID</div><div>连接状态</div><div>操作</div>
-            </div>
-            {% for w in t.workspaces %}
-            <div class="tc-wgrid {% if w.is_archived %}archived{% endif %}">
-              <form method="post" class="tc-wform" action="{% url 'admin:zh_overrides_tenant_config_action' %}#org-{{ t.organization_id }}" id="wsform-{{ t.organization_id }}-{{ forloop.counter }}">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="upsert_workspace">
-                <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
-                <input type="hidden" name="workspace_id" value="{{ w.workspace_id }}">
-                <input type="hidden" name="test" id="wstest-{{ t.organization_id }}-{{ forloop.counter }}" value="0">
-              </form>
-              <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="workspace_name" value="{{ w.name }}">{% if w.is_archived %}<div class="tc-hint">已归档</div>{% endif %}</div>
-              <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="ws_fb_id" value="{{ w.fb.client_id }}"></div>
-              <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="ws_fb_secret" value="{{ w.fb.client_secret }}"></div>
-              <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="ws_ig_id" value="{{ w.ig.client_id }}"></div>
-              <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="ws_ig_secret" value="{{ w.ig.client_secret }}"></div>
-              <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="fb_note" value="{{ w.fb_note }}"></div>
-              <div><input form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" name="ig_note" value="{{ w.ig_note }}"></div>
-              <div class="tc-status">
-                <span class="tc-dot {% if w.fb_connected %}on{% else %}off{% endif %}"></span>FB<br>
-                <span class="tc-dot {% if w.ig_connected %}on{% else %}off{% endif %}"></span>IG
+            <div class="sec-cap">组织架构</div>
+            {% for t in tenants %}
+            <div class="tn torg" id="tree-org-{{ t.organization_id }}"
+                 data-search="{{ t.owner_email|lower }} {{ t.organization_name|lower }}">
+              <div class="trow" data-node="org-{{ t.organization_id }}">
+                <button type="button" class="tchev">▾</button>
+                <span class="tic">📁</span>
+                <span class="ttxt"><div class="tname" title="{{ t.owner_email }}">{{ t.owner_email }}</div></span>
+                <span class="tstate">
+                  <span class="tag {% if t.mode == 'traditional' %}trad{% else %}ind{% endif %}">{% if t.mode == 'traditional' %}通用{% else %}独立{% endif %}</span>
+                  <span class="dot off" style="visibility:hidden;"></span>
+                </span>
+                <button type="button" class="tmore" data-menu="org" data-org="{{ t.organization_id }}">⋯</button>
               </div>
-              <div class="tc-actions">
-                <button form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" class="tc-btn primary" title="保存本行"
-                  data-test-input="wstest-{{ t.organization_id }}-{{ forloop.counter }}" data-test-value="0">✓</button>
-                <button type="submit" form="wsform-{{ t.organization_id }}-{{ forloop.counter }}" class="tc-btn warn" title="保存本行并向 Meta 探测验证两对凭证"
-                  data-test-input="wstest-{{ t.organization_id }}-{{ forloop.counter }}" data-test-value="1"
-                  data-confirm="保存后向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？">测试</button>
-                <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
-                      data-confirm="{% if w.is_archived %}取消归档该工作区？{% else %}归档后租户侧不可见但数据保留，可恢复。确定归档？{% endif %}">
-                  {% csrf_token %}
-                  <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
-                  <input type="hidden" name="workspace_id" value="{{ w.workspace_id }}">
-                  {% if w.is_archived %}
-                    <input type="hidden" name="action" value="unarchive_workspace"><button class="tc-btn warn" title="恢复">↺</button>
-                  {% else %}
-                    <input type="hidden" name="action" value="archive_workspace"><button class="tc-btn ghost" title="归档">归档</button>
+              <div class="tkids">
+                {% for w in t.workspaces %}
+                <div class="tn" id="tree-ws-{{ w.workspace_id }}">
+                  <div class="trow{% if w.is_archived %} archived{% endif %}" data-node="ws-{{ w.workspace_id }}">
+                    {% if w.accounts %}<button type="button" class="tchev">▾</button>{% else %}<button type="button" class="tchev blank"></button>{% endif %}
+                    <span class="tic">📁</span>
+                    <span class="ttxt"><div class="tname" title="{{ w.name }}">{{ w.name }}</div></span>
+                    <span class="tstate">
+                      {% if w.is_archived %}<span class="tag arch">归档</span><span class="dot off" style="visibility:hidden;"></span>
+                      {% else %}{% if t.mode == 'traditional' %}<span class="tag lock">共享</span>{% endif %}
+                      {% if w.accounts %}<span class="dot on"></span>{% else %}<span class="dot off"></span>{% endif %}{% endif %}
+                    </span>
+                    <button type="button" class="tmore" data-menu="{% if w.is_archived %}wsa{% else %}ws{% endif %}"
+                            data-org="{{ t.organization_id }}" data-ws="{{ w.workspace_id }}">⋯</button>
+                  </div>
+                  {% if w.accounts %}
+                  <div class="tkids">
+                    {% for a in w.accounts %}
+                    <div class="tn"><div class="trow" data-node="acct-{{ a.account_id }}">
+                      <button type="button" class="tchev blank"></button>
+                      <span class="tleaf-ic">{% if a.platform == 'facebook' %}🔵{% else %}🟣{% endif %}</span>
+                      <span class="ttxt"><div class="tname">{{ a.name }}</div></span>
+                      <span class="tstate"></span><button type="button" class="tmore"></button>
+                    </div></div>
+                    {% endfor %}
+                  </div>
                   {% endif %}
-                </form>
-                <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
-                      data-confirm="彻底删除将级联删除该工作区全部帖子、社交账号与凭证，不可恢复！确定？">
-                  {% csrf_token %}
-                  <input type="hidden" name="action" value="delete_workspace">
-                  <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
-                  <input type="hidden" name="workspace_id" value="{{ w.workspace_id }}">
-                  <button class="tc-btn danger" title="彻底删除">✗</button>
-                </form>
+                </div>
+                {% endfor %}
               </div>
             </div>
             {% endfor %}
-            <form method="post" class="tc-wgrid tc-new-row" id="newrow-{{ t.organization_id }}" style="display:none;"
-                  action="{% url 'admin:zh_overrides_tenant_config_action' %}#org-{{ t.organization_id }}">
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================= 中间详情 ================= -->
+    <main class="tc-main">
+      <div class="tc-pane-head">
+        <h2 id="tcPaneTitle">Brightbean 平台</h2>
+        <span id="tcPaneTag"></span>
+        <span class="h-acts" id="tcPaneActs"></span>
+      </div>
+      <div class="tc-pane-body"><div class="tc-pane-inner">
+
+        <!-- 根面板 -->
+        <section class="dpanel" data-panel="root">
+          <div class="dsec"><div class="dsec-t">概览</div>
+            <div class="dstats">
+              <div class="dstat"><div class="n">{{ stats.orgs }}</div><div class="l">组织</div></div>
+              <div class="dstat"><div class="n">{{ stats.workspaces }}</div><div class="l">工作区</div></div>
+              <div class="dstat"><div class="n">{{ stats.accounts }}</div><div class="l">已连接平台账号</div></div>
+              <div class="dstat"><div class="n">{{ stats.admins }}</div><div class="l">管理员</div></div>
+            </div>
+          </div>
+          <div class="dsec"><div class="dsec-t">管理员</div>
+            <table class="dmt">
+              <tr><th style="width:160px;">账号</th><th>邮箱</th><th style="width:150px;">最近登录</th></tr>
+              {% for a in admins %}
+              <tr><td>{{ a.name }}</td><td>{{ a.email }}</td><td>{{ a.last_login|date:"Y-m-d H:i"|default:"—" }}</td></tr>
+              {% endfor %}
+            </table>
+            <div class="dacts">
+              <a class="tbtn" href="/admin/accounts/user/add/">添加管理员</a>
+              <a class="tbtn" href="/admin/social_accounts/platformvisibility/">平台可见性设置</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- 管理员面板 -->
+        <section class="dpanel" data-panel="admins">
+          <div class="dsec"><div class="dsec-t">管理员账号</div>
+            <table class="dmt">
+              <tr><th style="width:160px;">账号</th><th>邮箱</th><th style="width:90px;">角色</th><th style="width:150px;">最近登录</th></tr>
+              {% for a in admins %}
+              <tr><td>{{ a.name }}</td><td>{{ a.email }}</td><td>超级管理员</td><td>{{ a.last_login|date:"Y-m-d H:i"|default:"—" }}</td></tr>
+              {% endfor %}
+            </table>
+            <div class="dacts"><a class="tbtn primary" href="/admin/accounts/user/add/">添加管理员</a></div>
+          </div>
+        </section>
+
+        {% for t in tenants %}
+        <!-- ===== 组织面板 ===== -->
+        <section class="dpanel" data-panel="org-{{ t.organization_id }}" data-saved-mode="{{ t.mode }}">
+          <form id="orgform-{{ t.organization_id }}" method="post"
+                action="{% url 'admin:zh_overrides_tenant_config_action' %}#org-{{ t.organization_id }}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_mode">
+            <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
+            <input type="hidden" name="mode" value="{{ t.mode }}" data-org-mode>
+            <input type="hidden" name="test" id="orgtest-{{ t.organization_id }}" value="0">
+
+            <div class="dsec"><div class="dsec-t">基本信息</div>
+              <div class="fg">
+                <div class="df"><label>组织名称</label>
+                  <input type="text" name="organization_name" value="{{ t.organization_name }}"></div>
+                <div class="df"><label>注册账号（登录邮箱）</label>
+                  <input type="text" value="{{ t.owner_email }}" readonly></div>
+                <div class="df"><label>组织 ID</label>
+                  <input type="text" value="{{ t.organization_id }}" readonly></div>
+                <div class="df"><label>模式</label>
+                  <div class="seg">
+                    <label data-mode-label="traditional"><input type="radio" name="mode-radio-{{ t.organization_id }}"
+                      value="traditional" data-org="{{ t.organization_id }}" data-mode="traditional"
+                      {% if t.mode == 'traditional' %}checked{% endif %}><span>通用</span></label>
+                    <label data-mode-label="independent"><input type="radio" name="mode-radio-{{ t.organization_id }}"
+                      value="independent" data-org="{{ t.organization_id }}" data-mode="independent"
+                      {% if t.mode == 'independent' %}checked{% endif %}><span>独立</span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dsec org-trad-sec" {% if t.mode != 'traditional' %}style="display:none"{% endif %}>
+              <div class="dsec-t">组织级 App 凭证</div>
+              <div class="mode-note" data-trad-note="{{ t.organization_id }}" style="display:none">
+                当前保存为独立模式：填写下方两对凭证并点「保存」后切换为通用模式，现有工作区凭证行会保留但不再生效。
+              </div>
+              <div class="pf">
+                <div class="pf-t">🔵 Facebook</div>
+                <div class="pf-b"><div class="fg">
+                  <div class="df"><label>App ID</label>
+                    <input type="text" autocomplete="off" name="org_fb_id" value="{{ t.org_credentials.facebook.client_id }}"></div>
+                  <div class="df"><label>App Secret</label>
+                    <input type="text" autocomplete="off" name="org_fb_secret" value="{{ t.org_credentials.facebook.client_secret }}"></div>
+                </div></div>
+              </div>
+              <div class="pf">
+                <div class="pf-t">🟣 Instagram（直连）</div>
+                <div class="pf-b"><div class="fg">
+                  <div class="df"><label>App ID</label>
+                    <input type="text" autocomplete="off" name="org_ig_id" value="{{ t.org_credentials.instagram_login.client_id }}"></div>
+                  <div class="df"><label>App Secret</label>
+                    <input type="text" autocomplete="off" name="org_ig_secret" value="{{ t.org_credentials.instagram_login.client_secret }}"></div>
+                </div></div>
+              </div>
+              <div class="dacts">
+                <button type="submit" class="tbtn primary"
+                        data-test-input="orgtest-{{ t.organization_id }}" data-test-value="0">保存</button>
+                <button type="submit" class="tbtn warn"
+                        data-test-input="orgtest-{{ t.organization_id }}" data-test-value="1"
+                        data-confirm="保存后用假授权码向 Meta 探测两对 App ID/Secret（不产生授权）。继续？">保存并测试</button>
+              </div>
+            </div>
+
+            <div class="dsec org-ind-hint" {% if t.mode != 'independent' %}style="display:none"{% endif %}>
+              <div class="dsec-t">工作区（{{ t.workspaces|length }}）</div>
+            </div>
+          </form>
+
+          <!-- 工作区列表（独立模式可配凭证；通用模式只读） -->
+          <div class="dsec">
+            <table class="dmt">
+              <tr><th>工作区</th><th style="width:100px;">FB</th><th style="width:100px;">IG</th>
+                  {% if t.mode == 'independent' %}<th style="width:90px;">凭证</th>{% endif %}</tr>
+              {% for w in t.workspaces %}
+              <tr class="hl" data-goto="ws-{{ w.workspace_id }}">
+                <td>{{ w.name }}{% if w.is_archived %} <span class="tag arch">归档</span>{% elif t.mode == 'traditional' %} <span class="tag lock">共享</span>{% endif %}</td>
+                <td class="{% if w.fb_connected %}s-ok{% else %}s-no{% endif %}">{% if w.fb_connected %}已连接{% else %}未连接{% endif %}</td>
+                <td class="{% if w.ig_connected %}s-ok{% else %}s-no{% endif %}">{% if w.ig_connected %}已连接{% else %}未连接{% endif %}</td>
+                {% if t.mode == 'independent' %}
+                <td class="{% if w.fb.client_id or w.ig.client_id %}s-ok{% else %}s-no{% endif %}">{% if w.fb.client_id or w.ig.client_id %}已配置{% else %}未配置{% endif %}</td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </table>
+            <div class="dacts org-ind-add" {% if t.mode != 'independent' %}style="display:none"{% endif %}>
+              <button type="button" class="tbtn" data-add-ws="{{ t.organization_id }}">＋ 添加工作区</button>
+            </div>
+
+            <!-- 新建工作区（独立模式，就地展开） -->
+            <form method="post" class="newws-form" id="newws-{{ t.organization_id }}"
+                  action="{% url 'admin:zh_overrides_tenant_config_action' %}#org-{{ t.organization_id }}"
+                  style="display:none;margin-top:12px;">
               {% csrf_token %}
               <input type="hidden" name="action" value="upsert_workspace">
               <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
               <input type="hidden" name="test" id="newtest-{{ t.organization_id }}" value="0">
-              <div><input name="workspace_name" placeholder="新工作区名称" required></div>
-              <div><input name="ws_fb_id" placeholder="FB App ID"></div>
-              <div><input name="ws_fb_secret" placeholder="FB App Secret"></div>
-              <div><input name="ws_ig_id" placeholder="IG App ID"></div>
-              <div><input name="ws_ig_secret" placeholder="IG App Secret"></div>
-              <div><input name="fb_note"></div>
-              <div><input name="ig_note"></div>
-              <div class="tc-status tc-hint">新建</div>
-              <div class="tc-actions">
-                <button class="tc-btn primary"
-                  data-test-input="newtest-{{ t.organization_id }}" data-test-value="0">添加并保存</button>
-                <button type="submit" class="tc-btn warn"
-                  data-test-input="newtest-{{ t.organization_id }}" data-test-value="1"
-                  data-confirm="保存并向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？">保存并测试</button>
+              <div class="pf">
+                <div class="pf-t">新工作区</div>
+                <div class="pf-b"><div class="fg">
+                  <div class="df full"><label>工作区名称</label>
+                    <input type="text" name="workspace_name" required placeholder="输入名称即可创建，凭证以后再补"></div>
+                  <div class="df"><label>Facebook App ID</label><input type="text" autocomplete="off" name="ws_fb_id"></div>
+                  <div class="df"><label>Facebook App Secret</label><input type="text" autocomplete="off" name="ws_fb_secret"></div>
+                  <div class="df full"><label>FB 测试员 / 主页 / Page ID</label><input type="text" autocomplete="off" name="fb_note"></div>
+                  <div class="df"><label>Instagram App ID</label><input type="text" autocomplete="off" name="ws_ig_id"></div>
+                  <div class="df"><label>Instagram App Secret</label><input type="text" autocomplete="off" name="ws_ig_secret"></div>
+                  <div class="df full"><label>IG 测试员 / IG 账号 / IG ID</label><input type="text" autocomplete="off" name="ig_note"></div>
+                </div>
+                <div class="dacts">
+                  <button type="submit" class="tbtn primary"
+                          data-test-input="newtest-{{ t.organization_id }}" data-test-value="0">添加并保存</button>
+                  <button type="submit" class="tbtn warn"
+                          data-test-input="newtest-{{ t.organization_id }}" data-test-value="1"
+                          data-confirm="保存后向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？">保存并测试</button>
+                  <span class="sp"></span>
+                  <button type="button" class="tbtn" data-cancel-ws="{{ t.organization_id }}">取消</button>
+                </div></div>
               </div>
             </form>
-            <button type="button" class="tc-btn ghost tc-add" data-add-row="{{ t.organization_id }}">+ 添加工作区</button>
-            <p class="tc-hint">独立模式下逐行保存；App ID/Secret 必须成对填写（留空=该平台未配置，连接页置灰）。新工作区自动给组织 Owner 加入成员关系。</p>
           </div>
 
-          <!-- traditional hint for workspace list -->
-          <div data-ws-matrix="{{ t.organization_id }}" {% if t.mode != 'traditional' %}style="display:none"{% endif %}>
-            <p class="tc-hint">通用模式：该租户全部 {{ t.workspaces|length }} 个工作区共享上方组织级 App；工作区仅管理名称、排期与媒体库。</p>
+          <div class="dsec">
+            <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
+                  data-confirm="彻底删除组织将级联删除其全部工作区、帖子、社交账号与凭证，不可恢复！确定？">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete_org">
+              <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
+              <button type="submit" class="tbtn danger">删除组织</button>
+            </form>
           </div>
-        </div>
+        </section>
+
+        {% for w in t.workspaces %}
+        <!-- ===== 工作区面板 ===== -->
+        <section class="dpanel" data-panel="ws-{{ w.workspace_id }}"
+                 data-mode="{% if t.mode == 'traditional' %}traditional{% else %}independent{% endif %}">
+          <form id="wsform-{{ w.workspace_id }}" method="post"
+                action="{% url 'admin:zh_overrides_tenant_config_action' %}#ws-{{ w.workspace_id }}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="upsert_workspace">
+            <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
+            <input type="hidden" name="workspace_id" value="{{ w.workspace_id }}">
+            <input type="hidden" name="test" id="wstest-{{ w.workspace_id }}" value="0">
+
+            <div class="dsec"><div class="dsec-t">基本信息</div>
+              <div class="fg">
+                <div class="df"><label>工作区名称</label>
+                  <input type="text" name="workspace_name" value="{{ w.name }}" {% if w.is_archived %}disabled{% endif %}></div>
+                <div class="df"><label>工作区 ID</label>
+                  <input type="text" value="{{ w.workspace_id }}" readonly></div>
+              </div>
+            </div>
+
+            {% if t.mode == 'independent' %}
+            <div class="dsec"><div class="dsec-t">App 凭证</div>
+              <div class="pf">
+                <div class="pf-t">🔵 Facebook
+                  <span class="rt pbadge {% if w.fb.client_id %}on{% else %}off{% endif %}">{% if w.fb.client_id %}已配置{% else %}未配置{% endif %}</span></div>
+                <div class="pf-b"><div class="fg">
+                  <div class="df"><label>App ID</label>
+                    <input type="text" autocomplete="off" name="ws_fb_id" value="{{ w.fb.client_id }}" placeholder="留空 = 不可连接"></div>
+                  <div class="df"><label>App Secret</label>
+                    <input type="text" autocomplete="off" name="ws_fb_secret" value="{{ w.fb.client_secret }}"></div>
+                  <div class="df full"><label>测试员 / 主页 / Page ID</label>
+                    <input type="text" autocomplete="off" name="fb_note" value="{{ w.fb_note }}"></div>
+                </div></div>
+              </div>
+              <div class="pf">
+                <div class="pf-t">🟣 Instagram（直连）
+                  <span class="rt pbadge {% if w.ig.client_id %}on{% else %}off{% endif %}">{% if w.ig.client_id %}已配置{% else %}未配置{% endif %}</span></div>
+                <div class="pf-b"><div class="fg">
+                  <div class="df"><label>App ID</label>
+                    <input type="text" autocomplete="off" name="ws_ig_id" value="{{ w.ig.client_id }}" placeholder="留空 = 不可连接"></div>
+                  <div class="df"><label>App Secret</label>
+                    <input type="text" autocomplete="off" name="ws_ig_secret" value="{{ w.ig.client_secret }}"></div>
+                  <div class="df full"><label>测试员 / IG 账号 / IG ID</label>
+                    <input type="text" autocomplete="off" name="ig_note" value="{{ w.ig_note }}"></div>
+                </div></div>
+              </div>
+              {% if not w.is_archived %}
+              <div class="dacts">
+                <button type="submit" class="tbtn primary"
+                        data-test-input="wstest-{{ w.workspace_id }}" data-test-value="0">保存</button>
+                <button type="submit" class="tbtn warn"
+                        data-test-input="wstest-{{ w.workspace_id }}" data-test-value="1"
+                        data-confirm="保存后向 Meta 探测验证 FB/IG 凭证（不产生授权），继续？">保存并测试</button>
+              </div>
+              {% endif %}
+            </div>
+            {% else %}
+            <div class="dsec"><div class="dsec-t">App 凭证</div>
+              <div class="empty-line">通用模式：App 凭证在组织级统一配置，本工作区自动共享，无需单独配置。</div>
+            </div>
+            {% endif %}
+          </form>
+
+          <div class="dsec"><div class="dsec-t">平台账号</div>
+            {% if w.accounts %}
+            <table class="dmt">
+              <tr><th>账号</th><th style="width:110px;">平台</th><th style="width:110px;">状态</th><th style="width:170px;">Webhook</th></tr>
+              {% for a in w.accounts %}
+              <tr class="hl" data-goto="acct-{{ a.account_id }}">
+                <td>{{ a.name }}</td>
+                <td>{% if a.platform == 'facebook' %}Facebook{% else %}Instagram{% endif %}</td>
+                <td class="s-ok">已连接</td>
+                <td class="{% if a.webhooks_active %}s-ok{% else %}s-no{% endif %}">{% if a.webhooks_active %}✓ 已订阅{% else %}未订阅{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </table>
+            {% else %}
+            <div class="empty-line">当前工作区无任何平台账号。租户在前台「社交账号 → Connect」完成授权后自动出现。</div>
+            {% endif %}
+          </div>
+
+          <div class="dsec">
+            <div class="dacts">
+              <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}#ws-{{ w.workspace_id }}"
+                    data-confirm="{% if w.is_archived %}取消归档该工作区？{% else %}归档后租户侧不可见但数据保留，可恢复。确定归档？{% endif %}">
+                {% csrf_token %}
+                <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
+                <input type="hidden" name="workspace_id" value="{{ w.workspace_id }}">
+                <input type="hidden" name="action" value="{% if w.is_archived %}unarchive_workspace{% else %}archive_workspace{% endif %}">
+                <button type="submit" class="tbtn {% if w.is_archived %}{% else %}warn{% endif %}">{% if w.is_archived %}恢复工作区{% else %}归档工作区{% endif %}</button>
+              </form>
+              <span class="sp"></span>
+              <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}"
+                    data-confirm="彻底删除将级联删除该工作区全部帖子、社交账号与凭证，不可恢复！确定？">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_workspace">
+                <input type="hidden" name="organization_id" value="{{ t.organization_id }}">
+                <input type="hidden" name="workspace_id" value="{{ w.workspace_id }}">
+                <button type="submit" class="tbtn danger">删除工作区</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        {% for a in w.accounts %}
+        <!-- ===== 平台账号面板（只读） ===== -->
+        <section class="dpanel" data-panel="acct-{{ a.account_id }}">
+          <div class="dsec"><div class="dsec-t">账号信息 <span style="margin-left:8px;font-weight:400;font-size:11.5px;color:var(--muted);">只读 · 授权/解除在租户前台</span></div>
+            <dl class="dkv">
+              <dt>平台</dt><dd>{{ a.platform_label }}</dd>
+              <dt>账号名称</dt><dd>{{ a.name }}</dd>
+              {% if a.platform_account_id %}<dt>{% if a.platform == 'facebook' %}Page ID{% else %}IG ID{% endif %}</dt><dd>{{ a.platform_account_id }}</dd>{% endif %}
+              {% if a.handle %}<dt>账号标识</dt><dd>{{ a.handle }}</dd>{% endif %}
+              <dt>所属组织</dt><dd>{{ t.owner_email }}{% if t.organization_name %}（{{ t.organization_name }}）{% endif %}</dd>
+              <dt>所属工作区</dt><dd>{{ w.name }}</dd>
+              <dt>连接状态</dt><dd><span class="pbadge on">已连接</span>{% if a.connected_at %} · {{ a.connected_at|date:"Y-m-d H:i" }}{% endif %}{% if a.connection_status %} · {{ a.connection_status }}{% endif %}</dd>
+              <dt>Webhook</dt><dd>{% if a.webhooks_active %}<span class="s-ok">✓ 已订阅</span>{% else %}<span class="s-no">未订阅</span>{% endif %}</dd>
+              <dt>令牌到期</dt><dd>{% if a.token_expires_at %}{{ a.token_expires_at|date:"Y-m-d H:i" }}{% else %}长寿命令牌（健康检查自动维护）{% endif %}</dd>
+              <dt>最近健康检查</dt><dd>{% if a.last_health_check_at %}{{ a.last_health_check_at|date:"Y-m-d H:i" }}{% else %}—{% endif %}</dd>
+              {% if a.last_error %}<dt>最近错误</dt><dd style="color:var(--danger);">{{ a.last_error }}</dd>{% endif %}
+            </dl>
+          </div>
+        </section>
+        {% endfor %}
+        {% endfor %}
+        {% endfor %}
+
+      </div></div>
+    </main>
+
+    <!-- ================= 右侧说明 ================= -->
+    <aside class="tc-guide">
+      <div class="tc-guide-h">操作说明</div>
+      <div class="tc-guide-b">
+        <h4>模式规则</h4>
+        <ul>
+          <li><b>通用</b>：组织配了 App，全组织工作区共享，工作区凭证被忽略。</li>
+          <li><b>独立</b>：每个工作区只认自己的 App；未配即不可连接，不回退默认。</li>
+        </ul>
+        <h4>新租户流程</h4>
+        <ul>
+          <li>1. 左上 ＋ 建组织（邮箱+密码）。</li>
+          <li>2. 选模式；独立模式逐工作区填两对凭证。</li>
+          <li>3. Meta 后台建 App、登记回调、加 Tester。</li>
+          <li>4. 租户前台 Connect 完成 OAuth。</li>
+          <li>5. 发测试帖验收，状态自动显示。</li>
+        </ul>
+        <h4>字段来源</h4>
+        <ul>
+          <li>FB App ID/Secret：应用设置 → 基本。</li>
+          <li>IG App ID/Secret：Instagram API → Instagram Login（与 FB 不同身份，切勿混填）。</li>
+        </ul>
+        <h4>固定回调 / 口令</h4>
+        <ul>
+          <li>FB OAuth：<code>https://v.ysec.cn/social-accounts/callback/facebook/</code></li>
+          <li>IG OAuth：<code>https://v.ysec.cn/social-accounts/callback/instagram_login/</code></li>
+          <li>FB Webhook：<code>https://v.ysec.cn/webhooks/facebook/</code></li>
+          <li>IG Webhook：<code>https://v.ysec.cn/webhooks/instagram_login/</code></li>
+          <li>FB 口令：<code>bb_fb_0fa22…360</code></li>
+          <li>IG 口令：<code>bb_ig_1fbd…2c54</code></li>
+        </ul>
+        <h4>权限清单</h4>
+        <ul>
+          <li>FB：business_management、pages_show_list、public_profile、pages_manage_posts、pages_manage_engagement、pages_read_engagement、pages_read_user_content、pages_manage_metadata、read_insights、pages_messaging。</li>
+          <li>IG：instagram_business_basic / content_publish / manage_comments / manage_messages / manage_insights。</li>
+        </ul>
+        <h4>开发模式限制</h4>
+        <ul>
+          <li class="rd">IG 收陌生人私信需公司验证 + manage_messages 高级访问 + 切 Live；每个独立 App 各自审核。</li>
+          <li>IG 令牌约 60 天，Worker 自动刷新。</li>
+        </ul>
+        <h4>常见错误码</h4>
+        <ul>
+          <li><code>1349168</code> 回调 URI 未加白（含尾斜杠）。</li>
+          <li><code>1349249</code> 未接受测试者邀请。</li>
+          <li>not subscribed to Page：<code>subscribe_webhooks --retry-failed</code>。</li>
+        </ul>
+        <h4>安全</h4>
+        <ul><li class="rd">本页明文显示全部 App Secret，仅超管可访问；所有写操作入操作日志。</li></ul>
       </div>
-      {% endfor %}
-    </div>
-
-    <!-- ================= right-side guide ================= -->
-    <aside class="tc-side">
-      <h4 id="g-rules">① 两种模式与生效规则</h4>
-      <ul>
-        <li><b>通用模式</b>：组织配了 App 凭证 → 全组织工作区共享，工作区凭证即使存在也被忽略。</li>
-        <li><b>独立模式</b>：组织无凭证行 → 每个工作区只认自己的凭证；未配置的工作区连接卡片置灰、无法发布，不向任何默认 App 回退。</li>
-        <li>环境变量完整配置优先级最高；服务器 .env 不含 Meta 凭证，不参与判定。</li>
-      </ul>
-      <h4 id="g-flow">② 新租户标准流程</h4>
-      <ul>
-        <li>1. 本页「新建租户登录账号」（或让用户 Google 登录后再改名）。</li>
-        <li>2. 展开租户卡片，选模式并保存。</li>
-        <li>3. 独立模式：「+ 添加工作区」逐行填名称+两对凭据+测试员备注并保存。</li>
-        <li>4. Meta 后台为每个客户建 Business App、加用例/权限、登记回调、配 Webhook、加 Tester。</li>
-        <li>5. 把第⑤节的回调/口令发给租户照抄。</li>
-        <li>6. 租户登录各工作区 Connect 完成 OAuth（用 Tester 账号）。</li>
-        <li>7. 必要时服务器执行 subscribe_webhooks 补订阅。</li>
-        <li>8. 发测试帖验收，连接状态列会实时显示。</li>
-      </ul>
-      <h4 id="g-fields">③ 各字段从哪里取</h4>
-      <ul>
-        <li><b>FB App ID/Secret</b>：Meta 应用「应用设置 → 基本」普通应用编号/密钥。</li>
-        <li><b>IG App ID/Secret</b>：「Instagram API」用例 → API setup with Instagram Login 中的独立编号/密钥（与 FB 不同身份，勿混用）。</li>
-        <li><b>备注列</b>：记录 Tester 账号、主页名/Page ID、IG 账号/IG ID，仅运营台账用途。</li>
-      </ul>
-      <h4 id="g-perms">④ 权限清单（逐字）</h4>
-      <ul>
-        <li><b>Facebook（9 项）</b>：business_management、pages_show_list、public_profile（自动）；pages_manage_posts、pages_manage_engagement、pages_read_engagement、pages_read_user_content、pages_manage_metadata、read_insights；另加 Messenger 用例 pages_messaging。</li>
-        <li><b>Instagram（5 项）</b>：instagram_business_basic、instagram_business_content_publish、instagram_business_manage_comments、instagram_business_manage_messages、instagram_business_manage_insights。</li>
-      </ul>
-      <h4 id="g-fixed">⑤ 固定回调与共享口令（所有租户/App 相同）</h4>
-      <ul>
-        <li>FB OAuth：<code>https://v.ysec.cn/social-accounts/callback/facebook/</code></li>
-        <li>IG OAuth：<code>https://v.ysec.cn/social-accounts/callback/instagram_login/</code></li>
-        <li>FB Webhook：<code>https://v.ysec.cn/webhooks/facebook/</code> 订阅 feed/mention/messages</li>
-        <li>IG Webhook：<code>https://v.ysec.cn/webhooks/instagram_login/</code> 订阅 comments/mentions/messages</li>
-        <li>FB 口令：<code>bb_fb_0fa2264954d3c3ec199ef182d1f556339360</code></li>
-        <li>IG 口令：<code>bb_ig_1fbd5447cf77507708dcfee4971298462c54</code></li>
-      </ul>
-      <h4 id="g-tester">⑥ 测试员邀请路径（开发模式）</h4>
-      <ul>
-        <li>FB：应用角色页添加 FB 用户为测试者/开发者。</li>
-        <li>IG：IG 手机端 → 设置和隐私 → 网站权限 → 应用和网站 → 测试者邀请 → 接受；账号须 Professional（Business/Creator）。</li>
-      </ul>
-      <h4 id="g-legal">⑦ 前提 / 法律页 / 删除说明</h4>
-      <ul>
-        <li>FB 需可管理的公共主页；IG 需专业账号；Threads 本矩阵不接入。</li>
-        <li>隐私政策 <code>/privacy</code>、服务条款 <code>/terms</code>、综合法律页 <code>/legal</code>、数据删除说明 <code>/data-deletion</code>。</li>
-        <li>Meta「业务账户关联登录设置」：取消授权回调留空；数据删除请求网址填 <code>https://v.ysec.cn/data-deletion</code>。</li>
-      </ul>
-      <h4 id="g-live">⑧ 开发模式限制与上线</h4>
-      <ul>
-        <li>开发模式：仅应用角色/Tester 账号可完成 OAuth 与数据可见。</li>
-        <li class="danger">IG 收真实客户（陌生人）私信需该 App 完成公司验证 + instagram_business_manage_messages 高级访问 + 切 Live；每个客户独立 App 需各自审核。</li>
-        <li>FB 为自有主页开发收发消息免应用审核。</li>
-        <li>IG 令牌约 60 天，Worker 健康检查自动刷新。</li>
-      </ul>
-      <h4 id="g-errors">⑨ 常见错误码</h4>
-      <ul>
-        <li><code>1349168</code> 回调 URI 未加白名单：逐字一致含尾斜杠，IG 填完点保存。</li>
-        <li><code>1349249</code> 未接受测试者邀请：账号端测试者邀请页接受。</li>
-        <li><code>4476002</code> Threads 用错 App 身份（本系统不接 Threads）。</li>
-        <li>not subscribed to Page：<code>python manage.py subscribe_webhooks --platform facebook --retry-failed</code>；诊断 <code>diagnose_facebook</code>。</li>
-      </ul>
-      <h4 id="g-security">⑩ 安全提示</h4>
-      <ul>
-        <li class="danger">本页明文集中显示所有租户 App Secret，仅超管可访问；所有保存/删除动作写入后台操作日志（LogEntry）。</li>
-      </ul>
-      <h4 id="g-probe">⑪ 「保存并测试」原理与边界</h4>
-      <ul>
-        <li>用一对假授权码请求 Meta 的 OAuth 换令牌端点，<b>不会产生任何真实授权或令牌</b>：App ID/Secret 正确时 Meta 仅拒绝假码（code/redirect_uri 类报错）；App 身份错误时返回「validating application/invalid client」类报错，据此判定。</li>
-        <li>只能验证<b>应用身份真伪与回调 URI 是否登记</b>，不能验证 Tester、Webhook 订阅、账号授权范围——这些仍需连接后看状态列与诊断命令。</li>
-        <li>结果不确定（网络异常、未知错误码）时一律报失败，不会把模棱两可的响应当成有效。</li>
-      </ul>
     </aside>
+  </div>
+
+  <!-- 右键菜单 -->
+  <div class="tc-menu" id="tcMenu"></div>
+
+  <!-- 新建组织弹窗 -->
+  <div class="tc-mask" id="tcNewModal">
+    <div class="bg" data-close-modal></div>
+    <div class="tc-box">
+      <h3>新建组织</h3>
+      <form method="post" action="{% url 'admin:zh_overrides_tenant_config_action' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_tenant">
+        <div class="df"><label>注册邮箱（必填，作为登录账号）</label>
+          <input type="email" name="email" required></div>
+        <div class="df"><label>初始密码（可空 = 仅 Google 登录）</label>
+          <input type="password" name="password"></div>
+        <div class="df"><label>组织名称（可空，默认取邮箱前缀）</label>
+          <input type="text" name="organization_name"></div>
+        <div class="foot">
+          <button type="button" class="tbtn" data-close-modal>取消</button>
+          <button type="submit" class="tbtn primary">创建</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
 <script nonce="{{ request.csp_nonce }}">
 (function () {
   "use strict";
-  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
-  function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
+  function $all(s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); }
+  function $(s, c) { return (c || document).querySelector(s); }
 
-  // Card expand / collapse (event delegation — no inline handlers, CSP-safe).
-  document.addEventListener("click", function (e) {
-    var head = e.target.closest("[data-toggle-card]");
-    if (head) { head.parentElement.classList.toggle("open"); }
+  var consoleEl = document.getElementById("tcConsole");
+  document.body.classList.add("admin-tenant-console");
+  document.documentElement.style.overflow = "hidden";
+  $all("input", consoleEl).forEach(function (i) { i.setAttribute("spellcheck", "false"); });
 
-    var addBtn = e.target.closest("[data-add-row]");
-    if (addBtn) {
-      var row = document.getElementById("newrow-" + addBtn.getAttribute("data-add-row"));
-      if (row) {
-        row.style.display = "";
-        var nameInput = row.querySelector("input[name=workspace_name]");
-        if (nameInput) { nameInput.focus(); }
+  /* 动态撑满到视口（避开 admin 头部/面包屑，不产生外层滚动条） */
+  function fitConsole() {
+    var top = consoleEl.getBoundingClientRect().top;
+    consoleEl.style.height = Math.max(320, window.innerHeight - top) + "px";
+  }
+  fitConsole();
+  window.addEventListener("resize", fitConsole);
+  var LS_KEY = "tc-tree-open-v4";
+  function loadOpen() {
+    try { return new Set(JSON.parse(localStorage.getItem(LS_KEY) || "[]")); } catch (e) { return new Set(); }
+  }
+  function saveOpen(s) { try { localStorage.setItem(LS_KEY, JSON.stringify(Array.from(s))); } catch (e) {} }
+  var openIds = loadOpen();
+
+  /* ---------- 面板切换 ---------- */
+  function showPanel(node, updateHash) {
+    var id = typeof node === "string" ? node : node.getAttribute("data-node");
+    if (!id) return;
+    $all(".dpanel", consoleEl).forEach(function (p) { p.classList.toggle("show", p.getAttribute("data-panel") === id); });
+    $all(".trow", consoleEl).forEach(function (r) { r.classList.toggle("sel", r.getAttribute("data-node") === id); });
+    // 同步头部标题/标签
+    var src = $('.trow[data-node="' + id + '"]', consoleEl);
+    var title = id, tagHtml = "";
+    if (id === "root") { title = "Brightbean 平台"; }
+    else if (id === "admins") { title = "管理员"; }
+    else if (src) { title = $(".tname", src).textContent.trim(); }
+    $("#tcPaneTitle", consoleEl).textContent = title;
+    $("#tcPaneTag", consoleEl).innerHTML = tagHtml;
+    $("#tcPaneActs", consoleEl).innerHTML = "";
+    // 展开全部祖先
+    var treeRow = $('.trow[data-node="' + id + '"]', consoleEl);
+    if (treeRow) {
+      var an = treeRow.closest(".tn");
+      while (an && an.id !== "tcTree") {
+        if (hasKids(an)) { setOpen(an, true); }
+        an = an.parentElement ? an.parentElement.closest(".tn") : null;
       }
+      treeRow.scrollIntoView({ block: "nearest" });
+    }
+    if (updateHash !== false) { try { history.replaceState(null, "", "#" + id); } catch (e) {} }
+  }
+
+  /* ---------- 树折叠（open/collapsed 双类同步；无记忆时默认全展开） ---------- */
+  var hasMemory = localStorage.getItem(LS_KEY) !== null;
+  function setOpen(n, on) {
+    n.classList.toggle("open", on);
+    n.classList.toggle("collapsed", !on);
+    var chev = n.querySelector(":scope > .trow > .tchev:not(.blank)");
+    if (chev) { chev.textContent = on ? "▾" : "▸"; }
+  }
+  function hasKids(n) {
+    var k = n.querySelector(":scope > .tkids");
+    return k && k.children.length > 0;
+  }
+  $all(".tn", consoleEl).forEach(function (n) {
+    if (!hasKids(n)) { return; }
+    var id = n.querySelector(":scope > .trow").getAttribute("data-node");
+    setOpen(n, !hasMemory || openIds.has(id));
+  });
+
+  /* ---------- 事件委托 ---------- */
+  document.addEventListener("click", function (e) {
+    var chev = e.target.closest(".tchev:not(.blank)");
+    if (chev && consoleEl.contains(chev)) {
+      var n = chev.closest(".tn");
+      var on = n.classList.contains("collapsed");
+      setOpen(n, on);
+      var nid = n.querySelector(":scope > .trow").getAttribute("data-node");
+      if (nid) { if (on) { openIds.add(nid); } else { openIds.delete(nid); } saveOpen(openIds); }
+      return;
     }
 
-    // Buttons that flip the hidden "test" flag before their form submits.
+    var gotoRow = e.target.closest("[data-goto]");
+    if (gotoRow && consoleEl.contains(gotoRow)) {
+      showPanel(gotoRow.getAttribute("data-goto"));
+      return;
+    }
+
+    var trow = e.target.closest(".trow");
+    if (trow && consoleEl.contains(trow) && !e.target.closest(".tchev") && !e.target.closest(".tmore")) {
+      var node = trow.getAttribute("data-node");
+      if (node) {
+        showPanel(node);
+        // 点组织/有账号的工作区同时展开
+        var tn = trow.closest(".tn");
+        if (tn && hasKids(tn) && tn.classList.contains("collapsed")) {
+          setOpen(tn, true);
+          openIds.add(node); saveOpen(openIds);
+        }
+      }
+      return;
+    }
+
+    // 新建工作区
+    var addWs = e.target.closest("[data-add-ws]");
+    if (addWs) {
+      var f = document.getElementById("newws-" + addWs.getAttribute("data-add-ws"));
+      if (f) {
+        f.style.display = "";
+        var nm = f.querySelector("input[name=workspace_name]");
+        if (nm) { nm.focus(); }
+      }
+      return;
+    }
+    var cancelWs = e.target.closest("[data-cancel-ws]");
+    if (cancelWs) {
+      var cf = document.getElementById("newws-" + cancelWs.getAttribute("data-cancel-ws"));
+      if (cf) { cf.style.display = "none"; }
+      return;
+    }
+
+    // 测试标记
     var tester = e.target.closest("[data-test-input]");
     if (tester) {
       var flag = document.getElementById(tester.getAttribute("data-test-input"));
       if (flag) { flag.value = tester.getAttribute("data-test-value") || "0"; }
     }
+  });
 
-    // Outline menu: toggle / close after picking an item.
-    var outlineBtn = e.target.closest("#tcOutlineBtn");
-    if (outlineBtn) {
-      document.getElementById("tcOutline").classList.toggle("open");
+  /* ---------- 节点 ⋯ 菜单 ---------- */
+  function closeMenu() { $("#tcMenu").classList.remove("open"); }
+  function openMenu(ev, kind, org, ws) {
+    var items;
+    if (kind === "org") {
+      items = [["添加工作区", "addws", 0], ["修改名称", "goto", 0], ["删除组织", "delorg", 1], "ID: " + org.slice(0, 8)];
+    } else if (kind === "wsa") {
+      items = [["恢复", "archive", 0], ["删除", "delws", 1], "ID: " + ws.slice(0, 8)];
+    } else {
+      items = [["修改名称", "goto", 0], ["归档", "archive", 2], ["删除", "delws", 1], "ID: " + ws.slice(0, 8)];
+    }
+    var box = $("#tcMenu");
+    box.innerHTML = "";
+    items.forEach(function (it) {
+      if (typeof it === "string") {
+        var d = document.createElement("div");
+        d.className = "idline"; d.textContent = it; box.appendChild(d);
+      } else {
+        var b = document.createElement("button");
+        b.textContent = it[0];
+        if (it[2] === 1) { b.className = "danger"; }
+        if (it[2] === 2) { b.style.color = "var(--warn)"; }
+        b.onclick = function () {
+          closeMenu();
+          if (it[1] === "goto") { showPanel(ws ? "ws-" + ws : "org-" + org); }
+          else if (it[1] === "addws") {
+            showPanel("org-" + org);
+            var btn = $("[data-add-ws='" + org + "']");
+            if (btn) { btn.click(); }
+          } else if (it[1] === "delorg") {
+            var p = $('[data-panel="org-' + org + '"]');
+            var form = p ? p.querySelector('form[action$="action/"] input[name="action"][value="delete_org"]').closest("form") : null;
+            if (form && window.confirm("彻底删除组织将级联删除其全部工作区、帖子、社交账号与凭证，不可恢复！确定？")) { form.submit(); }
+          } else if (it[1] === "delws") {
+            var wp = $('[data-panel="ws-' + ws + '"]');
+            var wf = wp ? wp.querySelector('input[name="action"][value="delete_workspace"]').closest("form") : null;
+            if (wf && window.confirm("彻底删除将级联删除该工作区全部帖子、社交账号与凭证，不可恢复！确定？")) { wf.submit(); }
+          } else if (it[1] === "archive") {
+            var ap = $('[data-panel="ws-' + ws + '"]');
+            var af = ap ? ap.querySelector('input[name="action"][value$="workspace"]').closest("form") : null;
+            if (af) { af.submit(); }
+          }
+        };
+        box.appendChild(b);
+      }
+    });
+    box.style.left = Math.min(ev.clientX, window.innerWidth - 170) + "px";
+    box.style.top = Math.min(ev.clientY, window.innerHeight - 180) + "px";
+    box.classList.add("open");
+  }
+  document.addEventListener("click", function (e) {
+    var mb = e.target.closest(".tmore");
+    if (mb && consoleEl.contains(mb)) {
+      e.stopPropagation();
+      openMenu(e, mb.getAttribute("data-menu"), mb.getAttribute("data-org"), mb.getAttribute("data-ws"));
       return;
     }
-    if (e.target.closest(".tc-outline-menu a")) {
-      document.getElementById("tcOutline").classList.remove("open");
-    }
+    if (!e.target.closest(".tc-menu")) { closeMenu(); }
   });
 
-  // Confirmation dialogs (mode switch, probe, archive, hard delete).
-  // The message can live on the form or on the clicked submit button.
+  /* ---------- 确认弹窗（表单 data-confirm） ---------- */
   document.addEventListener("submit", function (e) {
     var form = e.target.closest("form");
-    var submitter = e.submitter;
-    var msg = null;
-    if (form) { msg = form.getAttribute("data-confirm"); }
-    if (!msg && submitter) { msg = submitter.getAttribute("data-confirm"); }
-    if (msg && !window.confirm(msg)) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    var sm = e.submitter;
+    var msg = form ? form.getAttribute("data-confirm") : null;
+    if (!msg && sm) { msg = sm.getAttribute("data-confirm"); }
+    if (msg && !window.confirm(msg)) { e.preventDefault(); e.stopPropagation(); }
   });
 
-  // Close outline when clicking anywhere outside it.
-  document.addEventListener("mousedown", function (e) {
-    var menu = document.getElementById("tcOutline");
-    if (menu && !menu.contains(e.target)) { menu.classList.remove("open"); }
+  /* ---------- 模式变形 ---------- */
+  function applyOrgMode(org, mode) {
+    var panel = $('[data-panel="org-' + org + '"]');
+    if (!panel) { return; }
+    var trad = mode === "traditional";
+    var saved = panel.getAttribute("data-saved-mode");
+    $all(".org-trad-sec", panel).forEach(function (el) { el.style.display = trad ? "" : "none"; });
+    $all(".org-ind-hint", panel).forEach(function (el) { el.style.display = trad ? "none" : ""; });
+    $all(".org-ind-add", panel).forEach(function (el) { el.style.display = trad ? "none" : ""; });
+    var note = $('[data-trad-note="' + org + '"]', panel);
+    if (note) { note.style.display = (trad && saved === "independent") ? "" : "none"; }
+    $all("[data-mode-label]", panel).forEach(function (lb) {
+      lb.classList.toggle("on", lb.getAttribute("data-mode-label") === mode);
+    });
+  }
+  $all("input[type=radio][data-org][data-mode]", consoleEl).forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      var org = radio.getAttribute("data-org");
+      var mode = radio.getAttribute("data-mode");
+      var panel = $('[data-panel="org-' + org + '"]');
+      var saved = panel.getAttribute("data-saved-mode");
+      if (mode === "independent" && saved === "traditional") {
+        if (!window.confirm("切换到独立模式将删除该组织的组织级 App 凭证行；未单独配置的工作区会变为不可用。确定？")) {
+          radio.checked = false;
+          $('input[type=radio][data-org="' + org + '"][data-mode="traditional"]').checked = true;
+          return;
+        }
+        $('input[data-org-mode]', $("#orgform-" + org)).value = "independent";
+        $("#orgform-" + org).submit();
+        return;
+      }
+      applyOrgMode(org, mode);
+    });
+  });
+  // 组织表单提交前：把隐藏 mode 同步为当前选中的单选
+  $all("form[id^='orgform-']", consoleEl).forEach(function (f) {
+    f.addEventListener("submit", function () {
+      var org = f.querySelector('input[name="organization_id"]').value;
+      var checked = $('input[type=radio][data-org="' + org + '"]:checked');
+      $('input[data-org-mode]', f).value = checked ? checked.getAttribute("data-mode") : "traditional";
+    });
   });
 
-  // Toolbar: search + bulk expand/collapse.
+  /* ---------- 搜索（清空后恢复搜索前的展开态） ---------- */
   var search = $("#tcSearch");
+  var beforeSearchOpen = null;
   if (search) {
     search.addEventListener("input", function () {
       var q = search.value.trim().toLowerCase();
-      $all(".tc-card").forEach(function (c) {
-        c.style.display = (!q || (c.dataset.search || "").indexOf(q) !== -1) ? "" : "none";
-      });
+      var groups = $all(".torg", consoleEl);
+      if (q) {
+        if (beforeSearchOpen === null) {
+          beforeSearchOpen = groups.map(function (g) { return g.classList.contains("open"); });
+        }
+        groups.forEach(function (g) {
+          var hit = (g.getAttribute("data-search") || "").indexOf(q) > -1;
+          g.style.display = hit ? "" : "none";
+          if (hit) { setOpen(g, true); }
+        });
+      } else if (beforeSearchOpen !== null) {
+        groups.forEach(function (g, i) {
+          g.style.display = "";
+          setOpen(g, !!beforeSearchOpen[i]);
+        });
+        beforeSearchOpen = null;
+      }
     });
   }
-  var expandBtn = $("#tcExpandAll");
-  if (expandBtn) { expandBtn.addEventListener("click", function () { $all(".tc-card").forEach(function (c) { c.classList.add("open"); }); }); }
-  var collapseBtn = $("#tcCollapseAll");
-  if (collapseBtn) { collapseBtn.addEventListener("click", function () { $all(".tc-card").forEach(function (c) { c.classList.remove("open"); }); }); }
 
-  // Mode radios: instantly lock the opposite section (visual only; the
-  // server re-validates the mutual exclusion on save).
-  $all("input[type=radio][data-org][data-mode]").forEach(function (radio) {
-    radio.addEventListener("change", function () {
-      var orgId = radio.getAttribute("data-org");
-      var mode = radio.getAttribute("data-mode");
-      var trad = mode === "traditional";
-      $all("[data-org-cred='" + orgId + "']").forEach(function (el) {
-        el.style.display = trad ? "" : "none";
-      });
-      $all("[data-ws-matrix='" + orgId + "']").forEach(function (el) {
-        el.style.display = trad ? "none" : "";
-      });
-    });
+  /* ---------- 新建组织弹窗 ---------- */
+  var modal = $("#tcNewModal");
+  $("#tcNewOrgBtn").addEventListener("click", function () {
+    modal.classList.add("open");
+    var f = modal.querySelector("input[name=email]"); if (f) { f.focus(); }
   });
+  $all("[data-close-modal]", modal).forEach(function (el) {
+    el.addEventListener("click", function () { modal.classList.remove("open"); });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { modal.classList.remove("open"); closeMenu(); }
+  });
+
+  /* ---------- 初始定位 ---------- */
+  var hash = (location.hash || "").replace("#", "");
+  if (hash && $('[data-panel="' + hash + '"]')) { showPanel(hash, false); }
+  else { showPanel("root", false); }
 })();
 </script>
 {% endblock %}

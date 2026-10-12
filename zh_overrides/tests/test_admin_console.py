@@ -4,6 +4,7 @@ Run: DJANGO_SETTINGS_MODULE=zh_overrides.test_settings pytest zh_overrides
 """
 
 import pytest
+from django.test import Client
 
 from apps.accounts.models import User
 from apps.credentials.models import PlatformCredential, resolve_platform_credentials
@@ -128,6 +129,45 @@ def test_archive_unarchive_and_delete(org_and_owner):
     assert Workspace.objects.get(id=w1.id).is_archived is False
     svc.delete_workspace(str(org.id), str(w1.id))
     assert not Workspace.objects.filter(id=w1.id).exists()
+
+
+@pytest.mark.django_db
+def test_action_post_redirects_back_to_console(org_and_owner):
+    """Regression: POST actions must reverse the admin console URL, not 500."""
+    org, _user, ws = org_and_owner
+    root = User.objects.create_superuser(email="root@x.com", password="pw12345678")
+    c = Client()
+    assert c.login(username="root@x.com", password="pw12345678")
+    resp = c.post(
+        "/admin/zh_overrides/workspaceplatformcredential/tenant-config/action/",
+        {
+            "action": "upsert_workspace",
+            "organization_id": str(org.id),
+            "workspace_id": str(ws.id),
+            "workspace_name": "W1",
+            "ws_fb_id": "FB1", "ws_fb_secret": "FBS",
+            "ws_ig_id": "IG1", "ws_ig_secret": "IGS",
+        },
+    )
+    assert resp.status_code == 302
+    assert "/admin/zh_overrides/workspaceplatformcredential/tenant-config/#ws-" in resp.url
+
+
+@pytest.mark.django_db
+def test_delete_organization_cascades(org_and_owner):
+    org, _u, w1 = org_and_owner
+    n = svc.delete_organization(str(org.id))
+    assert n == 1
+    assert not Organization.objects.filter(id=org.id).exists()
+    assert not Workspace.objects.filter(id=w1.id).exists()
+
+
+@pytest.mark.django_db
+def test_save_mode_independent_also_renames(org_and_owner):
+    org, _u, _w = org_and_owner
+    svc.save_tenant_mode(str(org.id), "independent", {}, organization_name="新组织名")
+    org.refresh_from_db()
+    assert org.name == "新组织名"
 
 
 @pytest.mark.django_db

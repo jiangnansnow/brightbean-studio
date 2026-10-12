@@ -60,10 +60,22 @@ def _bundles_from_post(prefix: str, post) -> dict[str, svc.OrgBundle]:
 @require_http_methods(["GET"])
 def tenant_config_view(request):
     tenants = svc.load_tenants()
+    admins = [
+        {"email": u.email, "name": u.name or u.email, "last_login": u.last_login}
+        for u in svc.User.objects.filter(is_superuser=True, is_active=True).order_by("email")
+    ]
+    stats = {
+        "orgs": svc.Organization.objects.count(),
+        "workspaces": svc.Workspace.objects.count(),
+        "accounts": svc.SocialAccount.objects.filter(platform__in=svc.PLATFORMS).count(),
+        "admins": len(admins),
+    }
     context = {
         **admin.site.each_context(request),
         "title": "租户配置矩阵",
         "tenants": tenants,
+        "admins": admins,
+        "stats": stats,
         "fb": svc.FB,
         "ig": svc.IG,
         "opts": {"app_label": "zh_overrides"},  # admin template breadcrumbs
@@ -89,7 +101,10 @@ def tenant_config_action(request):
         elif action == "save_mode":
             mode = request.POST.get("mode", "")
             bundles = _bundles_from_post("org", request.POST)
-            svc.save_tenant_mode(org_id, mode, bundles)
+            svc.save_tenant_mode(
+                org_id, mode, bundles,
+                organization_name=request.POST.get("organization_name", ""),
+            )
             org = svc.Organization.objects.get(id=org_id)
             _log(request, org, CHANGE, f"租户配置控制台：切换/保存模式为 {mode}")
             messages.success(request, f"租户「{org.name}」已保存为{'通用' if mode == 'traditional' else '独立'}模式。")
@@ -141,6 +156,15 @@ def tenant_config_action(request):
             _log(request, ws, CHANGE, "租户配置控制台：取消归档工作区")
             messages.success(request, f"工作区「{ws.name}」已恢复。")
 
+        elif action == "delete_org":
+            org = svc.Organization.objects.filter(id=org_id).first()
+            name = org.name if org else org_id
+            ws_count = svc.delete_organization(org_id)
+            if org:
+                _log(request, org, DELETION, f"租户配置控制台：彻底删除组织（级联 {ws_count} 个工作区及全部数据）")
+            messages.warning(request, f"组织「{name}」及其 {ws_count} 个工作区已彻底删除。")
+            return _redirect_to_console(org_id=None)
+
         elif action == "delete_workspace":
             ws = svc.Workspace.objects.filter(
                 id=request.POST.get("workspace_id", ""), organization_id=org_id
@@ -160,13 +184,18 @@ def tenant_config_action(request):
         logging.getLogger("zh_overrides").exception("tenant console action failed")
         messages.error(request, "保存失败，请检查输入后重试（详见服务器日志）。")
 
-    return _redirect_to_console(org_id=org_id)
+    ws_anchor = request.POST.get("workspace_id") or None
+    if action in {"delete_workspace"}:
+        ws_anchor = None
+    return _redirect_to_console(org_id=org_id, ws_anchor=ws_anchor)
 
 
-def _redirect_to_console(org_id: str | None = None):
+def _redirect_to_console(org_id: str | None = None, ws_anchor: str | None = None):
     from django.shortcuts import redirect
 
-    url = reverse("zh_overrides:tenant-config")
-    if org_id:
+    url = reverse("admin:zh_overrides_tenant_config")
+    if ws_anchor:
+        url += f"#ws-{ws_anchor}"
+    elif org_id:
         url += f"#org-{org_id}"
     return redirect(url)

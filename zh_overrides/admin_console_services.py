@@ -59,6 +59,24 @@ class OrgBundle:
 
 
 @dataclass
+class AccountRow:
+    """A connected social account ("member" under a workspace node)."""
+
+    account_id: str
+    platform: str
+    platform_label: str
+    name: str
+    handle: str
+    platform_account_id: str
+    connected_at: object | None
+    webhooks_active: bool | None
+    connection_status: str
+    token_expires_at: object | None
+    last_health_check_at: object | None
+    last_error: str
+
+
+@dataclass
 class WorkspaceRow:
     workspace_id: str | None
     name: str
@@ -69,6 +87,7 @@ class WorkspaceRow:
     ig_note: str = ""
     fb_connected: bool = False
     ig_connected: bool = False
+    accounts: list[AccountRow] = field(default_factory=list)
     is_new: bool = False
 
 
@@ -105,10 +124,28 @@ def load_tenants() -> list[TenantRow]:
             )
         }
         meta_map = {m.workspace_id: m for m in WorkspaceMeta.objects.filter(workspace__organization=org)}
-        connected = {
-            (s.workspace_id, s.platform)
-            for s in SocialAccount.objects.filter(workspace__organization=org, platform__in=PLATFORMS)
-        }
+        social_qs = SocialAccount.objects.filter(
+            workspace__organization=org, platform__in=PLATFORMS
+        ).order_by("platform", "account_name")
+        connected = {(s.workspace_id, s.platform) for s in social_qs}
+        accounts_by_ws: dict = {}
+        for s in social_qs:
+            accounts_by_ws.setdefault(s.workspace_id, []).append(
+                AccountRow(
+                    account_id=str(s.id),
+                    platform=s.platform,
+                    platform_label=PLATFORM_LABELS.get(s.platform, s.platform),
+                    name=s.account_name or s.account_handle or s.account_platform_id,
+                    handle=s.account_handle or "",
+                    platform_account_id=s.account_platform_id or "",
+                    connected_at=s.connected_at,
+                    webhooks_active=s.webhooks_active,
+                    connection_status=s.connection_status or "",
+                    token_expires_at=s.token_expires_at,
+                    last_health_check_at=s.last_health_check_at,
+                    last_error=s.last_error or "",
+                )
+            )
         owner = (
             OrgMembership.objects.filter(organization=org)
             .select_related("user")
@@ -124,6 +161,7 @@ def load_tenants() -> list[TenantRow]:
                 ig_note=getattr(meta_map.get(ws.id), "ig_tester_note", ""),
                 fb_connected=(ws.id, FB) in connected,
                 ig_connected=(ws.id, IG) in connected,
+                accounts=accounts_by_ws.get(ws.id, []),
             )
             fb_row = cred_map.get((ws.id, FB))
             ig_row = cred_map.get((ws.id, IG))
@@ -204,13 +242,21 @@ def create_tenant(email: str, password: str, organization_name: str) -> Organiza
     return org
 
 
-def save_tenant_mode(organization_id: str, mode: str, credentials: dict[str, OrgBundle]) -> None:
+def save_tenant_mode(
+    organization_id: str,
+    mode: str,
+    credentials: dict[str, OrgBundle],
+    organization_name: str | None = None,
+) -> None:
     """Switch tenant-wide mode and write org-level credentials.
 
     * traditional: upsert complete org rows for BOTH platforms; incomplete
       pairs are rejected (keeps "all or nothing" at the tenant level).
     * independent: delete any org rows for both platforms so every workspace
       is resolved from its own row.
+
+    ``organization_name`` (when given) renames the organisation — in
+    independent mode this makes the same save button a plain rename.
     """
     if mode not in ("traditional", "independent"):
         raise ConsoleError("模式取值非法。")
@@ -219,6 +265,11 @@ def save_tenant_mode(organization_id: str, mode: str, credentials: dict[str, Org
         raise ConsoleError("组织不存在。")
 
     with transaction.atomic():
+        new_name = (organization_name or "").strip()
+        if new_name and new_name != org.name:
+            org.name = new_name
+            org.save(update_fields=["name", "updated_at"])
+
         if mode == "traditional":
             for platform in PLATFORMS:
                 bundle = credentials.get(platform) or OrgBundle()
@@ -335,6 +386,19 @@ def delete_workspace(organization_id: str, workspace_id: str) -> None:
     if ws is None:
         raise ConsoleError("工作区不存在或不属于该组织。")
     ws.delete()
+
+
+def delete_organization(organization_id: str) -> int:
+    """Hard-delete a whole tenant organisation (CASCADE: everything).
+
+    Returns the number of workspaces removed, for the confirmation message.
+    """
+    org = Organization.objects.filter(id=organization_id).first()
+    if org is None:
+        raise ConsoleError("组织不存在。")
+    ws_count = Workspace.objects.filter(organization=org).count()
+    org.delete()
+    return ws_count
 
 
 # ---------------------------------------------------------------- credential probe
