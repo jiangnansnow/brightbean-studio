@@ -10,6 +10,12 @@
 - 部署环境、服务器运维、1Panel 连通方法等运维事实统一以仓库外的《Brightbean运维手册.md》（`E:\外贸文件夹\Brightbean Studio\`）为准，勿写入本文
 - 词典规模（v1.4.0）：短语 1031 条 / 单词 201 条 / 词元 90 条
 
+## [未发布]
+
+### 变更（Changed）
+
+- **支持 Cloudflare R2 公开自定义域作为媒体主机**：`STORAGE_BACKEND=s3` 时 `zh_overrides/settings.py` 在覆盖层关闭 `AWS_QUERYSTRING_AUTH`（不再生成 1 小时签名 URL）与 `AWS_DEFAULT_ACL`（R2 不接受 canned ACL），改用 `S3_CUSTOM_DOMAIN`（如 `media.ysec.cn`）输出匿名、永久有效的媒体地址。媒体走独立主机，平台（Meta 等）服务器端异步回拉不再受签名 1 小时过期限制，也与应用域名的 WAF/AI bot 策略物理隔离。仅在 s3 后端生效，local 后端行为与上游完全一致、零变化。`.env.example` 双语补充 `S3_CUSTOM_DOMAIN` 说明。
+
 ## [1.6.1] - 2026-10-13
 
 ### 变更（Changed）

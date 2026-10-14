@@ -48,3 +48,18 @@ ZH_LOCALIZATION_ENABLED = env.bool("ZH_LOCALIZATION_ENABLED", True)
 if EMAIL_BACKEND_TYPE == "smtp" and env.bool("EMAIL_USE_SSL", default=False):
     EMAIL_USE_SSL = True
     EMAIL_USE_TLS = False
+
+# R2/S3 public custom domain mode. Upstream defaults to a private bucket with
+# 1-hour signed query URLs (AWS_QUERYSTRING_AUTH=True). Our deployment binds the
+# bucket to a public custom domain (S3_CUSTOM_DOMAIN, e.g. media.ysec.cn) where
+# objects are anonymously readable. Platforms (Meta etc.) fetch media
+# server-side and may do so well after publish, so unsigned permanent URLs are
+# more reliable than expiring signatures. Only applies when STORAGE_BACKEND=s3;
+# the local backend never executes this block and stays byte-identical to
+# upstream.
+if STORAGE_BACKEND.lower() == "s3":
+    # R2 does not accept the canned ACL header; None stops django-storages
+    # from sending x-amz-acl.
+    AWS_DEFAULT_ACL = None
+    # Emit plain custom-domain URLs with no ?X-Amz-Signature query string.
+    AWS_QUERYSTRING_AUTH = False
