@@ -33,7 +33,7 @@ root_id、selected_id。
             <!-- 根目录散素材（仅顶层显示） -->
             <div id="zh-folder-{{ root_id }}"
                  class="zh-auto-folder group relative rounded-xl border aspect-square cursor-pointer hover:border-orange-400 hover:shadow-md transition-all duration-150 bg-stone-50 {% if selected_id == root_id %}border-orange-500 ring-2 ring-orange-100{% else %}border-stone-200{% endif %}"
-                 @click="zhPickFolder('{{ root_id }}', '媒体库根目录')"
+                 @click="zhPickFolder('{{ root_id }}', '根目录')"
                  title="未分文件夹的视频">
                 <div class="w-full h-full flex flex-col items-center justify-center gap-2 px-2">
                     <svg class="w-9 h-9 text-stone-300 group-hover:text-orange-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 3h10a1 1 0 011 1v2H8a1 1 0 010-2z"/></svg>
