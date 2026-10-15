@@ -3,7 +3,12 @@ from django.urls import path
 
 from . import admin_console
 from .forms import WorkspacePlatformCredentialAdminForm
-from .models import WorkspaceMeta, WorkspacePlatformCredential
+from .models import (
+    WorkspaceMeta,
+    WorkspacePlatformCredential,
+    ZhScheduledBatch,
+    ZhScheduledBatchItem,
+)
 
 
 @admin.register(WorkspacePlatformCredential)
@@ -61,4 +66,34 @@ class WorkspaceMetaAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request):
         # Edited via the tenant console; hidden from the main admin menu.
+        return False
+
+
+class ZhScheduledBatchItemInline(admin.TabularInline):
+    model = ZhScheduledBatchItem
+    extra = 0
+    can_delete = False
+    readonly_fields = ("post", "media_asset", "created_at")
+    ordering = ("created_at",)
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ZhScheduledBatch)
+class ZhScheduledBatchAdmin(admin.ModelAdmin):
+    list_display = ("folder_name", "workspace", "created_by", "created_at")
+    search_fields = ("folder_name", "workspace__name")
+    list_filter = ("created_at",)
+    readonly_fields = (
+        "id",
+        "workspace",
+        "media_folder",
+        "folder_name",
+        "created_by",
+        "created_at",
+    )
+    inlines = [ZhScheduledBatchItemInline]
+
+    def has_add_permission(self, request):
         return False

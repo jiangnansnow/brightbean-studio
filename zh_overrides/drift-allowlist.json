@@ -3,7 +3,8 @@
   "_added": [
     "zh_overrides/legal.html",
     "zh_overrides/data_deletion.html",
-    "zh_overrides/admin/tenant_config.html"
+    "zh_overrides/admin/tenant_config.html",
+    "zh_overrides/batch_schedule/_folder_grid.html"
   ],
   "social_accounts/list.html": {
     "missing": [

@@ -1,4 +1,9 @@
-"""Workspace-scoped platform app credentials (local-custom feature).
+"""Local-custom data models (zh_hans overlay).
+
+- ``WorkspacePlatformCredential``: per-workspace social app credentials.
+- ``WorkspaceMeta``: operator-only notes for the tenant console.
+- ``ZhScheduledBatch`` / ``ZhScheduledBatchItem``: 作曲器「文件夹」模式一键
+  批量入队的批次与明细（本地定制功能，全部放在 zh_overrides，不触碰上游表）。
 
 Why a sidecar table instead of touching upstream ``PlatformCredential``:
 
@@ -22,6 +27,7 @@ Resolution rules (implemented in
 
 import uuid
 
+from django.conf import settings
 from django.db import models
 
 from apps.common.encryption import EncryptedJSONField
@@ -115,3 +121,85 @@ class WorkspaceMeta(models.Model):
 
     def __str__(self):
         return f"meta:{self.workspace.name}"
+
+
+class ZhScheduledBatch(models.Model):
+    """作曲器「文件夹」模式一键批量入队的一个批次。
+
+    用户在作曲器选择单个媒体文件夹、N 个视频与勾选账号后一次性入队，服务端
+    为每个视频建一条 Post，并在每个勾选账号上各占一个未来 7 天内的空闲时段。
+    批次仅用于在发布队列页呈现「批次系统标签」与一键清除；不驱动任何后台
+    定时任务（无持久规则、无开关）。
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    workspace = models.ForeignKey(
+        "workspaces.Workspace",
+        on_delete=models.CASCADE,
+        related_name="zh_scheduled_batches",
+    )
+    media_folder = models.ForeignKey(
+        "media_library.MediaFolder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="zh_scheduled_batches",
+        help_text="本次批量入队的来源文件夹（删除文件夹后批次记录保留）",
+    )
+    # 文件夹名快照：来源文件夹被删后，队列页批次条仍能显示名称。
+    folder_name = models.CharField(max_length=255, blank=True, default="")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="zh_scheduled_batches",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "zh_overrides_scheduled_batch"
+        verbose_name = "批量排期批次"
+        verbose_name_plural = "批量排期批次"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"批量批次:{self.folder_name or self.id}"
+
+
+class ZhScheduledBatchItem(models.Model):
+    """批次内一条入队帖子（一个视频对应一条 Post）。
+
+    Post 被删除时级联清除（含一键批量清除）；已发布（历史）的 Post 不会被
+    清除，对应明细保留，批次条只统计仍处于 scheduled 的帖子。
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    batch = models.ForeignKey(
+        ZhScheduledBatch,
+        on_delete=models.CASCADE,
+        related_name="items",
+    )
+    post = models.ForeignKey(
+        "composer.Post",
+        on_delete=models.CASCADE,
+        related_name="zh_batch_items",
+    )
+    media_asset = models.ForeignKey(
+        "media_library.MediaAsset",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="zh_batch_items",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "zh_overrides_scheduled_batch_item"
+        verbose_name = "批量排期明细"
+        verbose_name_plural = "批量排期明细"
+        unique_together = [("batch", "post")]
+        indexes = [models.Index(fields=["batch", "post"])]
+
+    def __str__(self):
+        return f"批次明细:{self.batch_id}:{self.post_id}"

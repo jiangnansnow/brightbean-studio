@@ -97,3 +97,43 @@ def client_js(request: HttpRequest) -> HttpResponse:
     response["Cache-Control"] = "public, max-age=31536000, immutable"
     response["X-Content-Type-Options"] = "nosniff"
     return response
+
+
+# --- batch-schedule.js ------------------------------------------------------
+# 作曲器批量入队功能脚本，与 zh-client.js 同样绕开 collectstatic 直接按文件
+# 内容提供（构建期 INSTALLED_APPS 不含 zh_overrides，其 static/ 不会被收集）。
+# 与汉化脚本不同：它是产品功能，中英文模式下都必须注入（见 middleware）。
+
+_BATCH_JS: tuple[str, str] | None = None
+
+
+def _build_batch_js() -> tuple[str, str]:
+    global _BATCH_JS
+    if _BATCH_JS is not None:
+        return _BATCH_JS
+
+    import hashlib
+
+    js_path = (
+        Path(__file__).resolve().parent
+        / "static"
+        / "zh_overrides"
+        / "batch-schedule.js"
+    )
+    raw_bytes = js_path.read_bytes()
+    digest = hashlib.sha1(raw_bytes).hexdigest()[:12]
+    _BATCH_JS = (digest, raw_bytes.decode("utf-8"))
+    return _BATCH_JS
+
+
+def batch_schedule_js_digest() -> str:
+    return _build_batch_js()[0]
+
+
+@require_GET
+def batch_schedule_js(request: HttpRequest) -> HttpResponse:
+    _digest, body = _build_batch_js()
+    response = HttpResponse(body, content_type="application/javascript; charset=utf-8")
+    response["Cache-Control"] = "public, max-age=31536000, immutable"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
