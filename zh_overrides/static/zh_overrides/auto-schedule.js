@@ -9,7 +9,9 @@
 (function () {
   "use strict";
 
-  var m = location.pathname.match(/^\/workspace\/([0-9a-fA-F-]{36})\//);
+  var m =
+    location.pathname.match(/^\/workspace\/([0-9a-fA-F-]{36})\//) ||
+    location.pathname.match(/^\/social-accounts\/([0-9a-fA-F-]{36})(?:\/|$)/);
   if (!m) return;
   var WS_ID = m[1];
   var BASE = "/workspace/" + WS_ID + "/zh-auto";

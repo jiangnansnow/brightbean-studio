@@ -304,13 +304,18 @@ def _lang_toggle_html(request) -> str:
 
 
 def _auto_schedule_script_tag(request) -> str:
-    """作曲器（开启入口）/社交账号页（总开关）/日历页（批次标签）注入。"""
+    """作曲器（开启入口）/社交账号页（总开关）/日历页（批次标签）注入。
+
+    路径事实：作曲器与日历在 /workspace/<id>/ 前缀下；社交账号页由上游
+    挂在根路径 /social-accounts/<workspace_id>/（见 config/urls.py）。
+    """
     import re
 
-    if not re.match(
-        r"^/workspace/[^/]+/(?:compose(?:/|$)|social-accounts(?:/|$)|calendar(?:/|$))",
-        request.path,
-    ):
+    if re.match(r"^/workspace/[^/]+/(?:compose(?:/|$)|calendar(?:/|$))", request.path):
+        pass
+    elif re.match(r"^/social-accounts/[0-9a-fA-F-]{36}(?:/|$)", request.path):
+        pass
+    else:
         return ""
     nonce = getattr(request, "csp_nonce", "") or ""
     return (
