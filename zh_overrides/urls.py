@@ -21,8 +21,8 @@ from . import privacy_views
 
 urlpatterns = [
     path("zh-overrides/", include("zh_overrides.payload_urls")),
-    # 作曲器「文件夹」模式批量入队（本地定制，上游无对应功能）。
-    path("workspace/<uuid:workspace_id>/zh-batch/", include("zh_overrides.batch_urls")),
+    # 作曲器文件夹自动候补排期（本地定制，上游无对应功能）。
+    path("workspace/<uuid:workspace_id>/zh-auto/", include("zh_overrides.auto_urls")),
     path("privacy", privacy_views.privacy_policy, name="privacy-policy"),
     path("legal", privacy_views.legal_center, name="legal-center"),
     path("terms", privacy_views.terms_of_service, name="terms-of-service"),

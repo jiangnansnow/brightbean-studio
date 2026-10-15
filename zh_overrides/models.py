@@ -2,8 +2,10 @@
 
 - ``WorkspacePlatformCredential``: per-workspace social app credentials.
 - ``WorkspaceMeta``: operator-only notes for the tenant console.
-- ``ZhScheduledBatch`` / ``ZhScheduledBatchItem``: 作曲器「文件夹」模式一键
-  批量入队的批次与明细（本地定制功能，全部放在 zh_overrides，不触碰上游表）。
+- ``ZhAutoScheduleRule`` / ``ZhAutoScheduleConsumption``: 文件夹自动候补排期
+  规则与消耗账本（48 小时滚动窗口、10 分钟后台扫描、社交页总开关）。
+- ``ZhScheduledBatch`` / ``ZhScheduledBatchItem``: 自动候补每次投递的批次与明细
+  （发布队列页「自动」标签与一键清除）。
 
 Why a sidecar table instead of touching upstream ``PlatformCredential``:
 
@@ -123,13 +125,129 @@ class WorkspaceMeta(models.Model):
         return f"meta:{self.workspace.name}"
 
 
-class ZhScheduledBatch(models.Model):
-    """作曲器「文件夹」模式一键批量入队的一个批次。
+class ZhAutoScheduleRule(models.Model):
+    """文件夹自动候补排期规则（每工作区至多一条）。
 
-    用户在作曲器选择单个媒体文件夹、N 个视频与勾选账号后一次性入队，服务端
-    为每个视频建一条 Post，并在每个勾选账号上各占一个未来 7 天内的空闲时段。
-    批次仅用于在发布队列页呈现「批次系统标签」与一键清除；不驱动任何后台
-    定时任务（无持久规则、无开关）。
+    用户在帖子编辑器勾选平台账号并选定监听文件夹后「开启自动候补」：系统每
+    10 分钟扫描一次，使每个目标账号未来 48 小时内的空槽始终排满该文件夹内
+    FIFO 最前的合格视频。文案/首评/Facebook 形态在开启瞬间快照入规则。
+    社交账号页总开关只负责停用/原样恢复，不承载任何配置。
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    workspace = models.OneToOneField(
+        "workspaces.Workspace",
+        on_delete=models.CASCADE,
+        related_name="zh_auto_schedule_rule",
+    )
+    media_folder = models.ForeignKey(
+        "media_library.MediaFolder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="zh_auto_schedule_rules",
+        help_text="监听的媒体文件夹；null 表示监听未分文件夹的根目录散素材；来源被删后置空",
+    )
+    # 文件夹名快照：空串=根目录；非空但 media_folder 为空=原文件夹已被删除。
+    folder_name = models.CharField(max_length=255, blank=True, default="")
+    accounts = models.ManyToManyField(
+        "social_accounts.SocialAccount",
+        related_name="zh_auto_schedule_rules",
+        help_text="参与自动候补的目标账号",
+    )
+    caption = models.TextField(blank=True, default="", verbose_name="文案快照")
+    first_comment = models.TextField(blank=True, default="", verbose_name="首评快照")
+    facebook_post_type = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        choices=[("", "普通视频"), ("reel", "Reel")],
+        verbose_name="Facebook 视频形态快照",
+        help_text="单账号粒度以 facebook_post_types JSON 为准，此字段为历史兼容",
+    )
+    facebook_post_types = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='各 FB 账号形态快照，形如 {"<account_id>": "reel"}',
+    )
+    is_active = models.BooleanField(default=False, verbose_name="是否启用")
+    enabled_at = models.DateTimeField(null=True, blank=True)
+    last_run_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "zh_overrides_auto_schedule_rule"
+        verbose_name = "自动候补排期规则"
+        verbose_name_plural = "自动候补排期规则"
+
+    def __str__(self):
+        state = "启用" if self.is_active else "停用"
+        label = self.folder_name or "媒体库根目录"
+        return f"自动候补[{state}]:{self.workspace_id}->{label}"
+
+    @property
+    def folder_missing(self):
+        """监听的命名文件夹已被用户删除（根目录规则不受影响）。"""
+        return bool(self.folder_name) and self.media_folder_id is None
+
+
+class ZhAutoScheduleConsumption(models.Model):
+    """自动候补消耗账本：(账号, 视频) 已成功投递记录。
+
+    纯内部数据，前台不展示。记账发生在成功入队的同一事务内：发布失败、手动
+    取消、一键清除、停用/恢复、整单替换都不触发二次投递；唯一约束从数据库层
+    杜绝同账号重复建帖。
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    rule = models.ForeignKey(
+        ZhAutoScheduleRule,
+        on_delete=models.CASCADE,
+        related_name="consumptions",
+    )
+    social_account = models.ForeignKey(
+        "social_accounts.SocialAccount",
+        on_delete=models.CASCADE,
+        related_name="zh_auto_consumptions",
+    )
+    media_asset = models.ForeignKey(
+        "media_library.MediaAsset",
+        on_delete=models.CASCADE,
+        related_name="zh_auto_consumptions",
+    )
+    post = models.ForeignKey(
+        "composer.Post",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="zh_auto_consumptions",
+    )
+    platform_post = models.ForeignKey(
+        "composer.PlatformPost",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="zh_auto_consumptions",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "zh_overrides_auto_schedule_consumption"
+        verbose_name = "自动候补消耗记录"
+        verbose_name_plural = "自动候补消耗记录"
+        unique_together = [("social_account", "media_asset")]
+        indexes = [models.Index(fields=["rule", "social_account"])]
+
+    def __str__(self):
+        return f"消耗:{self.social_account_id}:{self.media_asset_id}"
+
+
+class ZhScheduledBatch(models.Model):
+    """自动候补（或一键批量）每次投递生成的一个批次。
+
+    每次后台扫描实际投递 N 个视频即产生一个批次，用于在发布队列页呈现
+    「自动」系统标签与一键清除；批次本身不驱动投递。
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -138,15 +256,22 @@ class ZhScheduledBatch(models.Model):
         on_delete=models.CASCADE,
         related_name="zh_scheduled_batches",
     )
+    rule = models.ForeignKey(
+        ZhAutoScheduleRule,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="batches",
+    )
     media_folder = models.ForeignKey(
         "media_library.MediaFolder",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="zh_scheduled_batches",
-        help_text="本次批量入队的来源文件夹（删除文件夹后批次记录保留）",
+        help_text="本次投递的来源文件夹（删除文件夹后批次记录保留）",
     )
-    # 文件夹名快照：来源文件夹被删后，队列页批次条仍能显示名称。
+    # 文件夹名快照：来源文件夹被删后，队列页标签仍能显示；空串=根目录。
     folder_name = models.CharField(max_length=255, blank=True, default="")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

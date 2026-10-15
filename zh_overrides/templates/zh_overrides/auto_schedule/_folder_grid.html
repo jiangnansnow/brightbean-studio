@@ -1,0 +1,77 @@
+{% comment %}
+自动候补弹窗 - 文件夹浏览内容（htmx 片段，innerHTML 注入 #zh-auto-browser-host）。
+交互（定稿）：单击格子=仅选中高亮（@click，不导航）；双击=进入子文件夹
+（hx-trigger=dblclick）；根目录第一格固定「未分文件夹」。
+上下文：workspace、folders（带 zh_video_count）、parent、chain、root_count、
+root_id、selected_id。
+{% endcomment %}
+<div class="flex flex-col min-h-0">
+    <!-- 面包屑 -->
+    <div class="flex items-center gap-1 text-xs text-stone-400 mb-3 flex-wrap">
+        <button type="button"
+                class="hover:text-stone-600 transition-colors cursor-pointer"
+                hx-get="{% url 'zh_auto:folders' workspace_id=workspace.id %}"
+                hx-target="#zh-auto-browser-host"
+                hx-swap="innerHTML">Media Library</button>
+        {% for crumb in chain %}
+        <span class="text-stone-300">/</span>
+        {% if forloop.last %}
+        <span class="text-stone-600 font-medium">{{ crumb.name }}</span>
+        {% else %}
+        <button type="button"
+                class="hover:text-stone-600 transition-colors cursor-pointer"
+                hx-get="{% url 'zh_auto:folders' workspace_id=workspace.id %}?parent={{ crumb.id }}"
+                hx-target="#zh-auto-browser-host"
+                hx-swap="innerHTML">{{ crumb.name }}</button>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="overflow-y-auto panel-scroll" style="max-height:42vh;">
+        <div class="grid grid-cols-4 gap-3">
+            {% if not parent %}
+            <!-- 根目录散素材（仅顶层显示） -->
+            <div id="zh-folder-{{ root_id }}"
+                 class="zh-auto-folder group relative rounded-xl border aspect-square cursor-pointer hover:border-orange-400 hover:shadow-md transition-all duration-150 bg-stone-50 {% if selected_id == root_id %}border-orange-500 ring-2 ring-orange-100{% else %}border-stone-200{% endif %}"
+                 @click="zhPickFolder('{{ root_id }}', '媒体库根目录')"
+                 title="未分文件夹的视频">
+                <div class="w-full h-full flex flex-col items-center justify-center gap-2 px-2">
+                    <svg class="w-9 h-9 text-stone-300 group-hover:text-orange-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 3h10a1 1 0 011 1v2H8a1 1 0 010-2z"/></svg>
+                    <span class="text-xs font-medium text-stone-600 text-center leading-tight">未分文件夹</span>
+                </div>
+                {% if root_count %}
+                <div class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm tabular-nums">{{ root_count }}</div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% for folder in folders %}
+            <div id="zh-folder-{{ folder.id }}"
+                 class="zh-auto-folder group relative rounded-xl border aspect-square cursor-pointer hover:border-orange-400 hover:shadow-md transition-all duration-150 bg-stone-50 {% if selected_id == folder.id|stringformat:'s' %}border-orange-500 ring-2 ring-orange-100{% else %}border-stone-200{% endif %}"
+                 @click="zhPickFolder('{{ folder.id }}', '{{ folder.name|escapejs }}')"
+                 {% if folder.sub_count %}
+                 hx-get="{% url 'zh_auto:folders' workspace_id=workspace.id %}?parent={{ folder.id }}"
+                 hx-target="#zh-auto-browser-host"
+                 hx-swap="innerHTML"
+                 hx-trigger="dblclick"
+                 {% endif %}>
+                <div class="w-full h-full flex flex-col items-center justify-center gap-2 px-2">
+                    <svg class="w-9 h-9 text-stone-300 group-hover:text-orange-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                    <span class="text-xs font-medium text-stone-600 text-center leading-tight line-clamp-2">{{ folder.name }}</span>
+                </div>
+                {% if folder.zh_video_count %}
+                <div class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm tabular-nums">{{ folder.zh_video_count }}</div>
+                {% endif %}
+                {% if folder.sub_count %}
+                <div class="absolute top-1.5 right-1.5 text-stone-300" title="含子文件夹，双击进入">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% if not parent and not folders %}
+        <div class="text-center py-10"><p class="text-xs text-stone-400">No folders</p></div>
+        {% endif %}
+    </div>
+</div>

@@ -31,7 +31,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils.html import escape
 
-from .payload_views import batch_schedule_js_digest, client_js_digest
+from .payload_views import auto_schedule_js_digest, client_js_digest
 
 _DICTIONARY: dict | None = None
 _DIGEST: str | None = None
@@ -303,15 +303,18 @@ def _lang_toggle_html(request) -> str:
     )
 
 
-def _batch_schedule_script_tag(request) -> str:
-    """作曲器/发布页注入批量入队功能脚本（产品功能，与界面语言无关）。"""
+def _auto_schedule_script_tag(request) -> str:
+    """作曲器（开启入口）/社交账号页（总开关）/日历页（批次标签）注入。"""
     import re
 
-    if not re.match(r"^/workspace/[^/]+/(?:compose|calendar/)", request.path):
+    if not re.match(
+        r"^/workspace/[^/]+/(?:compose(?:/|$)|social-accounts(?:/|$)|calendar(?:/|$))",
+        request.path,
+    ):
         return ""
     nonce = getattr(request, "csp_nonce", "") or ""
     return (
-        f'<script src="/zh-overrides/batch-schedule.js?v={batch_schedule_js_digest()}" '
+        f'<script src="/zh-overrides/auto-schedule.js?v={auto_schedule_js_digest()}" '
         f'nonce="{nonce}" defer></script>'
     )
 
@@ -391,8 +394,8 @@ class ZhLocalizationMiddleware:
             new_html = html_text
 
         # 批量入队功能脚本：产品功能，中英文模式下都注入（仅作曲器/日历页）。
-        if "</body>" in new_html and "zh-overrides/batch-schedule.js" not in new_html:
-            batch_tag = _batch_schedule_script_tag(request)
+        if "</body>" in new_html and "zh-overrides/auto-schedule.js" not in new_html:
+            batch_tag = _auto_schedule_script_tag(request)
             if batch_tag:
                 new_html = new_html.replace("</body>", batch_tag + "</body>", 1)
 
