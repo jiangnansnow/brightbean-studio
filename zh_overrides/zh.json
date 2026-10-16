@@ -1050,10 +1050,7 @@
     "Choose a folder first.": "请先选择一个监听文件夹。",
     "Select at least one platform account above first.": "请先在页面上方选择至少一个平台账号。",
     "Select at least one valid account first.": "请先选择至少一个有效的平台账号。",
-    "Enable this in the post composer first.": "请先在帖子编辑器选择账号与文件夹后开启。",
-    "Folder no longer exists; re-select it in the composer.": "监听文件夹已被删除，请回到帖子编辑器重新选择。",
-    "No open posting slot within 7 days for the selected accounts.": "所选账号未来 48 小时内没有空闲发帖时段。",
-    "No eligible videos in this folder.": "该文件夹没有可排期的视频。",
+    "Enable auto-schedule in workspace settings first.": "请先在社交账号页开启「自动排期」总开关。",
     "Workspace requires approval before scheduling; create the post as a draft and route it through the approval workflow.": "该工作区要求排期前先通过审批，请先保存为草稿并提交审批流程。"
   },
   "words": {

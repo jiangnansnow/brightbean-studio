@@ -40,7 +40,9 @@ root_id、selected_id。
                     <span class="text-xs font-medium text-stone-600 text-center leading-tight">未分文件夹</span>
                 </div>
                 {% if root_count %}
-                <div class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm tabular-nums">{{ root_count }}</div>
+                <div data-count="{{ root_count }}" class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm tabular-nums">{{ root_count }}</div>
+                {% else %}
+                <div data-count="0" class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-stone-400 bg-black/30 backdrop-blur-sm tabular-nums">0</div>
                 {% endif %}
             </div>
             {% endif %}
@@ -60,7 +62,9 @@ root_id、selected_id。
                     <span class="text-xs font-medium text-stone-600 text-center leading-tight line-clamp-2">{{ folder.name }}</span>
                 </div>
                 {% if folder.zh_video_count %}
-                <div class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm tabular-nums">{{ folder.zh_video_count }}</div>
+                <div data-count="{{ folder.zh_video_count }}" class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm tabular-nums">{{ folder.zh_video_count }}</div>
+                {% else %}
+                <div data-count="0" class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-stone-400 bg-black/30 backdrop-blur-sm tabular-nums">0</div>
                 {% endif %}
                 {% if folder.sub_count %}
                 <div class="absolute top-1.5 right-1.5 text-stone-300" title="含子文件夹，双击进入">

@@ -8,8 +8,6 @@ from .models import (
     WorkspacePlatformCredential,
     ZhAutoScheduleConsumption,
     ZhAutoScheduleRule,
-    ZhScheduledBatch,
-    ZhScheduledBatchItem,
 )
 
 
@@ -71,46 +69,6 @@ class WorkspaceMetaAdmin(admin.ModelAdmin):
         return False
 
 
-class ZhScheduledBatchItemInline(admin.TabularInline):
-    model = ZhScheduledBatchItem
-    extra = 0
-    can_delete = False
-    readonly_fields = ("post", "media_asset", "created_at")
-    ordering = ("created_at",)
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-
-@admin.register(ZhScheduledBatch)
-class ZhScheduledBatchAdmin(admin.ModelAdmin):
-    """自动候补批次只读审计视图（前台功能，后台仅供查看，不可新建/改配置）。"""
-
-    list_display = ("folder_name", "workspace", "rule", "created_by", "created_at")
-    search_fields = ("folder_name", "workspace__name")
-    list_filter = ("created_at",)
-    readonly_fields = (
-        "id",
-        "workspace",
-        "rule",
-        "media_folder",
-        "folder_name",
-        "created_by",
-        "created_at",
-    )
-    inlines = [ZhScheduledBatchItemInline]
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        # 批次仅为审计记录，删除走前台「一键清除」（连带级联），后台不给删。
-        return False
-
-
-# 规则与账本只服务前台自动候补逻辑，刻意不注册 Admin（用户明确：前台功能不进
-# 后台菜单）。保留 import 是为了让模型在 admin autodiscover 时正常装载。
+# 规则/账本/批次只服务前台自动候补逻辑，刻意不注册 Admin（用户明确：前台功能
+# 不进后台菜单）。保留 import 是为了让模型在 admin autodiscover 时正常装载。
 _ = (ZhAutoScheduleRule, ZhAutoScheduleConsumption)

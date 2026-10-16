@@ -1,8 +1,8 @@
-"""文件夹自动候补排期视图层（zh_overrides 本地定制）。
+"""文件夹自动排期视图层（zh_overrides 本地定制，V2）。
 
 端点挂在工作区前缀下，复用上游作曲器的工作区成员校验
 （``apps.composer.views._get_workspace``）与成员权限装饰器，不复制鉴权逻辑。
-文件夹浏览走 htmx 片段；开启/停用/状态/批次操作均返回 JSON。
+文件夹浏览走 htmx 片段；队列提交/武装开关/批次操作返回 JSON。
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import uuid
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.utils import timezone
+from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.composer.views import _get_workspace, _parse_selected_account_ids
@@ -88,18 +88,18 @@ def folders(request, workspace_id):
 @require_GET
 @require_permission("create_posts")
 def panel(request, workspace_id):
-    """规则运行状态 JSON：是否启用、监听标签、已投递数、跳过账号。"""
+    """作曲器状态 JSON：武装开关 + 已有规则状态（决定按钮灰态与会话恢复提示）。"""
     workspace = _get_workspace(request, workspace_id)
+    armed = auto_schedule.is_armed(workspace)
     rule = ZhAutoScheduleRule.objects.filter(workspace=workspace).first()
-    if rule is None:
-        return JsonResponse({"has_rule": False, "can_enable": True})
-    status = auto_schedule.rule_status(rule)
-    status["has_rule"] = True
+    status = {"armed": armed, "has_rule": rule is not None}
+    if rule is not None:
+        status.update(auto_schedule.rule_status(rule))
     return JsonResponse(status)
 
 
 def _snapshot_from_post(request):
-    """从作曲器表单提取开启瞬间的文案/首评/FB 形态快照。"""
+    """从作曲器表单提取提交瞬间的文案/首评/FB 形态快照。"""
     return {
         "caption": request.POST.get("caption", ""),
         "first_comment": request.POST.get("first_comment", ""),
@@ -111,29 +111,37 @@ def _snapshot_from_post(request):
     }
 
 
-@require_POST
-@require_permission("create_posts")
-def enable(request, workspace_id):
-    """开启自动候补或整单替换监听目标。成功立即补排一次。"""
-    workspace = _get_workspace(request, workspace_id)
+def _resolve_folder(request, workspace):
+    """解析 POST 里的 folder_id 为 MediaFolder 实例（root → None）。"""
     raw_folder = request.POST.get("folder_id", "").strip()
     if raw_folder == ROOT_FOLDER_ID:
-        folder = None  # 监听未分文件夹的根目录散素材
-    else:
-        folder_id = _parse_uuid(raw_folder)
-        if folder_id is None:
-            return JsonResponse(
-                {"error": "Choose a folder first."}, status=400
-            )
-        folder = MediaFolder.objects.filter(id=folder_id, workspace=workspace).first()
-        if folder is None:
-            return JsonResponse(
-                {"error": "Choose a folder first."}, status=400
-            )
+        return None  # 监听未分文件夹的根目录散素材
+    folder_id = _parse_uuid(raw_folder)
+    if folder_id is None:
+        return None
+    return MediaFolder.objects.filter(id=folder_id, workspace=workspace).first()
+
+
+@require_POST
+@require_permission("create_posts")
+def queue(request, workspace_id):
+    """作曲器文件夹模式「加入队列」提交入口（拦截原生提交）。
+
+    校验武装开关 → 创建/更新规则 → 立即补满 24h → 返回跳转 URL（前端跳日历）。
+    """
+    workspace = _get_workspace(request, workspace_id)
+    if not auto_schedule.is_armed(workspace):
+        return JsonResponse(
+            {"error": "Enable auto-schedule in workspace settings first."}, status=400
+        )
+
+    folder = _resolve_folder(request, workspace)
+    if folder is None and request.POST.get("folder_id", "").strip() != ROOT_FOLDER_ID:
+        return JsonResponse({"error": "Choose a folder first."}, status=400)
 
     account_ids = _parse_selected_account_ids(request.POST.get("selected_accounts", ""))
     try:
-        rule, created = auto_schedule.enable_rule(
+        rule, queued = auto_schedule.submit_folder_schedule(
             workspace=workspace,
             user=request.user,
             folder=folder,
@@ -143,64 +151,48 @@ def enable(request, workspace_id):
     except AutoScheduleError as exc:
         return JsonResponse({"error": str(exc)}, status=400)
 
-    return JsonResponse({"enabled": True, "queued_now": created, **auto_schedule.rule_status(rule)})
-
-
-@require_POST
-@require_permission("create_posts")
-def disable(request, workspace_id):
-    """作曲器弹窗内停用（社交页总开关走 toggle）。已在队列的帖子不动。"""
-    workspace = _get_workspace(request, workspace_id)
-    rule = get_object_or_404(ZhAutoScheduleRule, workspace=workspace)
-    rule.is_active = False
-    rule.save(update_fields=["is_active", "updated_at"])
-    return JsonResponse({"enabled": False, **auto_schedule.rule_status(rule)})
+    payload = {
+        "queued_now": queued,
+        "redirect": reverse("calendar:calendar", kwargs={"workspace_id": workspace.id}),
+        **auto_schedule.rule_status(rule),
+    }
+    if queued == 0:
+        payload["reason"] = auto_schedule.explain_zero(rule)
+    return JsonResponse(payload)
 
 
 @require_GET
 @require_permission("create_posts")
 def social_toggle_state(request, workspace_id):
     """社交账号页总开关初始状态。"""
-    return panel(request, workspace_id)
+    workspace = _get_workspace(request, workspace_id)
+    return JsonResponse({"armed": auto_schedule.is_armed(workspace)})
 
 
 @require_POST
 @require_permission("create_posts")
 def social_toggle(request, workspace_id):
-    """社交页总开关：启用⇄停用。
+    """社交页「自动排期」总开关翻转（纯武装开关）。
 
-    - 无规则：前端禁用不可提交（无文件夹/账号可恢复）；
-    - 规则存在但监听文件夹被删：不允许直接恢复，提示回编辑器重选；
-    - 由停用转启用＝原样恢复，立即补排一次。
+    开 = 武装（不自动排期、不恢复）；关 = 停止补货且不自动恢复。
+    已在队列里的帖子、账本一律不动。
     """
     workspace = _get_workspace(request, workspace_id)
-    rule = ZhAutoScheduleRule.objects.filter(workspace=workspace).first()
-    if rule is None:
-        return JsonResponse(
-            {"error": "Enable this in the post composer first."}, status=400
-        )
+    armed = auto_schedule.set_armed(workspace, not auto_schedule.is_armed(workspace))
+    return JsonResponse({"armed": armed})
 
-    if rule.is_active:
-        rule.is_active = False
-        rule.save(update_fields=["is_active", "updated_at"])
-        return JsonResponse({"enabled": False, **auto_schedule.rule_status(rule)})
 
-    if rule.folder_missing:
-        return JsonResponse(
-            {"error": "Folder no longer exists; re-select it in the composer."},
-            status=400,
-        )
+@require_POST
+@require_permission("create_posts")
+def clear_media(request, workspace_id):
+    """文件夹模式激活时清空作曲器「待提交」素材（session 级，不删文件）。
 
-    rule.is_active = True
-    rule.enabled_at = timezone.now()
-    rule.save(update_fields=["is_active", "enabled_at", "updated_at"])
-    try:
-        queued = auto_schedule.run_rule(rule)
-    except AutoScheduleError as exc:
-        rule.is_active = False
-        rule.save(update_fields=["is_active", "updated_at"])
-        return JsonResponse({"error": str(exc)}, status=400)
-    return JsonResponse({"enabled": True, "queued_now": queued, **auto_schedule.rule_status(rule)})
+    与上游 remove_pending_media 的关键区别：后者会 delete_asset 删除素材文件，
+    这里仅从 session 撤销"已选中"，素材文件与媒体库记录完整保留。
+    """
+    workspace = _get_workspace(request, workspace_id)
+    request.session.pop(f"pending_media_{workspace.id}", None)
+    return JsonResponse({"ok": True})
 
 
 @require_GET
@@ -210,10 +202,7 @@ def active(request, workspace_id):
     workspace = _get_workspace(request, workspace_id)
     return JsonResponse(
         [
-            {
-                "batch_id": str(batch.id),
-                "remaining": batch.remaining,
-            }
+            {"batch_id": str(batch.id), "remaining": batch.remaining}
             for batch in auto_schedule.active_batches(workspace)
         ],
         safe=False,

@@ -3,7 +3,7 @@
 - ``WorkspacePlatformCredential``: per-workspace social app credentials.
 - ``WorkspaceMeta``: operator-only notes for the tenant console.
 - ``ZhAutoScheduleRule`` / ``ZhAutoScheduleConsumption``: 文件夹自动候补排期
-  规则与消耗账本（48 小时滚动窗口、10 分钟后台扫描、社交页总开关）。
+  规则与消耗账本（24 小时滚动窗口、10 分钟后台扫描、社交页武装总开关）。
 - ``ZhScheduledBatch`` / ``ZhScheduledBatchItem``: 自动候补每次投递的批次与明细
   （发布队列页「自动」标签与一键清除）。
 
@@ -114,6 +114,14 @@ class WorkspaceMeta(models.Model):
         default="",
         verbose_name="IG 测试员 / IG ID 备注",
     )
+    # 自动排期（文件夹模式）工作区级武装开关：开启后作曲器「排期文件夹」按钮
+    # 才可用；关闭即停止补货且不自动恢复（已排队列帖子保留、账本保留）。
+    # 仅是"开关"，不承载任何配置——配置只发生在作曲器选文件夹+加入队列。
+    auto_schedule_armed = models.BooleanField(
+        default=False,
+        verbose_name="自动排期总开关",
+        help_text="开启后作曲器「排期文件夹」可用；关闭即停止补货、不自动恢复",
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -126,12 +134,12 @@ class WorkspaceMeta(models.Model):
 
 
 class ZhAutoScheduleRule(models.Model):
-    """文件夹自动候补排期规则（每工作区至多一条）。
+    """文件夹自动排期规则（每工作区至多一条）。
 
-    用户在帖子编辑器勾选平台账号并选定监听文件夹后「开启自动候补」：系统每
-    10 分钟扫描一次，使每个目标账号未来 48 小时内的空槽始终排满该文件夹内
-    FIFO 最前的合格视频。文案/首评/Facebook 形态在开启瞬间快照入规则。
-    社交账号页总开关只负责停用/原样恢复，不承载任何配置。
+    用户在帖子编辑器勾选平台账号、选定监听文件夹后点原生「加入队列」：系统
+    每 10 分钟扫描一次，使每个目标账号未来 24 小时内的空槽始终排满该文件夹
+    内 FIFO 最前的合格视频。文案/首评/Facebook 形态在提交瞬间快照入规则。
+    社交账号页「自动排期」总开关只做武装（开/关），不恢复、不承载任何配置。
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
