@@ -10,10 +10,32 @@
 - 部署环境、服务器运维、1Panel 连通方法等运维事实统一以仓库外的《Brightbean运维手册.md》（`E:\外贸文件夹\Brightbean Studio\`）为准，勿写入本文
 - 词典规模（v1.4.0）：短语 1031 条 / 单词 201 条 / 词元 90 条
 - 词典规模（v1.7.0）：短语 1054 条 / 单词 201 条 / 词元 98 条
+- 词典规模（v1.8.0）：短语 1416 条 / 单词 201 条 / 词元 113 条
 
 ## [未发布]
 
 _暂无。_
+
+## [1.8.0] - 2026-10-16
+
+### 新增（Added）
+
+- **LLM 批量补全汉化词条 417 条**：以「专名/品牌/平台名保英文、社媒行业术语沿用标准译法、已有词条一字不动」为约束，批量翻译回填上游模板中未覆盖的英文 UI 文案，词典规模从 1353 增至 1730 键，模板层精确翻译覆盖率由约 42% 提升至约 77%。
+- **运行时漏翻收集机制**：新增 `zh_overrides/leak_collector.py`，在 `ZhLocalizationMiddleware` 翻译文本节点时捕获「词典完全未命中」的英文原文，经去重与过滤后追加写入本地 `leaks.jsonl`（不触碰生产数据库）；配套管理命令 `python manage.py zhleak` 导出漏翻清单、`--clear` 清空。默认关闭，用于部署后运行时精确补词，替代不可靠的静态扫描。
+
+### 变更（Changed）
+
+- **汉化机制硬化——子串替换收归 `tokens` 白名单**：`load_dictionary()` 与客户端 payload 生成改为 `phrases` 段只做整段精确匹配、不再参与子串替换，子串替换完全由 `tokens` 段承担（`middleware.py` / `payload_views.py` 同步修改）。从机制上杜绝「短词误伤更长英文词」的残片。
+- **词典清洗**：`tokens` 段移除 22 个高危子串键（星期缩写 `Mon/Tue/Wed/Thu/Fri/Sat/Sun`、月份缩写 `Jan/Feb/…/Dec`、单词碎片 `post/user/member/workspace` 等），`AM/PM/hours/hour` 改为带空格边界；`phrases` 段删除 18 个与 `words` 完全重复的键；37 个带空格边界的动态拼接碎片键由 `phrases` 迁回 `tokens`，保证动态文案（如「Caption exceeds … character limit」「… days ago」）翻译不丢失。
+
+### 修复（Fixed）
+
+- **根治半中半英显示残片**：旧机制下短键做子串替换，导致 `Changes`→「更改s」、`Saved`→「保存d」、`Thumbnail`→「四mbnail」、`Remember`→「re成员」等破坏性误译；机制硬化 + 词典清洗后此类残片不再产生。
+
+### 部署注意（Deployment）
+
+- 本次无新增数据库迁移，纯静态词典与中间件逻辑变更。
+- 漏翻收集默认关闭；如需收集，在 `.env` 增加 `ZH_LEAK_COLLECT_ENABLED=true`（可选 `ZH_LEAK_COLLECT_DIR=/某个可写目录`，留空则落到系统临时目录），收集后执行 `python manage.py zhleak` 导出，补词完成后关闭开关并 `python manage.py zhleak --clear` 清理。
 
 ## [1.7.0] - 2026-10-16
 

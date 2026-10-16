@@ -36,7 +36,7 @@ def _build_payload() -> tuple[str, str]:
     lower = {key.lower(): value for key, value in exact.items()}
 
     subs: dict[str, str] = {}
-    subs.update(phrases)
+    # 与 middleware.load_dictionary 保持一致：仅 tokens 段参与子串替换。
     subs.update(tokens)
     ordered = sorted(subs.items(), key=lambda pair: len(pair[0]), reverse=True)
 

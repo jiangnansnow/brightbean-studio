@@ -41,6 +41,12 @@ SOCIALACCOUNT_ADAPTER = "zh_overrides.adapters.ZhSocialAccountAdapter"
 # disable zh-hans without code changes or image rebuild.
 ZH_LOCALIZATION_ENABLED = env.bool("ZH_LOCALIZATION_ENABLED", True)
 
+# 运行时漏翻收集（默认关闭）。开启后 middleware 会把词典完全未命中的英文文本
+# 追加写到 ZH_LEAK_COLLECT_DIR/leaks.jsonl，供 `python manage.py zhleak` 导出补词；
+# 生产常态保持关闭，避免每请求的磁盘 IO 开销。DIR 留空则落到系统临时目录。
+ZH_LEAK_COLLECT_ENABLED = env.bool("ZH_LEAK_COLLECT_ENABLED", default=False)
+ZH_LEAK_COLLECT_DIR = env("ZH_LEAK_COLLECT_DIR", default="")
+
 # SMTP implicit SSL (port 465) support. Upstream only wires EMAIL_USE_TLS
 # (STARTTLS on 587); providers such as NetEase 163 mail require implicit SSL
 # on 465. TLS and SSL are mutually exclusive in Django's SMTP backend.

@@ -31,6 +31,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils.html import escape
 
+from . import leak_collector
 from .payload_views import auto_schedule_js_digest, client_js_digest
 
 _DICTIONARY: dict | None = None
@@ -75,7 +76,8 @@ def load_dictionary() -> dict:
     exact_lower = {key.lower(): value for key, value in exact.items()}
 
     subs: dict[str, str] = {}
-    subs.update(phrases)
+    # 仅 tokens 段参与子串替换；phrases 段只做精确匹配，避免单词/短语
+    # 嵌入更长英文串（Save→Saved、Thu→Thumbnail）产生半中半英残片。
     subs.update(tokens)
     ordered = sorted(subs.items(), key=lambda pair: len(pair[0]), reverse=True)
 
@@ -138,6 +140,8 @@ class _ZhHTMLParser(HTMLParser):
         if translated != combined:
             self.parts.append(translated)
         else:
+            # 整段文本节点完全未命中词典：记录漏翻（默认关闭，见 settings）。
+            leak_collector.record(combined)
             for raw, decoded in self._pending:
                 if raw == decoded:
                     self.parts.append(translate_text(raw, self._dictionary))
