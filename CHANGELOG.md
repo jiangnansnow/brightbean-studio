@@ -11,10 +11,25 @@
 - 词典规模（v1.4.0）：短语 1031 条 / 单词 201 条 / 词元 90 条
 - 词典规模（v1.7.0）：短语 1054 条 / 单词 201 条 / 词元 98 条
 - 词典规模（v1.8.0）：短语 1416 条 / 单词 201 条 / 词元 113 条
+- 词典规模（v1.9.0）：短语 1438 条 / 单词 201 条 / 词元 120 条
 
-## [未发布]
+## [1.9.0] - 2026-10-17
 
-_暂无。_
+### 新增（Added）
+
+- **汉化回归三重防护机制**（对翻译的过去、当前、未来结果负责）：
+  - **译文异常检测命令 `zh_audit`**：全量扫描 `zh.json` 每个词条的译文质量，检出「空译文、译文含模板占位符、译文与原文相同（未翻译）、译文残留英文片段、译文异常缩短」五类问题，并为每条结果附带其在模板中的出现位置（`文件:行号` + 上下文行），便于人工用浏览器 F12 定位来源后判断改法。
+  - **翻译快照回归测试 `test_translation_snapshot`**：冻结上游 `templates/**/*.html` 全部文本节点的翻译输出为基线（`zh_overrides/tests/fixtures/translation_snapshot.json`），改动 `zh.json` 后重跑即可捕获「误伤已有翻译」的回归；首次运行自动生成基线，之后只对「已有译文结果发生变化」判失败。
+  - **部署前变更影响报告命令 `zh_diff`**：对比当前 `zh.json` 与指定旧版（`--baseline`），列出新增/修改/删除的词条，并扫出每条英文源在上游模板中的出现位置，作为部署前必审清单；不依赖 git CLI，适配本机无 git、走 gh REST API 的环境。
+
+### 修复（Fixed）
+
+- **删除 1 条孤儿词条**：`phrases` 段移除截断重复项 `Expected columns: date, time, platforms, caption, media`（精确匹配永不命中，全站仅完整版 `... first_comment` 被 CSV 导入页使用）。
+
+### 部署注意（Deployment）
+
+- 本次无新增数据库迁移，纯工具脚本 + 单条词典删除；部署后无需执行 `migrate`。
+- 三个管理命令/回归测试随镜像部署后在生产容器内使用：`python manage.py zh_audit`、`python manage.py zh_diff --baseline <旧版 zh.json>`、`python -m pytest --ds=zh_overrides.test_settings zh_overrides/tests/test_translation_snapshot.py`（重新定基线只需删除该 fixtures 文件）。
 
 ## [1.8.0] - 2026-10-16
 
