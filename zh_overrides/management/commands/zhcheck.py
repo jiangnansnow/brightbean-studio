@@ -24,10 +24,60 @@ from django.core.management.base import BaseCommand
 
 _TAG_RE = re.compile(r"{%\s*(.*?)\s*%}", re.DOTALL)
 _VAR_RE = re.compile(r"{{\s*(.*?)\s*}}", re.DOTALL)
+_TOKEN_WORD_RE = re.compile(r"[A-Za-z]{2,}")
 
 
 def _tokens(source: str) -> Counter:
     return Counter(_TAG_RE.findall(source) + _VAR_RE.findall(source))
+
+
+def _harmful_embedding(core: str, parent: str) -> bool:
+    """``core`` 作为 ``parent`` 的子串出现，且其左/右紧邻字符是字母或下划线
+    （即 core 嵌入在更长英文词或 snake_case 标识符内部，而非由空格/标点分隔
+    的独立单词）。"""
+    start = 0
+    while True:
+        idx = parent.find(core, start)
+        if idx == -1:
+            return False
+        left = parent[idx - 1] if idx > 0 else ""
+        right = parent[idx + len(core)] if idx + len(core) < len(parent) else ""
+        if (left and (left.isalpha() or left == "_")) or (right and (right.isalpha() or right == "_")):
+            return True
+        start = idx + 1
+
+
+def _check_token_embedding(base_dir: Path) -> list[tuple[str, list[str]]]:
+    """检测 tokens 段中「会切碎更长英文词/标识符」的危险子串 token。
+
+    仅 tokens 段参与子串替换（见 middleware.load_dictionary），任何去空格后
+    是纯字母单词、且会嵌入更长英文词/蛇形标识符内部的 token（``posts`` →
+    ``create_posts``/``Reposts``、``platform`` → ``platforms``）都会产生半中
+    半英残片。这类词应移入 words 段做精确匹配，或用「键值相同」词条保护。
+
+    返回 [(token, [父词...]), ...]，父词为 zh.json 中把该 token 作为「有害
+    子串」包含在内的其它源词（phrases/words/tokens 的 key）。
+    """
+    zh_path = base_dir / "zh_overrides" / "zh.json"
+    if not zh_path.exists():
+        return []
+    data = json.loads(zh_path.read_text(encoding="utf-8"))
+    sources: dict[str, str] = {}
+    for section in ("phrases", "words", "tokens"):
+        for key in data.get(section, {}):
+            sources.setdefault(key, section)
+
+    findings: list[tuple[str, list[str]]] = []
+    for tok in data.get("tokens", {}):
+        # 仅检测「无首尾空格」的纯字母 token：这类 token 无词界锚定，会嵌入
+        # 连续字母/下划线串；带前导/后置空格的量词/前缀（" minutes"、"Add "）
+        # 已有锚定，危害小，跳过。
+        if tok != tok.strip() or not _TOKEN_WORD_RE.fullmatch(tok):
+            continue
+        parents = sorted(s for s in sources if s != tok and _harmful_embedding(tok, s))
+        if parents:
+            findings.append((tok, parents))
+    return findings
 
 
 class Command(BaseCommand):
@@ -109,6 +159,19 @@ class Command(BaseCommand):
                     self.stdout.write(f"    ~ allowed but no longer extra: {{{{{token}}}}}")
             else:
                 self.stdout.write(self.style.SUCCESS(f"[OK] {rel}"))
+
+        self.stdout.write("")
+        self.stdout.write(self.style.WARNING("tokens 子串嵌入检测（会切碎长词的 token，建议移入 words 段或键值保护）："))
+        token_findings = _check_token_embedding(base_dir)
+        if not token_findings:
+            self.stdout.write(self.style.SUCCESS("[OK] tokens 段无危险子串"))
+        else:
+            for tok, parents in token_findings:
+                shown = ", ".join(parents[:8])
+                more = "" if len(parents) <= 8 else f" …共 {len(parents)} 个"
+                self.stdout.write(
+                    self.style.WARNING(f"[TOKEN] {tok!r} 嵌入：{shown}{more}")
+                )
 
         self.stdout.write("")
         summary = f"Checked {checked} override file(s); {problems} problem(s)."
