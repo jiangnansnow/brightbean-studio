@@ -13,6 +13,22 @@
 - 词典规模（v1.8.0）：短语 1416 条 / 单词 201 条 / 词元 113 条
 - 词典规模（v1.9.0）：短语 1438 条 / 单词 201 条 / 词元 120 条
 - 词典规模（v1.10.0）：短语 1478 条 / 单词 201 条 / 词元 121 条
+- 词典规模（v1.10.1）：短语 1485 条 / 单词 204 条 / 词元 121 条
+
+## [1.10.1] - 2026-10-17
+
+### 修复（Fixed）
+
+- **API 密钥权限标识符误译**：`create_posts` / `edit_others_posts` / `approve_posts` 等 snake_case 权限 key 不再被 tokens 段 `posts → 帖子` 子串替换切碎，改为「键值相同」词条做精确匹配保护，权限标识符保持英文不翻译（权限不翻、描述可翻）。
+- **onboarding 引导清单补整句**：`Connect social accounts` / `Link your Instagram, LinkedIn, or other platforms` / `Add team members to collaborate on content` 三条整句补词，替代此前靠 tokens 子串产生的 `other 个平台` 类残片。
+
+### 新增（Added）
+
+- **API 密钥权限描述整句**：`Create posts` / `Edit others posts` / `Publish directly` / `Manage social accounts` 四条 label 补词（描述可翻，权限 key 保留）。
+
+### 部署注意（Deployment）
+
+- 无数据库迁移；纯词典增量，随镜像部署生效。
 
 ## [1.10.0] - 2026-10-17
 
