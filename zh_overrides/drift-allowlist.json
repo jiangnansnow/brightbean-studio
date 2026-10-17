@@ -38,5 +38,10 @@
     "extra": [
       "{{r.caption|default:\"（无文案）\"}}"
     ]
+  },
+  "media_library/_delete_blocked.html": {
+    "missing": [
+      "referencing_posts|pluralize"
+    ]
   }
 }

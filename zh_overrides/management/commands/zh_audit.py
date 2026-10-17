@@ -69,8 +69,11 @@ def _word_count(text: str) -> int:
 
 
 def _english_residues(value: str) -> list[str]:
+    # 先剥离 HTML 实体（&middot; / &rsaquo; / &times; 等）：实体名不是 UI 英文，
+    # 且中间件不解码它们、译文内也按原样保留，不能当作漏译残片误报。
+    cleaned = re.sub(r"&[a-zA-Z]+;", " ", value)
     seen: list[str] = []
-    for match in _EN_RUN.finditer(value):
+    for match in _EN_RUN.finditer(cleaned):
         frag = match.group(0)
         if frag.lower() in _WHITELIST:
             continue

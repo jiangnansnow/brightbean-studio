@@ -12,6 +12,27 @@
 - 词典规模（v1.7.0）：短语 1054 条 / 单词 201 条 / 词元 98 条
 - 词典规模（v1.8.0）：短语 1416 条 / 单词 201 条 / 词元 113 条
 - 词典规模（v1.9.0）：短语 1438 条 / 单词 201 条 / 词元 120 条
+- 词典规模（v1.10.0）：短语 1478 条 / 单词 201 条 / 词元 121 条
+
+## [1.10.0] - 2026-10-17
+
+### 新增（Added）
+
+- **残片检测命令 `zh_residue`**：回归上游模板文本节点、跑与中间件同一套 `translate_text`，检出「部分翻译造成的中英混杂残句」，并定位到 `文件:行号`（精确匹配优先，tokens 子串替换只作用于未整句命中的动态片段）。
+
+### 修复（Fixed）
+
+- **根治 33 处机械子串替换残片**：19 个 `zh_overrides/templates` 覆盖 + 17 处词典整句补词，消除 `monthly→个月ly`、`memberships→成员hips`、`title-only→标题-only` 等破坏性单词切碎，以及 `posts/members/workspaces/caption/title/social accounts/media assets` 等单词被切进长句的中英混杂问题。
+- **zh_audit 跳过 HTML 实体**：`&middot;` / `&rsaquo;` / `&times;` 等不再被误报为「残留英文」。
+- **漏翻补词**：登录页（Continue with Google→使用 Google 登录 等）、通知（发布失败/无匹配）、成员角色权限项（View analytics/Use inbox 等 7 项）、onboarding 引导、API 密钥提示、`401/403` 等 20+ 词条。
+
+### 变更（Changed）
+
+- tokens 段新增 `Issued by → 签发人`，与既有 `Invited by → 邀请人` 对齐。
+
+### 部署注意（Deployment）
+
+- 本次无新增数据库迁移；新增 19 个模板覆盖 + 词典增量，随镜像部署后生效，需在容器内执行 `python manage.py migrate` 之外无额外步骤。
 
 ## [1.9.0] - 2026-10-17
 
